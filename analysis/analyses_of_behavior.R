@@ -75,8 +75,6 @@ summary.dataSDT.dprime <- summarySEwithin(dataSDT.ssj,measurevar="dprime",within
 # summary d', add condition
 dataSDT.ssj$Condition <- ifelse(dataSDT.ssj$RewardedColor==dataSDT.ssj$AttendedColor,"RewAtt","NotRewAtt")
 
-
-
 ##### PLOTS #####
 
 ### summary of d' for merged colors and separately
