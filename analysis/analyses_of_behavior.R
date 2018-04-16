@@ -1,13 +1,15 @@
-# experiment: FSAReward (Ivan Grahek*, Antonio Schettino*, Gilles Pourtois, Ernst Koster, & Søren Andersen)
-# (*: co-first authors)
-# code contributions: Antonio Schettino, Ivan Grahek
-# analysis of behavioral data
-#
+################################################################## Code info ###############################################################################################################################################################################################################
 
 
-##### Importing data & first steps ####
+# Experiment: FSAReward (Ivan Grahek*, Antonio Schettino*, Gilles Pourtois, Ernst Koster, & Søren Andersen) (*: co-first authors)
+# Code written by: Ivan Grahek & Antonio Schettino (2016-2018)
+# Description: Code for the analysis of behavioral data for Experiment 1 of the SSVEP - reward project. 
 
-# Clear environemnt and import data-------------------------------------------------------------------------------------------------
+
+################################################################## Importing data & first steps ###############################################################################################################################################################################################################
+
+
+# Clear environemnt and import data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # clear the environment
 rm(list=ls()) 
@@ -21,8 +23,7 @@ set.seed(42)
 # import data
 data.raw = read.csv(file="./data/Data_behavior_exp1_48pps.csv",header=TRUE,na.strings="NaN") 
 
-
-# Prepare the dataset----------------------------------------------------------------------------------------------------------------
+# Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### Adding and renaming variables 
 # rename EventType variable
@@ -42,8 +43,8 @@ data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("baselin
 data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )] = 
   lapply(data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )], factor)
 
-# count hits, false alarms, misses, correct rejections, and RT separately for each participant
-# (their calculation is done in Matlab: see DataProcessing.m)
+### Create variables needed for the accuracy analyses
+# count hits, false alarms, misses, correct rejections, and RT separately for each participant (their calculation is done in Matlab: see DataProcessing.m)
 data.ssj <- ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots),summarize,
                   numtrials=length(which(Response!=99)), # number of trials per condition (anything that is not 99 or any other number that we're not using)
                   Hits=length(which(Response==1)), # hits: attended color moved, correct response
@@ -52,11 +53,16 @@ data.ssj <- ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,
                   CRs=length(which(Response==3)), # correct rejections: attended color did not move, no response
                   mean.RT=mean(RT,na.rm=TRUE)) # mean RT per condition
 
-#### Calculate d' prime' #########
+
+################################################################## Calculate d' prime' ###############################################################################################################################################################################################################
+
+# Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
+# False alarms are  calculated for each participant in each condition on trials when they are attending the color that didn't move (the unattended color moved, but they responded)  
 data.ssj = ddply(data.ssj, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
                  Hits = Hits[MovedDots==AttendedColor],
                  FAs = FAs[MovedDots!=AttendedColor])
 
+# Keep only trials on which the attended color moved
 data.ssj = subset(data.ssj,MovedDots==AttendedColor)
 
 # calculate d'
