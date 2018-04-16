@@ -54,32 +54,34 @@ data.ssj <- ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,
                   mean.RT=mean(RT,na.rm=TRUE)) # mean RT per condition
 
 
-################################################################## Calculate d' prime' ###############################################################################################################################################################################################################
+################################################################## Calculate accuracy and RTs per condition ###############################################################################################################################################################################################################
 
-# Prepare the accuracy data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Prepare the data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### Calculate Hits and False alarms
 # Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
 # False alarms are  calculated for each participant in each condition on trials when they are attending the color that didn't move (the unattended color moved, but they responded)  
 # Here we create the same number of hits & fas for each of the two conditions (moved attended or not)
-data.ssj = ddply(data.ssj, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
+data.final = ddply(data.final, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
                  Hits = Hits[MovedDots==AttendedColor],
                  FAs = FAs[MovedDots!=AttendedColor])
 
 # Keep only trials on which the attended color moved (we can do behavioral analysis only on those)
-data.ssj = subset(data.ssj,MovedDots==AttendedColor)
+data.final = subset(data.final,MovedDots==AttendedColor)
 
 ### Calculate d'
 # use loglinear transformation: add 0.5 to Hits, FAs, Misses, and CRs (Hautus, 1995, Behavior Research Methods, Instruments, & Computers),
 # which is preferred over the 1/2N rule (Macmillan & Kaplan, 1985, Psychological Bulletin) because it results in less biased estimates of d'.
-dataSDT.ssj =  ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarize,
+data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarize,
                       tot.Hits=Hits+.5, # hits
                       tot.FAs=FAs+.5, # false alarms
                       tot.Misses=(numtrials-tot.Hits)+.5, # misses
                       tot.CRs=(numtrials-tot.FAs)+.5, # correct rejections
                       Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
                       FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
-                      dprime=qnorm(Hit.Rate)-qnorm(FA.Rate)) # d' (see Pallier, 2002)
+                      dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
+                      Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
+                      
 
 # Handle outliers------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -87,46 +89,22 @@ dataSDT.ssj =  ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCol
 # outliers based on hit rate at any condition
 crit = .6 # minimum 60% hit rate in any condition .6
 # select participants below the criterion
-criterion = subset(ddply(dataSDT.ssj,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
+criterion = subset(ddply(data.final,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
 # eliminate ouotliers from data frame
-dataSDT.ssj = dataSDT.ssj[!dataSDT.ssj$ParticipantNo %in% unique(criterion),] 
+data.final = data.final[!data.final$ParticipantNo %in% unique(criterion),] 
 
-# Create the final dataframe for accuracy------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Create the final dataframe for accuracy and RTs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-### Create a final dataframe for accuracy analyses
-# summary d'
-summary.dataSDT.dprime = summarySEwithin(dataSDT.ssj,measurevar="dprime",withinvars=c("ExpPhase","RewardedColor","AttendedColor"),idvar="ParticipantNo",na.rm=TRUE)
+### Create a final dataframe for accuracy and RTs analyses
+# summary 
+data.final = summarySEwithin(data.final,measurevar="dprime",withinvars=c("ExpPhase","RewardedColor","AttendedColor"),idvar="ParticipantNo",na.rm=TRUE)
 # add a new variable specifying whether the participant is attending the high or low rewarded color
-dataSDT.ssj$Condition = ifelse(dataSDT.ssj$RewardedColor==dataSDT.ssj$AttendedColor,"RewAtt","NotRewAtt")
+data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"RewAtt","NotRewAtt")
 # make this variable a factor for further analyses
-dataSDT.ssj$Condition = factor(dataSDT.ssj$Condition)
-
-##### Calculate RTs #####
-
-# Clean outliers (mean +/- 2 SD)
-# LowerBoundary <- mean(data.ssj[data.ssj$AttendedColor==data.ssj$MovedDots,]$mean.RT)-2.5*sd(data.ssj[data.ssj$AttendedColor==data.ssj$MovedDots,]$mean.RT)
-# UpperBoundary <- mean(data.ssj[data.ssj$AttendedColor==data.ssj$MovedDots,]$mean.RT)+2.5*sd(data.ssj[data.ssj$AttendedColor==data.ssj$MovedDots,]$mean.RT)
-# data.ssj$mean.RT <- ifelse(data.ssj$mean.RT<LowerBoundary,NA,data.ssj$mean.RT)
-# data.ssj$mean.RT <- ifelse(data.ssj$mean.RT>UpperBoundary,NA,data.ssj$mean.RT)
+data.final$Condition = factor(data.final$Condition)
 
 
-# Calculate RTs
-data.summaryRT.wide.ssj <- ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,MovedDots),summarize,
-                                 Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs of hits
-
-# Delete RTs for False alarms
-data.summaryRT.wide.ssj <- subset(data.summaryRT.wide.ssj,AttendedColor==MovedDots)
-
-# Make a new variable "Condition" with two levels - RewardedAttended and NotRewardedAttended                                 
-data.summaryRT.wide.ssj$Condition <- ifelse(data.summaryRT.wide.ssj$AttendedColor==data.summaryRT.wide.ssj$RewardedColor,"RewAtt","NotRewAtt")
-
-# Outliers - based on previously calculated criterion (see d' section)
-#data.summaryRT.wide.ssj <- data.summaryRT.wide.ssj[!data.summaryRT.wide.ssj$ParticipantNo %in% unique(criterion),]
-
-
-
-
-##### STATS #####
+################################################################## STATS ###############################################################################################################################################################################################################
 
 dataSDT.ssj$Condition <- as.factor(dataSDT.ssj$Condition) # convert to factor
 dataSDT.ssj$RewardedColor <- as.factor(dataSDT.ssj$RewardedColor) # convert to factor
