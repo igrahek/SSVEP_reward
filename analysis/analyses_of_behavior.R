@@ -104,11 +104,8 @@ data.final$Condition = factor(data.final$Condition)
 
 ################################################################## STATS ###############################################################################################################################################################################################################
 
-dataSDT.ssj$Condition <- as.factor(dataSDT.ssj$Condition) # convert to factor
-dataSDT.ssj$RewardedColor <- as.factor(dataSDT.ssj$RewardedColor) # convert to factor
-data.summaryRT.wide.ssj$Condition <- as.factor(data.summaryRT.wide.ssj$Condition) # convert to factor
-data.summaryRT.wide.ssj$RewardedColor <- as.factor(data.summaryRT.wide.ssj$RewardedColor) # convert to factor
-num.iter=10000 # number of MonteCarlo iterations (default: 10000)
+# number of MonteCarlo iterations (default: 10000)
+num.iter=10000 
 
 # DV: dprime
 
@@ -121,13 +118,13 @@ num.iter=10000 # number of MonteCarlo iterations (default: 10000)
 # Assuming a medium prior d~Cauchy(0,.707):
 
 
-rANOVA_dPrime.bf.med <- anovaBF(dprime~ExpPhase*Condition+ParticipantNo,data=dataSDT.ssj,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+rANOVA_dPrime.bf.med <- anovaBF(dprime~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
 rANOVA_dPrime.bf.med
 
 # DV: Hit.Rate
 # 3 x 2 rANOVA
 # Assuming a medium prior d~Cauchy(0,.707):
-rANOVA_HitRate.bf.med <- anovaBF(Hit.Rate~ExpPhase*Condition+ParticipantNo,data=dataSDT.ssj,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+rANOVA_HitRate.bf.med <- anovaBF(Hit.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
 rANOVA_HitRate.bf.med
 
 HitRate=subset(dataSDT.ssj,select=c(ParticipantNo,ExpPhase,Condition,Hit.Rate))
@@ -137,18 +134,14 @@ write.csv2(HitRate,file="Hit Rates.csv")
 # DV: FA rate
 # 3 x 2 rANOVA
 # Assuming a medium prior d~Cauchy(0,.707):
-rANOVA_FArate.bf.med <- anovaBF(FA.Rate~ExpPhase*Condition+ParticipantNo,data=dataSDT.ssj,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+rANOVA_FArate.bf.med <- anovaBF(FA.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
 rANOVA_FArate.bf.med
 
 # DV: RTs for Hits 
 # 3 x 2 rANOVA
-#Deleting one participant with a missing RT average for one condition
-# not necessary anymore: VP14 is already considered outlier
-
-#data.summaryRT.wide.ssj=subset(data.summaryRT.wide.ssj, data.summaryRT.wide.ssj$ParticipantNo!=14 & data.summaryRT.wide.ssj$ParticipantNo!=34)
 
 # Assuming a medium prior d~Cauchy(0,.707):
-rANOVA_RT.bf.med <- anovaBF(Hits.RTs~ExpPhase*Condition+ParticipantNo,data=data.summaryRT.wide.ssj,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+rANOVA_RT.bf.med <- anovaBF(Hits.RTs~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
 rANOVA_RT.bf.med
 
 #### lmBF analysis ####
