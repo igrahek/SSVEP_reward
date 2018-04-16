@@ -96,8 +96,6 @@ data.final = data.final[!data.final$ParticipantNo %in% unique(criterion),]
 # Create the final dataframe for accuracy and RTs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### Create a final dataframe for accuracy and RTs analyses
-# summary 
-data.final = summarySEwithin(data.final,measurevar="dprime",withinvars=c("ExpPhase","RewardedColor","AttendedColor"),idvar="ParticipantNo",na.rm=TRUE)
 # add a new variable specifying whether the participant is attending the high or low rewarded color
 data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"RewAtt","NotRewAtt")
 # make this variable a factor for further analyses
