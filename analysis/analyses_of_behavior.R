@@ -121,34 +121,6 @@ data.summaryRT.wide.ssj$Condition <- ifelse(data.summaryRT.wide.ssj$AttendedColo
 
 
 
-###### CALCULATING DIFFERENCE SCORES ######
-# #Calculate difference scores between rewarded and non rewarded trials for each participant
-# #Go into wide format
-# data.summaryRT.wide.ssj=subset(data.summaryRT.wide.ssj,select=c(ParticipantNo,Hits.RTs,Condition,ExpPhase))
-# data.summaryRT.wide.ssj.diff=dcast(data.summaryRT.wide.ssj,ParticipantNo~Condition+ExpPhase, value.var="Hits.RTs")
-# 
-# data.summaryRT.wide.ssj.diff$BaselineToAcquisition = data.summaryRT.wide.ssj.diff$RewardedAttended_baseline - data.summaryRT.wide.ssj.diff$RewardedAttended_acquisition
-# data.summaryRT.wide.ssj.diff$BaselineToExtinction = data.summaryRT.wide.ssj.diff$RewardedAttended_baseline - data.summaryRT.wide.ssj.diff$RewardedAttended_extinction
-# write.csv2(data.summaryRT.wide.ssj.diff,file = "data.summaryRT.wide.ssj.diff.csv")
-######ADDING QUESTIONNAIRES#########
-# 
-# #Add BDI (depression) and BISBAS scores to each participant
-# BDIdata = read.csv2("BDI.csv",header=TRUE,na.strings="NaN") # read data
-# BDIdata = arrange(BDIdata,Participant)#sort BDI data by participant name
-# #Delete participants which we don't consider based on the accuracy cutoff
-# # Sets accuracy cutoff based on what you selected before
-# if (condition == "All_Subjects"){
-#   BDIdata = BDIdata
-# }else if (condition == "60_Acc"){
-#   BDIdata = BDIdata[!BDIdata$Participant %in% criterion60,]
-# }else if (condition == "75_Acc"){
-#   BDIdata = BDIdata[!BDIdata$Participant %in% criterion75,]
-# }
-# 
-# #Add individual differences to the difference scores
-# diff.final.data_sub = cbind(diff.final.data_sub,BDIdata) #merge the two dataframes
-
-
 ##### STATS #####
 
 dataSDT.ssj$Condition <- as.factor(dataSDT.ssj$Condition) # convert to factor
