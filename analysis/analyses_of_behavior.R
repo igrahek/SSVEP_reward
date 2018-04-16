@@ -59,9 +59,6 @@ dataSDT.ssj <-  ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCo
                       FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
                       dprime=qnorm(Hit.Rate)-qnorm(FA.Rate)) # d' (see Pallier, 2002)
 
-#length(unique(subset(dataSDT.ssj,Hit.Rate<.5)$ParticipantNo))
-
-
 # Outliers
 # Outliers based on hit rate at any condition
 crit <- .6 # minimum 60% hit rate in any condition .6
