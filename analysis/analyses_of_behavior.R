@@ -56,19 +56,22 @@ data.ssj <- ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,
 
 ################################################################## Calculate d' prime' ###############################################################################################################################################################################################################
 
+
+### Calculate Hits and False alarms
 # Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
 # False alarms are  calculated for each participant in each condition on trials when they are attending the color that didn't move (the unattended color moved, but they responded)  
+# Here we create the same number of hits & fas for each of the two conditions (moved attended or not)
 data.ssj = ddply(data.ssj, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
                  Hits = Hits[MovedDots==AttendedColor],
                  FAs = FAs[MovedDots!=AttendedColor])
 
-# Keep only trials on which the attended color moved
+# Keep only trials on which the attended color moved (we can do behavioral analysis only on those)
 data.ssj = subset(data.ssj,MovedDots==AttendedColor)
 
-# calculate d'
+### Calculate d'
 # use loglinear transformation: add 0.5 to Hits, FAs, Misses, and CRs (Hautus, 1995, Behavior Research Methods, Instruments, & Computers),
 # which is preferred over the 1/2N rule (Macmillan & Kaplan, 1985, Psychological Bulletin) because it results in less biased estimates of d'.
-dataSDT.ssj <-  ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarize,
+dataSDT.ssj =  ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarize,
                       tot.Hits=Hits+.5, # hits
                       tot.FAs=FAs+.5, # false alarms
                       tot.Misses=(numtrials-tot.Hits)+.5, # misses
@@ -77,21 +80,21 @@ dataSDT.ssj <-  ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCo
                       FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
                       dprime=qnorm(Hit.Rate)-qnorm(FA.Rate)) # d' (see Pallier, 2002)
 
-# Outliers
-# Outliers based on hit rate at any condition
-crit <- .6 # minimum 60% hit rate in any condition .6
-# # Delete participants below the criterion
-criterion <- subset(ddply(dataSDT.ssj,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
+### Determine outliers and cut them
+# outliers based on hit rate at any condition
+crit = .6 # minimum 60% hit rate in any condition .6
+# select participants below the criterion
+criterion = subset(ddply(dataSDT.ssj,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
+# eliminate ouotliers from data frame
+dataSDT.ssj = dataSDT.ssj[!dataSDT.ssj$ParticipantNo %in% unique(criterion),] 
 
-# The most principled, we would eliminate 11 participants: 4, 6, 14, 15, 17, 20, 24, 25, 26, 31, 34.
-# criterion <- dataSDT.ssj[dataSDT.ssj$Hit.Rate<crit,]$Participant # which participants are marked as outliers
-dataSDT.ssj <- dataSDT.ssj[!dataSDT.ssj$ParticipantNo %in% unique(criterion),] # eliminate ouotliers from data frame
-
+### Create a final dataframe for accuracy analyses
 # summary d'
-summary.dataSDT.dprime <- summarySEwithin(dataSDT.ssj,measurevar="dprime",withinvars=c("ExpPhase","RewardedColor","AttendedColor"),idvar="ParticipantNo",na.rm=TRUE)
-
-# summary d', add condition
-dataSDT.ssj$Condition <- ifelse(dataSDT.ssj$RewardedColor==dataSDT.ssj$AttendedColor,"RewAtt","NotRewAtt")
+summary.dataSDT.dprime = summarySEwithin(dataSDT.ssj,measurevar="dprime",withinvars=c("ExpPhase","RewardedColor","AttendedColor"),idvar="ParticipantNo",na.rm=TRUE)
+# add a new variable specifying whether the participant is attending the high or low rewarded color
+dataSDT.ssj$Condition = ifelse(dataSDT.ssj$RewardedColor==dataSDT.ssj$AttendedColor,"RewAtt","NotRewAtt")
+# make this variable a factor for further analyses
+dataSDT.ssj$Condition = factor(dataSDT.ssj$Condition)
 
 ##### PLOTS #####
 
