@@ -65,7 +65,6 @@ crit <- .6 # minimum 60% hit rate in any condition .6
 # # Delete participants below the criterion
 criterion <- subset(ddply(dataSDT.ssj,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
 
-
 # The most principled, we would eliminate 11 participants: 4, 6, 14, 15, 17, 20, 24, 25, 26, 31, 34.
 # criterion <- dataSDT.ssj[dataSDT.ssj$Hit.Rate<crit,]$Participant # which participants are marked as outliers
 dataSDT.ssj <- dataSDT.ssj[!dataSDT.ssj$ParticipantNo %in% unique(criterion),] # eliminate ouotliers from data frame
