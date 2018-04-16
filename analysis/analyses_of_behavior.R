@@ -30,17 +30,6 @@ data.raw$MovedDots <- ifelse(data.raw$MovedDots==1,"red","blue") # color that mo
 data.raw$ExpPhase <- cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("baseline","acquisition","extinction")) # trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction
 data.raw$ParticipantNo <- factor(data.raw$ParticipantNo) # convert to factor
 
-#Exclude participants without full behavioral RT data
-#data.raw=subset(data.raw, data.raw$ParticipantNo!=14 & data.raw$ParticipantNo!=34 & data.raw$ParticipantNo!=24)
-# #Exclude participants without full behavioral RT data
-# behavioral.data = c(1,3,7,8,9,11,12,16,18,19,21,22,23,28,29,30,32,33,36,37,40,42,43,46,47,48) # 26 participants, criterion is 0.6
-# # behavioral.data = c(1,  3,  4,  6,  7,  8,  9,  11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29, 30, 32, 33, 36, 37, 38, 40, 41, 42, 43, 45, 46, 47, 48) # 37 participants, criterion is 0.5
-#behavioral.data = c(11,14,15,17,18,20,31,34,41) # exclude people with at least one condition below .5
-#data.raw = data.raw[!data.raw$ParticipantNo %in% behavioral.data, ]
-
-#delete the participant that doesn't have full RT data
-# data.raw <- subset(data.raw,ParticipantNo!=14)
-
 # count hits, false alarms, misses, correct rejections, and RT separately for each participant
 # (their calculation is done in Matlab: see DataProcessing.m)
 data.ssj <- ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots),summarize,
