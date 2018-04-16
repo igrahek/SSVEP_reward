@@ -45,7 +45,7 @@ data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPh
 
 ### Create variables needed for the accuracy analyses
 # count hits, false alarms, misses, correct rejections, and RT separately for each participant (their calculation is done in Matlab: see DataProcessing.m)
-data.ssj <- ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots),summarize,
+data.final = ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots),summarize,
                   numtrials=length(which(Response!=99)), # number of trials per condition (anything that is not 99 or any other number that we're not using)
                   Hits=length(which(Response==1)), # hits: attended color moved, correct response
                   FAs=length(which(Response==2)), # false alarms: attended color did not move, (wrong) response
