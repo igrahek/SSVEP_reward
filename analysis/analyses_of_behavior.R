@@ -56,6 +56,7 @@ data.ssj <- ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,
 
 ################################################################## Calculate d' prime' ###############################################################################################################################################################################################################
 
+# Prepare the accuracy data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### Calculate Hits and False alarms
 # Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
@@ -80,6 +81,8 @@ dataSDT.ssj =  ddply(data.ssj,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCol
                       FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
                       dprime=qnorm(Hit.Rate)-qnorm(FA.Rate)) # d' (see Pallier, 2002)
 
+# Handle outliers------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 ### Determine outliers and cut them
 # outliers based on hit rate at any condition
 crit = .6 # minimum 60% hit rate in any condition .6
@@ -87,6 +90,8 @@ crit = .6 # minimum 60% hit rate in any condition .6
 criterion = subset(ddply(dataSDT.ssj,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
 # eliminate ouotliers from data frame
 dataSDT.ssj = dataSDT.ssj[!dataSDT.ssj$ParticipantNo %in% unique(criterion),] 
+
+# Create the final dataframe for accuracy------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### Create a final dataframe for accuracy analyses
 # summary d'
