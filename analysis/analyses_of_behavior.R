@@ -4,31 +4,43 @@
 # analysis of behavioral data
 #
 
-##### Importing data & first steps ####
-# dev.off() # clear plots
-rm(list=ls()) # clear environment
-cat("\014") # clear console
 
-#load packages and install them if they're not installed. the pacman package will 
-#automatically check for the requested packages and download & install them if they are not on the computer.
+##### Importing data & first steps ####
+
+# Clear environemnt and import data-------------------------------------------------------------------------------------------------
+
+# clear the environment
+rm(list=ls()) 
+# clear the console
+cat("\014") 
+#load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2)
+# set seed
+set.seed(42) 
+# import data
+data.raw = read.csv(file="./data/Data_behavior_exp1_48pps.csv",header=TRUE,na.strings="NaN") 
 
-set.seed(42) # the Answer to the Ultimate Question of Life, the Universe and Everything
-# wd <- ("D:/OneDrive - UGent/FSAReward/Analysis/Behavior/Exp1/") # Antonio's work directory
-wd <- ("C:/Users/igrahek/Desktop/All participants/FSAReward-master/Exp1_fullsample/") # Ivan's work directory
-setwd(wd) # set work directory
-data.raw <- read.csv("Data_behavior_exp1_48pps.csv",header=TRUE,na.strings="NaN") # read data
-#data.raw <- read.csv("allssj.csv",header=TRUE,na.strings="NaN") # read data
 
-data.raw <- rename(data.raw,c(EventType="MovedDots")) # rename EventType variable
+# Prepare the dataset----------------------------------------------------------------------------------------------------------------
 
-data.raw$AttendedColor <- ifelse(data.raw$AttendedColor==1,"red","blue") # attended color: 1 -> red; 2 -> blue
-data.raw$RewardedColor <- ifelse(data.raw$ParticipantNo%%2==0,"blue","red") # if participant number is even, blue was rewarded
-data.raw$MovedDots <- ifelse(data.raw$MovedDots==1,"red","blue") # color that moved: 1 -> red; 2 -> blue
-#data.raw$ExpPhase <- cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("baseline1","baseline2","acquisition1","acquisition2","extinction1","extinction2")) # trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction
-data.raw$ExpPhase <- cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("baseline","acquisition","extinction")) # trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction
-data.raw$ParticipantNo <- factor(data.raw$ParticipantNo) # convert to factor
+### Adding and renaming variables 
+# rename EventType variable
+data.raw = rename(data.raw,c(EventType="MovedDots")) 
+# add a variable with the name of the attended color instead of a numbers
+data.raw$AttendedColor = ifelse(data.raw$AttendedColor==1,"red","blue")
+# add a variable saying which color was linked with high reward (even numbers - blue was high reward)
+data.raw$RewardedColor = ifelse(data.raw$ParticipantNo%%2==0,"blue","red") 
+# add a variable with the name of the moved color instead of a numbers
+data.raw$MovedDots = ifelse(data.raw$MovedDots==1,"red","blue") 
+# split experimental phases into 6 isntead of 3 phases (trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction)
+#data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("baseline1","baseline2","acquisition1","acquisition2","extinction1","extinction2")) 
+# split experimental phases into 3 phases (trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction)
+data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("baseline","acquisition","extinction")) # trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction
+
+### Convert variables to be used in analyses into factors
+data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )] = 
+  lapply(data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )], factor)
 
 # count hits, false alarms, misses, correct rejections, and RT separately for each participant
 # (their calculation is done in Matlab: see DataProcessing.m)
