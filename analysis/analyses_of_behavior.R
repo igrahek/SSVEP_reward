@@ -87,11 +87,11 @@ data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCo
 
 ### Determine outliers and cut them
 # outliers based on hit rate at any condition
-crit = .6 # minimum 60% hit rate in any condition .6
+#crit = .6 # minimum 60% hit rate in any condition .6
 # select participants below the criterion
-criterion = subset(ddply(data.final,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
+#criterion = subset(ddply(data.final,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
 # eliminate ouotliers from data frame
-data.final = data.final[!data.final$ParticipantNo %in% unique(criterion),] 
+#data.final = data.final[!data.final$ParticipantNo %in% unique(criterion),] 
 
 # Create the final dataframe for accuracy and RTs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -108,16 +108,8 @@ data.final$Condition = factor(data.final$Condition)
 num.iter=10000 
 
 # DV: dprime
-
-#Deleting one participant with a missing RT average for one condition
-# not necessary anymore: VP14 is already considered outlier
-# dataSDT.ssj <- subset(dataSDT.ssj,ParticipantNo!=14)
-
-
 # 3 x 2 rANOVA
 # Assuming a medium prior d~Cauchy(0,.707):
-
-
 rANOVA_dPrime.bf.med <- anovaBF(dprime~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
 rANOVA_dPrime.bf.med
 
@@ -126,10 +118,6 @@ rANOVA_dPrime.bf.med
 # Assuming a medium prior d~Cauchy(0,.707):
 rANOVA_HitRate.bf.med <- anovaBF(Hit.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
 rANOVA_HitRate.bf.med
-
-HitRate=subset(dataSDT.ssj,select=c(ParticipantNo,ExpPhase,Condition,Hit.Rate))
-HitRate=dcast(HitRate,ParticipantNo~ExpPhase+Condition, value.var="Hit.Rate")
-write.csv2(HitRate,file="Hit Rates.csv")
 
 # DV: FA rate
 # 3 x 2 rANOVA
