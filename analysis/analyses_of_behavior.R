@@ -101,8 +101,109 @@ data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor
 # make this variable a factor for further analyses
 data.final$Condition = factor(data.final$Condition)
 
+################################################################## Plotting ###############################################################################################################################################################################################################
+# Plot of Hit rates 
 
-################################################################## STATS ###############################################################################################################################################################################################################
+  # Pirate plot
+  pirateplot(formula=Hit.Rate~ExpPhase+Condition, # dependent~independent variables
+             data=data.final, # data frame
+             main="Hit rates", # main title
+             xlim=NULL, # x-axis: limits
+             xlab="", # x-axis: label
+             ylim=c(0,1), # y-axis: limits
+             ylab="Hit Rate", # y-axis: label
+             inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
+             hdi.iter=5000, # number of iterations for estimation of HDI
+             inf.within=ParticipantNo, # ID variable
+             theme=0, # preset theme (0: use your own)
+             # theme settings
+             # pal="xman", # color palette [see piratepal(palette="all")]
+             point.col="black", # points: color
+             point.o=.3, # points: opacity (0-1)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bar.b.col=NULL, # bars, border: color
+             bar.lwd=0, # bars, border: line width
+             bar.b.o=0, # bars, border: opacity (0-1)
+             bar.f.col=NULL, # bars, filling: color
+             bar.f.o=0, # bars, filling: opacity (0-1)
+             inf.b.col="black", # inference band, border: color
+             inf.lwd=0.1, # inference band, border: line width
+             inf.b.o=1, # inference band, border: opacity (0-1)
+             inf.f.col="black", # inference band, filling: color
+             inf.f.o=0, # inference band, filling: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
+             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
+             # quant.col="black", # quantiles, line: color
+             # quant.length=.7, # quantiles, horizontal line length
+             # quant.lwd=2, # quantiles, line width
+             gl.col="gray", # gridlines: color
+             gl.lwd=c(.75,0), # gridlines: line width
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=0.8, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             bty="l", # plot box type
+             back.col="white") # background, color
+  
+
+### Plot of RTs of hits 
+
+  # Pirate plot
+  pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
+             data=data.final, # data frame
+             main="Reaction times", # main title
+             xlim=NULL, # x-axis: limits
+             xlab="", # x-axis: label
+             ylim=c(400,700), # y-axis: limits
+             ylab="Reaction time", # y-axis: label
+             inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
+             hdi.iter=5000, # number of iterations for estimation of HDI
+             inf.within=ParticipantNo, # ID variable
+             theme=0, # preset theme (0: use your own)
+             # theme settings
+             # pal="xman", # color palette [see piratepal(palette="all")]
+             point.col="black", # points: color
+             point.o=.3, # points: opacity (0-1)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bar.b.col=NULL, # bars, border: color
+             bar.lwd=0, # bars, border: line width
+             bar.b.o=0, # bars, border: opacity (0-1)
+             bar.f.col=NULL, # bars, filling: color
+             bar.f.o=0, # bars, filling: opacity (0-1)
+             inf.b.col="black", # inference band, border: color
+             inf.lwd=0.1, # inference band, border: line width
+             inf.b.o=1, # inference band, border: opacity (0-1)
+             inf.f.col="black", # inference band, filling: color
+             inf.f.o=0, # inference band, filling: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
+             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
+             # quant.col="black", # quantiles, line: color
+             # quant.length=.7, # quantiles, horizontal line length
+             # quant.lwd=2, # quantiles, line width
+             gl.col="gray", # gridlines: color
+             gl.lwd=c(.75,0), # gridlines: line width
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=0.8, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             bty="l", # plot box type
+             back.col="white") # background, color
+  
+################################################################## Stats ###############################################################################################################################################################################################################
 
 # number of MonteCarlo iterations (default: 10000)
 num.iter=10000 
