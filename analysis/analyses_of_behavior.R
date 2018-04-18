@@ -37,7 +37,7 @@ data.raw$MovedDots = ifelse(data.raw$MovedDots==1,"red","blue")
 # split experimental phases into 6 isntead of 3 phases (trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction)
 #data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("baseline1","baseline2","acquisition1","acquisition2","extinction1","extinction2")) 
 # split experimental phases into 3 phases (trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction)
-data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("baseline","acquisition","extinction")) # trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction
+data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("Baseline","Acquisition","Extinction")) # trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction
 
 ### Convert variables to be used in analyses into factors
 data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )] = 
@@ -97,7 +97,7 @@ data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCo
 
 ### Create a final dataframe for accuracy and RTs analyses
 # add a new variable specifying whether the participant is attending the high or low rewarded color
-data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"RewAtt","NotRewAtt")
+data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High reward","Low reward")
 # make this variable a factor for further analyses
 data.final$Condition = factor(data.final$Condition)
 
@@ -236,89 +236,48 @@ rANOVA_RT.bf.med
 #### brms analysis  ####
 library(brms)
 # referencing for easier interpretation
-data.summaryRT.wide.ssj$ExpPhase=relevel(data.summaryRT.wide.ssj$ExpPhase,ref="acquisition")
-data.summaryRT.wide.ssj$Condition=relevel(data.summaryRT.wide.ssj$Condition,ref="RewAtt")
+data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Acquisition")
+data.final$Condition=relevel(data.final$Condition,ref="High reward")
 
-#data.summaryRT.wide.ssj = within(data.summaryRT.wide.ssj,Condition=relevel(Condition,ref="RewAtt")) # reference Phase to high reward
 # Null model
 model.null <-brm(Hits.RTs~1+(1|ParticipantNo),
-                 data=data.summaryRT.wide.ssj,
+                 data=data.final,
                  family=exgaussian(),
-                 warmup = 2000, #200 & 10000
+                 warmup = 2000, 
                  iter = 10000)
 saveRDS(model.null,file="nullmodel.RT.rds")
 
 # ExpPhase model
-model.expphase <-brm(Hits.RTs~ExpPhase+(1|ParticipantNo),
-                 data=data.summaryRT.wide.ssj,
+model.expphase <-brm(Hits.RTs~ExpPhase+(1|ParticipantNo)+(ExpPhase|ParticipantNo),
+                 data=data.final,
                  family=exgaussian(),
-                 warmup = 2000, #200 & 10000
+                 warmup = 2000, 
                  iter = 10000)
 saveRDS(model.expphase,file="expphasemodel.RT.rds")
 
 # Condition model
-model.condition <-brm(Hits.RTs~Condition+(1|ParticipantNo),
-                     data=data.summaryRT.wide.ssj,
+model.condition <-brm(Hits.RTs~Condition+(1|ParticipantNo)+(Condition|ParticipantNo),
+                     data=data.final,
                      family=exgaussian(),
-                     warmup = 2000, #200 & 10000
+                     warmup = 2000, 
                      iter = 10000)
 saveRDS(model.expphase,file="model.condition.RT.rds")
 
 # # Two main effects model
-model.twomaineffects <-brm(Hits.RTs~ExpPhase+Condition+(1|ParticipantNo),
+model.twomaineffects <-brm(Hits.RTs~ExpPhase+Condition+(Condition+ExpPhase|ParticipantNo),
                  data=data.summaryRT.wide.ssj,
-                 family=exgaussian(),
-                 warmup = 2000, #200 & 10000
+                 family=data.final(),
+                 warmup = 2000, 
                  iter = 10000)
 saveRDS(model.twomaineffects,file="model.twomaineffects.RT.rds")
 
 #Interaction model
-model.full <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(1|ParticipantNo),
-                 data=data.summaryRT.wide.ssj,
+model.full <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(Condition+ExpPhase|ParticipantNo),
+                 data=data.final,
                  family=exgaussian(),
-                 warmup = 2000, #200 & 10000
+                 warmup = 2000, 
                  iter = 10000)
 saveRDS(model.full,file="model.full.RT.rds")
-
-#Interaction model with random effect of condition 
-model.full.random.cond <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(Condition|ParticipantNo),
-                        data=data.summaryRT.wide.ssj,
-                        family=exgaussian(),
-                        warmup = 2000, #200 & 10000
-                        iter = 10000)
-saveRDS(model.full.random.cond,file="model.full.random.cond.RT.rds")
-
-#Interaction model with random effects of condition and experiment phase
-model.full.random <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(Condition*ExpPhase|ParticipantNo),
-                 data=data.summaryRT.wide.ssj,
-                 family=exgaussian(),
-                 warmup = 2000, #200 & 10000
-                 iter = 10000)
-saveRDS(model.full.random,file="model.full.random.RT.rds")
-
-#Interaction model with random effect of exp phase 
-model.full.random.expphase <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(ExpPhase|ParticipantNo),
-                             data=data.summaryRT.wide.ssj,
-                             family=exgaussian(),
-                             warmup = 2000, #200 & 10000
-                             iter = 10000)
-saveRDS(model.full.random.expphase,file="model.full.random.expphase.RT.rds")
-
-#Interaction model with random effects of condition and experiment phase
-model.full.random1 <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(ExpPhase*Condition|ParticipantNo),
-                        data=data.summaryRT.wide.ssj,
-                        family=exgaussian(),
-                        warmup = 2000, #200 & 10000
-                        iter = 10000)
-saveRDS(model.full.random1,file="model.full.random1.RT.rds")
-
-#Interaction model with random effects of condition and experiment phase
-model.full.random2 <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(ExpPhase*Condition|ParticipantNo),
-                         data=data.summaryRT.wide.ssj,
-                         family=exgaussian(),
-                         warmup = 2000, #200 & 10000
-                         iter = 10000)
-saveRDS(model.full.random2,file="model.full.random2.RT.rds")
 
 #WAIC
 compare.RT.waic <- WAIC(model.null,model.condition,model.expphase,model.twomaineffects,model.full.random.expphase,model.full.random.cond,model.full.random1,model.full.random2)
