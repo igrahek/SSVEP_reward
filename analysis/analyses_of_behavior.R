@@ -102,7 +102,7 @@ data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor
 data.final$Condition = factor(data.final$Condition)
 
 ################################################################## Plotting ###############################################################################################################################################################################################################
-# Plot of Hit rates 
+# Plot Hit rates 
 
   # Pirate plot
   pirateplot(formula=Hit.Rate~ExpPhase+Condition, # dependent~independent variables
@@ -153,7 +153,7 @@ data.final$Condition = factor(data.final$Condition)
              back.col="white") # background, color
   
 
-### Plot of RTs of hits 
+### Plot RTs of hits 
 
   # Pirate plot
   pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
