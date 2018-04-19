@@ -21,7 +21,7 @@ pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,lme4)
 # set seed
 set.seed(42) 
 # import data
-data.raw = read.csv(file="./data/amplitudes_rewardBoth_wholeSample.csv",header=TRUE,na.strings="NaN") #only good behavior: amplitudes_rewardBoth.csv
+data.raw = read.csv2(file="./data/amplitudes_rewardBoth_wholeSample.csv",header=TRUE,na.strings="NaN") #only good behavior: amplitudes_rewardBoth.csv
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
