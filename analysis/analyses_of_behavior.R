@@ -102,7 +102,8 @@ data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor
 data.final$Condition = factor(data.final$Condition)
 
 ################################################################## Plotting ###############################################################################################################################################################################################################
-# Plot Hit rates 
+
+# Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   # Pirate plot
   pirateplot(formula=Hit.Rate~ExpPhase+Condition, # dependent~independent variables
@@ -152,8 +153,7 @@ data.final$Condition = factor(data.final$Condition)
              bty="l", # plot box type
              back.col="white") # background, color
   
-
-### Plot RTs of hits 
+# Plot Reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   # Pirate plot
   pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
@@ -205,6 +205,8 @@ data.final$Condition = factor(data.final$Condition)
   
 ################################################################## Stats ###############################################################################################################################################################################################################
 
+# BF ANOVA------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # number of MonteCarlo iterations (default: 10000)
 num.iter=10000 
 
@@ -233,74 +235,88 @@ rANOVA_FArate.bf.med
 rANOVA_RT.bf.med <- anovaBF(Hits.RTs~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
 rANOVA_RT.bf.med
 
-#### brms analysis  ####
-library(brms)
+# brms------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # referencing for easier interpretation
 data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Acquisition")
 data.final$Condition=relevel(data.final$Condition,ref="High reward")
 
+# increase adapt_delta parameter. default is 0.8. This is the target average proposal acceptance probability during Stan’s adaptation period, and increasing it will force Stan to take smaller steps.
+# library(rstan)
+# stan(..., control = list(adapt_delta = 0.99))
+
 # Null model
-model.null <-brm(Hits.RTs~1+(1|ParticipantNo),
+model.null = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
                  data=data.final,
-                 family=exgaussian(),
-                 warmup = 2000, 
-                 iter = 10000)
+                 family=gaussian(),
+                 warmup = 2000,
+                 iter = 10000,
+                 save_all_pars = TRUE)
 saveRDS(model.null,file="nullmodel.RT.rds")
 
 # ExpPhase model
-model.expphase <-brm(Hits.RTs~ExpPhase+(1|ParticipantNo)+(ExpPhase|ParticipantNo),
+model.expphase = brm(Hits.RTs ~ ExpPhase + (ExpPhase|ParticipantNo),
                  data=data.final,
-                 family=exgaussian(),
-                 warmup = 2000, 
-                 iter = 10000)
+                 family=gaussian(),
+                 warmup = 2000,
+                 iter = 10000,
+                 save_all_pars = TRUE)
 saveRDS(model.expphase,file="expphasemodel.RT.rds")
 
 # Condition model
-model.condition <-brm(Hits.RTs~Condition+(1|ParticipantNo)+(Condition|ParticipantNo),
+model.condition = brm(Hits.RTs ~ Condition + (Condition|ParticipantNo),
                      data=data.final,
-                     family=exgaussian(),
-                     warmup = 2000, 
-                     iter = 10000)
+                     family=gaussian(),
+                     warmup = 2000,
+                     iter = 10000,
+                     save_all_pars = TRUE)
 saveRDS(model.expphase,file="model.condition.RT.rds")
 
 # # Two main effects model
-model.twomaineffects <-brm(Hits.RTs~ExpPhase+Condition+(Condition+ExpPhase|ParticipantNo),
-                 data=data.summaryRT.wide.ssj,
-                 family=data.final(),
-                 warmup = 2000, 
-                 iter = 10000)
+model.twomaineffects = brm(Hits.RTs ~ ExpPhase + Condition + (Condition + ExpPhase|ParticipantNo),
+                 data=data.final,
+                 family=gaussian(),
+                 warmup = 2000,
+                 iter = 10000,
+                 save_all_pars = TRUE)
 saveRDS(model.twomaineffects,file="model.twomaineffects.RT.rds")
 
 #Interaction model
-model.full <-brm(Hits.RTs~ExpPhase+Condition+ExpPhase*Condition+(Condition+ExpPhase|ParticipantNo),
+model.full = brm(Hits.RTs ~ ExpPhase + Condition + ExpPhase * Condition + (Condition * ExpPhase|ParticipantNo),
                  data=data.final,
-                 family=exgaussian(),
-                 warmup = 2000, 
-                 iter = 10000)
+                 family=gaussian(),
+                 warmup = 2000,
+                 iter = 10000,
+                 save_all_pars = TRUE)
 saveRDS(model.full,file="model.full.RT.rds")
 
 #WAIC
-compare.RT.waic <- WAIC(model.null,model.condition,model.expphase,model.twomaineffects,model.full.random.expphase,model.full.random.cond,model.full.random1,model.full.random2)
+compare.RT.waic = WAIC(model.null,model.condition,model.expphase,model.twomaineffects,model.full)
 saveRDS(compare.RT.waic,file="compare.RT.waic")
 
 # #LOO crossvalidation
-compare.RT.loo <- LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE)
+compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
 saveRDS(compare.RT.loo,file="compare.RT.loo")
 
-
-
 # read in the models and comparisons
-model.null <- readRDS("nullmodel.RT.rds")
-model.condition <- readRDS("model.condition.RT.rds")
-model.expphase <- readRDS("expphasemodel.RT.rds")
-model.twomaineffects <- readRDS("model.twomaineffects.RT.rds")
-model.full <- readRDS("model.RT.full.rds")
+model.null = readRDS("nullmodel.RT.rds")
+model.condition = readRDS("model.condition.RT.rds")
+model.expphase = readRDS("expphasemodel.RT.rds")
+model.twomaineffects = readRDS("model.twomaineffects.RT.rds")
+model.full = readRDS("model.RT.full.rds")
 compare.loo = readRDS("compare.RT.loo")
 compare.waic = readRDS("compare.RT.waic")
 
-launch_shinystan(model.full.random1)
-
 # Plot marginal effects for each predictor
-plot(marginal_effects(model.full.random2),ask=FALSE)
+plot(marginal_effects(model.full),ask=FALSE)
+
+# Calculate bayes factors from marginal likelihoods
+bayes_factor(model.full,model.null)
+
+# Compare log marginal likelihood via bridge sampling
+bridge_sampler(model.full)
+
+# Compute the posterior model probabilities
+post_prob(model.twomaineffects,model.full)
 
 
