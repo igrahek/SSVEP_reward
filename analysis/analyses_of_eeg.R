@@ -21,7 +21,7 @@ pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,lme4)
 # set seed
 set.seed(42) 
 # import data
-data.raw = read.csv2(file="./data/amplitudes_rewardBoth_wholeSample.csv",header=TRUE,na.strings="NaN") #only good behavior: amplitudes_rewardBoth.csv
+data.raw = read.csv2(file="C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/data/amplitudes_rewardBoth_wholeSample.csv",header=TRUE,na.strings="NaN") #only good behavior: amplitudes_rewardBoth.csv  # full sample: amplitudes_rewardBoth_wholeSample.csv POORPERF_amplitude_rewardBoth.csv
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -50,16 +50,16 @@ data$AttendedColor = Conditions[,2]
 data$RecordedFrequency = ifelse(data$Frequency==10,"Blue","Red") # if the recorded frequency is 10Hz assign Blue (color flickering at 10Hz), otherwise assign Red (color flickering at 12Hz)
 
 # Make a new condition based on the attended color and the rewarded color
-data$Condition = ifelse(data$AttendedColor==data$RewardedColor, "High Reward Attended","Low Reward Attended")
+data$Condition = ifelse(data$AttendedColor==data$RewardedColor, "High_Rew","Low_Rew")
 
 # Make a new condition based on the attended color and the recorded frequency
-data$ConditionRecording = ifelse(data$AttendedColor==data$RecordedFrequency, "AttRec","NotAttRec")
+data$Attention = ifelse(data$AttendedColor==data$RecordedFrequency, "Att","NotAtt")
 
-# Make a new condition based the Condition and the ConditionRecording
-data$RecordingAndCondition = with(data, paste0(Condition,"_",ConditionRecording))
+# Make a new condition based the Condition and the Attention
+data$RecordingAndCondition = with(data, paste0(Condition,"_",Attention))
 
 # Select variables which we want to keep
-data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor","Condition","RecordedFrequency","ConditionRecording","RecordingAndCondition","Amplitude"))
+data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor","Condition","RecordedFrequency","Attention","RecordingAndCondition","Amplitude"))
 
 # Sort the data 
 data = data[with(data, order(Subject)), ]
@@ -74,53 +74,66 @@ data = ddply(data,.(Subject,RecordedFrequency),transform,
 data$Amplitude = data$Amplitude/data$MeanAmplitude
 
 # Calculate the attention indexes - Selectivity (attended-unattended) & total enhancement (attended+unattended) (Andersen & Muller, 2010, PNAS)
-data.diff = ddply(data, .(Subject,ExpPhase,Condition), transform, Selectivity = Amplitude[ConditionRecording=="AttRec"]-Amplitude[ConditionRecording=="NotAttRec"],TotalEnhancement=Amplitude[ConditionRecording=="AttRec"]+Amplitude[ConditionRecording=="NotAttRec"])
-# Delete the ConditionRecording column and rows which are not necessary (indexes repeated twice)
-data.diff = subset(data.diff,ConditionRecording=="AttRec") #keep only AttRec as it is equal to NotAttRec
-data.diff$ConditionRecording = NULL  #drop the ConditionRecording column
+data.diff = ddply(data, .(Subject,ExpPhase,Condition), transform, Selectivity = Amplitude[Attention=="Att"]-Amplitude[Attention=="NotAtt"],TotalEnhancement=Amplitude[Attention=="Att"]+Amplitude[Attention=="NotAtt"])
+# Delete the Attention column and rows which are not necessary (indexes repeated twice)
+data.diff = subset(data.diff,Attention=="Att") #keep only Att as it is equal to NotAtt
+data.diff$Attention = NULL  #drop the Attention column
 
 # Sort the data 
 data.diff$ExpPhase = factor(data.diff$ExpPhase, levels = c("Bsln","Acq","Ext"))
 data.diff = data.diff[order(data.diff$Subject,data.diff$Condition,data.diff$ExpPhase),]
 
-# Convert variables to be used in analyses into factors
-data[c("Subject", "Condition","ExpPhase", "RewardedColor", "ConditionRecording", "RecordingAndCondition")] = 
-  lapply(data.raw[c("Subject", "Condition","ExpPhase", "RewardedColor", "ConditionRecording", "RecordingAndCondition")], factor)
+# Calculate the reward index - High reward minus Low reward
+data.reward = ddply(data, .(Subject,ExpPhase,Attention), transform, Reward = Amplitude[Condition=="High_Rew"]-Amplitude[Condition=="Low_Rew"])
+# Delete the Attention column and rows which are not necessary (indexes repeated twice)
+data.reward = subset(data.reward,Condition=="High_Rew") #keep only Att as it is equal to NotAtt
+data.reward$Condition = NULL  #drop the Condition column
 
-data.dif[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] = 
-  lapply(data.raw[c("Subject", "Condition","ExpPhase",  "RecordingAndCondition")], factor)
+# Sort the data 
+data.reward$ExpPhase = factor(data.reward$ExpPhase, levels = c("Bsln","Acq","Ext"))
+data.reward = data.reward[order(data.reward$Subject,data.reward$Attention,data.reward$ExpPhase),]
+
+hist(subset(data.reward,data.reward$Attention=="Att" & data.reward$ExpPhase=="Acq" )$Reward)
+hist(subset(data.reward,data.reward$Attention=="NotAtt")$Reward)
+
+# Convert variables to be used in analyses into factors
+data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "RecordingAndCondition")] = 
+  lapply(data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "RecordingAndCondition")], factor)
+
+data.diff[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] = 
+  lapply(data.diff[c("Subject", "Condition","ExpPhase",  "RecordingAndCondition")], factor)
 
 ################################################################## Plotting ###############################################################################################################################################################################################################
 
 # Plot amplitude across experiment phases------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-plottingConditions = c("Amplitude both reward conditions","Amplitude high reward attended","Amplitude low reward attended" )
+plottingConditions = c("Amplitude both reward conditions","Amplitude High_Rew","Amplitude Low_Rew" )
 for (i in 1:length(plottingConditions)){
   
   if(plottingConditions[i]=="Amplitude both reward conditions"){
     
     #Average over the reward condition and order data for plotting
-    dataAmplitudePlot=ddply(data,.(Subject,ConditionRecording,ExpPhase),plyr::summarize,Amplitude=mean(Amplitude,na.rm=TRUE)) 
+    dataAmplitudePlot=ddply(data,.(Subject,Attention,ExpPhase),plyr::summarize,Amplitude=mean(Amplitude,na.rm=TRUE)) 
     
     #Order the data again in order to be able to plot Condition in the same order as in the other plots
-    dataAmplitudePlot$ConditionRecording = factor(dataAmplitudePlot$ConditionRecording, levels = c("NotAttRec","AttRec"))
+    dataAmplitudePlot$Attention = factor(dataAmplitudePlot$Attention, levels = c("NotAtt","Att"))
     dataAmplitudePlot$ExpPhase = factor(dataAmplitudePlot$ExpPhase, levels = c("Bsln","Acq","Ext"))
-    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$ConditionRecording),]}
+    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$Attention),]}
   
-  if(plottingConditions[i]=="Amplitude high reward attended"){dataAmplitudePlot=subset(data,Condition=="High Reward Attended")}
+  if(plottingConditions[i]=="Amplitude High_Rew"){dataAmplitudePlot=subset(data,Condition=="High_Rew")}
   
-  if(plottingConditions[i]=="Amplitude low reward attended"){
+  if(plottingConditions[i]=="Amplitude Low_Rew"){
     
     #Order the data again in order to be able to plot Condition in the same order as in the other plots
-    dataAmplitudePlot=subset(data,Condition=="Low Reward Attended")
-    dataAmplitudePlot$ConditionRecording = factor(dataAmplitudePlot$ConditionRecording, levels = c("NotAttRec","AttRec"))
+    dataAmplitudePlot=subset(data,Condition=="Low_Rew")
+    dataAmplitudePlot$Attention = factor(dataAmplitudePlot$Attention, levels = c("NotAtt","Att"))
     dataAmplitudePlot$ExpPhase = factor(dataAmplitudePlot$ExpPhase, levels = c("Bsln","Acq","Ext"))
-    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$ConditionRecording),] #order the data again in order to be able to plot Condition in the same order as in the other plots
+    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$Attention),] #order the data again in order to be able to plot Condition in the same order as in the other plots
     }  
 
 # Pirate plot
 
-  pirateplot(formula=Amplitude~ConditionRecording+ExpPhase, # dependent~independent variables
+  pirateplot(formula=Amplitude~Attention+ExpPhase, # dependent~independent variables
              data=dataAmplitudePlot, # data frame
              main=plottingConditions[i], # main title
              xlim=NULL, # x-axis: limits
@@ -276,147 +289,208 @@ pirateplot(formula=Selectivity ~ Condition + ExpPhase, # dependent~independent v
     
 ##### STATS ####
 
-# Set the parameters 
-num.iter=10000 # number of MonteCarlo iterations (default: 10000)
-# select scaling factor r of Cauchy(0,r) prior on standardized effect sizes
-medprior=sqrt(2)/2 # medium prior
+# # Set the parameters 
+# num.iter=10000 # number of MonteCarlo iterations (default: 10000)
+# # select scaling factor r of Cauchy(0,r) prior on standardized effect sizes
+# medprior=sqrt(2)/2 # medium prior
+# 
+# 
+# 
+# # Amplitude - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
+# ssVEPamp.bf.amplitude <- anovaBF(Amplitude ~ ExpPhase * Condition  * Attention + Subject,data=data,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
+# sort(ssVEPamp.bf.amplitude)
+# 
+# # Amplitude - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) 
+# ssVEPamp.bf.amplitude <- anovaBF(Amplitude ~ ExpPhase * Attention + Subject,data=data,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
+# sort(ssVEPamp.bf.amplitude)
+# 
+# 
+# # Selectivity index - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
+# ssVEPamp.bf.selectivity <- anovaBF(Selectivity ~ ExpPhase * Condition + Subject,data=data.diff,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
+# sort(ssVEPamp.bf.selectivity)
+# 
+# # Total enhancement index - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
+# ssVEPamp.bf.totalenhancement <- anovaBF(TotalEnhancement ~ ExpPhase * Condition + Subject,data=data.diff,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
+# sort(ssVEPamp.bf.totalenhancement)
+# 
 
+# brms three factors------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+# Set the working directory where to save the models
+setwd("./brms_models")
 
-# Amplitude - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
-ssVEPamp.bf.amplitude <- anovaBF(Amplitude ~ ExpPhase * Condition  *ConditionRecording + Subject,data=data,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
-sort(ssVEPamp.bf.amplitude)
-
-
-# Selectivity index - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
-ssVEPamp.bf.selectivity <- anovaBF(Selectivity ~ ExpPhase * Condition + Subject,data=data.diff,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
-sort(ssVEPamp.bf.selectivity)
-
-# Total enhancement index - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
-ssVEPamp.bf.totalenhancement <- anovaBF(TotalEnhancement ~ ExpPhase * Condition + Subject,data=data.dif,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
-sort(ssVEPamp.bf.totalenhancement)
-
-
-# brms------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#help stan run faster
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 
 # Modelling the effects of phase, attention, and reward magnitude - All subjects
 
+# Set the intercept model
 data$ExpPhase=relevel(data$ExpPhase,ref="Bsln")
-data$Condition=relevel(data$Condition,ref="High Reward Attended")
-data$ConditionRecording=relevel(data$ConditionRecording,ref="AttRec")
+data$Condition=relevel(data$Condition,ref="High_Rew")
+data$Attention=relevel(data$Attention,ref="Att")
 
 # Null model
-model.null.threefactors <-brm(Amplitude ~ 1 + (1|Subject),
+null = brm(Amplitude ~ 1 + (1|Subject),
                               data=data,
                               family=gaussian(),
                               warmup = 2000,
                               iter = 10000,
-                              save_all_pars = TRUE)
-saveRDS(model.null.threefactors,file="model.null.threefactors.EEG.allsub.rds")
+                              save_all_pars = TRUE,
+                              control = list(adapt_delta = 0.99),
+                              cores = 4)
+saveRDS(null,file="null.EEG.allsub.rds")
 
 # Exp phase model
-model.expphase.threefactors <-brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
+expphase = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
                                   data=data,
                                   family=gaussian(),
                                   warmup = 2000,
                                   iter = 10000,
-                                  save_all_pars = TRUE)
-saveRDS(model.expphase.threefactors,file="model.expphase.threefactors.EEG.allsubs.rds")
+                                  save_all_pars = TRUE,
+                                  control = list(adapt_delta = 0.99),
+                                  cores = 4)
+saveRDS(expphase,file="expphase.EEG.allsubs.rds")
 
 # Condition model
-model.condition.threefactors <-brm(Amplitude ~ Condition + (Condition|Subject),
+condition = brm(Amplitude ~ Condition + (Condition|Subject),
                                    data=data,
                                    family=gaussian(),
                                    warmup = 2000,
                                    iter = 10000,
-                                   save_all_pars = TRUE)
-saveRDS(model.condition.threefactors,file="model.condition.threefactors.EEG.allsubs.rds")
+                                   save_all_pars = TRUE,
+                                   control = list(adapt_delta = 0.99),
+                                   cores = 4)
+saveRDS(condition,file="condition.EEG.allsubs.rds")
 
 # Attention model
-model.attention.threefactors <-brm(Amplitude ~ ConditionRecording + (ConditionRecording|Subject),
+attention = brm(Amplitude ~ Attention + (Attention|Subject),
                                    data=data,
                                    family=gaussian(),
                                    warmup = 2000,
                                    iter = 10000,
-                                   save_all_pars = TRUE)
-saveRDS(model.attention.threefactors,file="model.attention.threefactors.EEG.allsubs.rds")
+                                   save_all_pars = TRUE,
+                                   control = list(adapt_delta = 0.99),
+                                   cores = 4)
+saveRDS(attention,file="attention.EEG.allsubs.rds")
 
 # Two main effects - phase and attention
-model.phaseANDattention.threefactors <-brm(Amplitude ~ ExpPhase + ConditionRecording + (ExpPhase + ConditionRecording|Subject),
+phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention|Subject),
                                         data=data,
                                         family=gaussian(),
                                         warmup = 2000,
                                         iter = 10000,
-                                        save_all_pars = TRUE)
-saveRDS(model.phaseANDattention.threefactors,file="model.phaseANDattention.threefactors.EEG.allsubs.rds")
+                                        save_all_pars = TRUE,
+                                        control = list(adapt_delta = 0.99),
+                                        cores = 4)
+saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.rds")
 
 # Two main effects - reward magnitude and attention
-model.rewardmagnitudeANDattention.threefactors <-brm(Amplitude ~ Condition + ConditionRecording + (Condition + ConditionRecording|Subject),
+rewardANDattention = brm(Amplitude ~ Condition + Attention + (Condition + Attention|Subject),
                                            data=data,
                                            family=gaussian(),
                                            warmup = 2000,
                                            iter = 10000,
-                                           save_all_pars = TRUE)
-saveRDS(model.rewardmagnitudeANDattention.threefactors,file="model.rewardmagnitudeANDattention.threefactors.EEG.allsubs.rds")
+                                           save_all_pars = TRUE,
+                                           control = list(adapt_delta = 0.99),
+                                           cores = 4)
+saveRDS(rewardANDattention,file="rewardANDattention.EEG.allsubs.rds")
 
 # Three main effects
-model.threemaineffects.threefactors <-brm(Amplitude ~ Condition + ExpPhase + ConditionRecording + (Condition + ExpPhase + ConditionRecording|Subject),
+threemain = brm(Amplitude ~ Condition + ExpPhase + Attention + (Condition + ExpPhase + Attention|Subject),
                                           data=data,
                                           family=gaussian(),
                                           warmup = 2000,
                                           iter = 10000,
-                                          save_all_pars = TRUE)
-saveRDS(model.threemaineffects.threefactors,file="model.threemaineffects.threefactors.EEG.allsubs.rds")
+                                          save_all_pars = TRUE,
+                                          control = list(adapt_delta = 0.99),
+                                          cores = 4)
+saveRDS(threemain,file="threemain.EEG.allsubs.rds")
 
 # Full model
-model.full.threefactors <-brm(Amplitude ~ Condition * ExpPhase * ConditionRecording + (Condition * ExpPhase * ConditionRecording|Subject),
+full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),
                               data=data,
                               family=gaussian(),
                               warmup = 2000,
                               iter = 10000,
-                              save_all_pars = TRUE)
-saveRDS(model.full.threefactors,file="model.full.threefactors.EEG.allsubs.rds")
+                              save_all_pars = TRUE,
+                              control = list(adapt_delta = 0.99),
+                              cores = 4)
+saveRDS(full,file="full.EEG.allsubs.rds")
 
 
-#LOO crossvalidation
-compare.threefactors.EEG.loo <- LOO(model.null.threefactors,model.condition.threefactors,model.attention.threefactors,model.expphase.threefactors,model.phaseANDattention.threefactors,model.rewardmagnitudeANDattention.threefactors,model.threemaineffects.threefactors,model.full.threefactors)
-saveRDS(compare.threefactors.EEG.loo,file="compare.threefactors.EEG.loo.allsubs.rds")
+
 #WAIC
-compare.threefactors.EEG.waic <- WAIC(model.null.threefactors,model.condition.threefactors,model.attention.threefactors,model.expphase.threefactors,model.phaseANDattention.threefactors,model.rewardmagnitudeANDattention.threefactors,model.threemaineffects.threefactors,model.full.threefactors)
-saveRDS(compare.threefactors.EEG.waic,file="compare.threefactors.EEG.waic.allsubs.rds")
+compare.EEG.waic = WAIC(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, compare = FALSE)
+saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.rds")
+#LOO crossvalidation
+# compare.EEG.loo = LOO(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, reloo = TRUE)
+# saveRDS(compare.EEG.loo,file="compare.threefactors.EEG.loo.allsubs.rds")
 
-# Plot chains
-plot(model.threemaineffects.threefactors, pars = parnames(model.threemaineffects.threefactors)[1:5])
+# Summary of the best model
+# print(summary(full), digits = 2)
+# 
+# library(broom)
+# 
+# tidy(print(fixef(model.full.threefactors))) %>%
+#   mutate_if(is.numeric, round, digits = 2)  # This just rounds the values
+# 
+# print(fixef(model.full.threefactors), digits = 2)
+# 
+# # Plot chains
+# plot(full, pars = "^b_", N = 12)
+# 
+# posterior_samples(model.full.threefactors)
+# 
+# # # Plot parameter estimates
+# # pairs(model.full.threefactors, pars = parnames(model.full.threefactors)[1:12], exact_match = TRUE)
+# 
+# # Plot marginal effects for each predictor
+# conditions = data.frame(Condition = c("High Reward Attended", "Low Reward Attended"))
+# plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:ConditionRecording", conditions = conditions),ask=FALSE)
+# 
+# pp_check(model.full.threefactors)
+# 
+# full %>%
+#   plot(
+#     combo = c("hist", "trace"), widths = c(1, 1.5),
+#     theme = theme_bw(base_size = 10)
+#   )
+# 
+# # Bayes factor - marginal likelihoods
+# bayes_factor(threemain, full)
+# bayes_R2(full)
+# bridge_sampler(attention)
+# bayes_factor(model.condition.threefactors,model.null.threefactors)
+# bayes_factor(model.attention.threefactors,model.null.threefactors)
+# bayes_factor(model.expphase.threefactors,model.null.threefactors)
+# bayes_factor(model.phaseANDattention.threefactors,model.null.threefactors)
+# bayes_factor(model.rewardmagnitudeANDattention.threefactors,model.null.threefactors)
+# bayes_factor(model.threemaineffects.threefactors,model.null.threefactors)
+# bayes_factor(model.full.threefactors,model.null.threefactors)
+# 
+# # Compute the posterior model probabilities
+# post_prob(model.condition.threefactors,model.null.threefactors)
+# post_prob(model.attention.threefactors,model.null.threefactors)
+# post_prob(model.expphase.threefactors,model.null.threefactors)
+# post_prob(model.phaseANDattention.threefactors,model.null.threefactors)
+# post_prob(model.rewardmagnitudeANDattention.threefactors,model.null.threefactors)
+# post_prob(model.threemaineffects.threefactors,model.null.threefactors)
+# post_prob(model.full.threefactors,model.null.threefactors)
+# 
+# # read in the models and comparisons
+# null = readRDS("null.EEG.allsub.rds")
+# condition = readRDS("condition.EEG.allsubs.rds")
+# attention = readRDS("attention.EEG.allsubs.rds")
+# expphase = readRDS("expphase.EEG.allsubs.rds")
+# rewardANDattention = readRDS("rewardANDattention.EEG.allsubs.rds")
+# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
+# threemain = readRDS("threemain.EEG.allsubs.rds")
+# full = readRDS("full.EEG.allsubs.rds")
+# compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
+# compare.threefactors.EEG.waic = readRDS("compare.threefactors.EEG.waic.allsubs.rds")
 
-# Plot parameter estimates
-pairs(fit, pars = parnames(model.threemaineffects.threefactors)[1:5], exact_match = TRUE)
 
-# Plot marginal effects for each predictor
-plot(marginal_effects(model.full.threefactors),ask=FALSE)
-
-pp_check(model.full.threefactors)
-
-bayes_R2(model.attention.threefactors)
-bayes_R2(model.condition.threefactors)
-bayes_R2(model.expphase.threefactors)
-bayes_R2(model.twomaineffects.threefactors)
-bayes_R2(model.threemaineffects.threefactors)
-bayes_R2(model.full.threefactors)
-
-bayes_factor(model.threemaineffects.threefactors,model.attention.threefactors)
-bayes_factor(model.threemaineffects.threefactors,model.null.threefactors)
-bayes_factor(model.attention.threefactors,model.null.threefactors)
-bayes_factor(model.twomaineffects.threefactors,model.null.threefactors)
-bayes_factor(model.full.threefactors,model.null.threefactors)
-bayes_factor(model.full.threefactors,model.attention.threefactors)
-
-# read in the models and comparisons
-model.null.threefactors = readRDS("model.null.threefactors.EEG.allsubs.rds")
-model.condition.threefactors = readRDS("model.condition.threefactors.EEG.allsubs.rds")
-model.attention.threefactors = readRDS("model.attention.threefactors.EEG.allsubs.rds")
-model.expphase.threefactors = readRDS("model.expphase.threefactors.EEG.rds")
-model.twomaineffects.threefactors = readRDS("model.twomaineffects.threefactors.EEG.allsubs.rds")
-model.threemaineffects.threefactors = readRDS("model.threemaineffects.threefactors.EEG.allsubs.rds")
-model.full.threefactors = readRDS("model.full.threefactors.EEG.allsubs.rds")
-compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
-compare.threefactors.EEG.waic = readRDS("compare.threefactors.EEG.waic.allsubs.rds")
+# ```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = FALSE,fig.width = 10,fig.height = 6)
+# 
