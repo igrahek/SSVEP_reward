@@ -5,7 +5,6 @@
 # Code written by: Ivan Grahek & Antonio Schettino (2016-2018)
 # Description: Code for the analysis of behavioral data for Experiment 1 of the SSVEP - reward project. 
 
-
 ################################################################## Importing data & first steps ###############################################################################################################################################################################################################
 
 
@@ -17,9 +16,11 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2)
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms,rstan)
 # set seed
 set.seed(42) 
+# set directory
+setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/")
 # import data
 data.raw = read.csv(file="./data/Data_behavior_exp1_48pps.csv",header=TRUE,na.strings="NaN") 
 
@@ -27,17 +28,17 @@ data.raw = read.csv(file="./data/Data_behavior_exp1_48pps.csv",header=TRUE,na.st
 
 ### Adding and renaming variables 
 # rename EventType variable
-data.raw = rename(data.raw,c(EventType="MovedDots")) 
+names(data.raw)[names(data.raw) == "EventType"] = "MovedDots"
 # add a variable with the name of the attended color instead of a numbers
 data.raw$AttendedColor = ifelse(data.raw$AttendedColor==1,"red","blue")
-# add a variable saying which color was linked with high reward (even numbers - blue was high reward)
+# add a variable saying which color was linked with High_Rew (even numbers - blue was High_Rew)
 data.raw$RewardedColor = ifelse(data.raw$ParticipantNo%%2==0,"blue","red") 
 # add a variable with the name of the moved color instead of a numbers
 data.raw$MovedDots = ifelse(data.raw$MovedDots==1,"red","blue") 
-# split experimental phases into 6 isntead of 3 phases (trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction)
-#data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("baseline1","baseline2","acquisition1","acquisition2","extinction1","extinction2")) 
-# split experimental phases into 3 phases (trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction)
-data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("Baseline","Acquisition","Extinction")) # trial 0-200: baseline; trial 201-400: acquisition; trial 401-600: extinction
+# split experimental phases into 6 isntead of 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+#data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("Bsln1","Bsln2","Acq1","Acq2","Ext1","Ext2")) 
+# split experimental phases into 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("Bsln","Acq","Ext")) # trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext
 
 ### Convert variables to be used in analyses into factors
 data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )] = 
@@ -90,21 +91,24 @@ data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCo
 #crit = .6 # minimum 60% hit rate in any condition .6
 # select participants below the criterion
 #criterion = subset(ddply(data.final,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
+
+#criterion = subset(data.final,data.final$Hit.Rate<.3)$Participant # minimum 60% hit rate across all conditions
+
 # eliminate ouotliers from data frame
 #data.final = data.final[!data.final$ParticipantNo %in% unique(criterion),] 
 
 # Create the final dataframe for accuracy and RTs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ### Create a final dataframe for accuracy and RTs analyses
-# add a new variable specifying whether the participant is attending the high or low rewarded color
-data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High reward","Low reward")
+# add a new variable specifying whether the participant is attending the high or Low_Rewed color
+data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High_Rew","Low_Rew")
 # make this variable a factor for further analyses
 data.final$Condition = factor(data.final$Condition)
 
 ################################################################## Plotting ###############################################################################################################################################################################################################
 
-# Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+# # Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 
   # Pirate plot
   pirateplot(formula=Hit.Rate~ExpPhase+Condition, # dependent~independent variables
              data=data.final, # data frame
@@ -152,9 +156,9 @@ data.final$Condition = factor(data.final$Condition)
              cex.axis=1, # axis numbers: size
              bty="l", # plot box type
              back.col="white") # background, color
-  
-# Plot Reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#  Plot Reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 
   # Pirate plot
   pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
              data=data.final, # data frame
@@ -202,121 +206,202 @@ data.final$Condition = factor(data.final$Condition)
              cex.axis=1, # axis numbers: size
              bty="l", # plot box type
              back.col="white") # background, color
-  
+#   
 ################################################################## Stats ###############################################################################################################################################################################################################
 
 # BF ANOVA------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # number of MonteCarlo iterations (default: 10000)
-num.iter=10000 
+# num.iter=10000 
+# 
+# # DV: dprime
+# # 3 x 2 rANOVA
+# # Assuming a medium prior d~Cauchy(0,.707):
+# rANOVA_dPrime.bf.med <- anovaBF(dprime~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+# rANOVA_dPrime.bf.med
+# 
+# # DV: Hit.Rate
+# # 3 x 2 rANOVA
+# # Assuming a medium prior d~Cauchy(0,.707):
+# rANOVA_HitRate.bf.med <- anovaBF(Hit.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+# rANOVA_HitRate.bf.med
+# 
+# # DV: FA rate
+# # 3 x 2 rANOVA
+# # Assuming a medium prior d~Cauchy(0,.707):
+# rANOVA_FArate.bf.med <- anovaBF(FA.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+# rANOVA_FArate.bf.med
+# 
+# # DV: RTs for Hits 
+# # 3 x 2 rANOVA
+# 
+# # Assuming a medium prior d~Cauchy(0,.707):
+# rANOVA_RT.bf.med <- anovaBF(Hits.RTs~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
+# rANOVA_RT.bf.med
+# 
 
-# DV: dprime
-# 3 x 2 rANOVA
-# Assuming a medium prior d~Cauchy(0,.707):
-rANOVA_dPrime.bf.med <- anovaBF(dprime~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-rANOVA_dPrime.bf.med
+# brms reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# DV: Hit.Rate
-# 3 x 2 rANOVA
-# Assuming a medium prior d~Cauchy(0,.707):
-rANOVA_HitRate.bf.med <- anovaBF(Hit.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-rANOVA_HitRate.bf.med
+# Set the working directory where to save the models
+setwd("./brms_models")
 
-# DV: FA rate
-# 3 x 2 rANOVA
-# Assuming a medium prior d~Cauchy(0,.707):
-rANOVA_FArate.bf.med <- anovaBF(FA.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-rANOVA_FArate.bf.med
-
-# DV: RTs for Hits 
-# 3 x 2 rANOVA
-
-# Assuming a medium prior d~Cauchy(0,.707):
-rANOVA_RT.bf.med <- anovaBF(Hits.RTs~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-rANOVA_RT.bf.med
-
-# brms------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#help stan run faster
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 
 # referencing for easier interpretation
-data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Acquisition")
-data.final$Condition=relevel(data.final$Condition,ref="High reward")
+data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
 
-# increase adapt_delta parameter. default is 0.8. This is the target average proposal acceptance probability during Stan’s adaptation period, and increasing it will force Stan to take smaller steps.
-# library(rstan)
-# stan(..., control = list(adapt_delta = 0.99))
 
 # Null model
-model.null = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
+model.null.RT = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
                  data=data.final,
                  family=gaussian(),
                  warmup = 2000,
                  iter = 10000,
-                 save_all_pars = TRUE)
-saveRDS(model.null,file="nullmodel.RT.rds")
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99),
+                 cores = 4)
+saveRDS(model.null.RT,file="nullmodel.RT.rds")
 
 # ExpPhase model
-model.expphase = brm(Hits.RTs ~ ExpPhase + (ExpPhase|ParticipantNo),
+model.expphase.RT = brm(Hits.RTs ~ ExpPhase + (ExpPhase|ParticipantNo),
                  data=data.final,
                  family=gaussian(),
                  warmup = 2000,
                  iter = 10000,
-                 save_all_pars = TRUE)
-saveRDS(model.expphase,file="expphasemodel.RT.rds")
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99),
+                 cores = 4)
+saveRDS(model.expphase.RT,file="expphasemodel.RT.rds")
 
 # Condition model
-model.condition = brm(Hits.RTs ~ Condition + (Condition|ParticipantNo),
+model.condition.RT = brm(Hits.RTs ~ Condition + (Condition|ParticipantNo),
                      data=data.final,
                      family=gaussian(),
                      warmup = 2000,
                      iter = 10000,
-                     save_all_pars = TRUE)
-saveRDS(model.expphase,file="model.condition.RT.rds")
+                     save_all_pars = TRUE,
+                     control = list(adapt_delta = 0.99),
+                     cores = 4)
+saveRDS(model.condition.RT,file="model.condition.RT.rds")
 
 # # Two main effects model
-model.twomaineffects = brm(Hits.RTs ~ ExpPhase + Condition + (Condition + ExpPhase|ParticipantNo),
+model.twomaineffects.RT = brm(Hits.RTs ~ ExpPhase + Condition + (ExpPhase + Condition|ParticipantNo),
                  data=data.final,
                  family=gaussian(),
                  warmup = 2000,
                  iter = 10000,
-                 save_all_pars = TRUE)
-saveRDS(model.twomaineffects,file="model.twomaineffects.RT.rds")
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99),
+                 cores = 4)
+saveRDS(model.twomaineffects.RT,file="model.twomaineffects.RT.rds")
 
 #Interaction model
-model.full = brm(Hits.RTs ~ ExpPhase + Condition + ExpPhase * Condition + (Condition * ExpPhase|ParticipantNo),
+model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
                  data=data.final,
                  family=gaussian(),
                  warmup = 2000,
                  iter = 10000,
-                 save_all_pars = TRUE)
-saveRDS(model.full,file="model.full.RT.rds")
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99),
+                 cores = 4)
+saveRDS(model.full.RT,file="model.full.RT.rds")
+
+# # read in the models and comparisons
+# model.null.RT = readRDS("nullmodel.RT.rds")
+# model.condition.RT = readRDS("model.condition.RT.rds")
+# model.expphase.RT = readRDS("expphasemodel.RT.rds")
+# model.twomaineffects.RT = readRDS("model.twomaineffects.RT.rds")
+# model.full.RT = readRDS("model.full.RT.rds")
+#compare.loo = readRDS("compare.RT.loo")
+#compare.waic = readRDS("compare.RT.waic")
 
 #WAIC
-compare.RT.waic = WAIC(model.null,model.condition,model.expphase,model.twomaineffects,model.full)
+compare.RT.waic = WAIC(model.null.RT,model.condition.RT,model.expphase.RT,model.twomaineffects.RT,model.full.RT, compare = FALSE)
 saveRDS(compare.RT.waic,file="compare.RT.waic")
 
 # #LOO crossvalidation
-compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
-saveRDS(compare.RT.loo,file="compare.RT.loo")
-
-# read in the models and comparisons
-model.null = readRDS("nullmodel.RT.rds")
-model.condition = readRDS("model.condition.RT.rds")
-model.expphase = readRDS("expphasemodel.RT.rds")
-model.twomaineffects = readRDS("model.twomaineffects.RT.rds")
-model.full = readRDS("model.RT.full.rds")
-compare.loo = readRDS("compare.RT.loo")
-compare.waic = readRDS("compare.RT.waic")
-
-# Plot marginal effects for each predictor
-plot(marginal_effects(model.full),ask=FALSE)
-
-# Calculate bayes factors from marginal likelihoods
-bayes_factor(model.full,model.null)
-
-# Compare log marginal likelihood via bridge sampling
-bridge_sampler(model.full)
-
-# Compute the posterior model probabilities
-post_prob(model.twomaineffects,model.full)
+# compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
+# saveRDS(compare.RT.loo,file="compare.RT.loo")
 
 
+# brms accuracy------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# referencing for easier interpretation
+data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+
+
+# Null model
+model.null.Acc = brm(Hit.Rate ~ 1 + (1|ParticipantNo),
+                 data=data.final,
+                 family=gaussian(),
+                 warmup = 2000,
+                 iter = 10000,
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99),
+                 cores = 4)
+saveRDS(model.null.Acc,file="nullmodel.Acc.rds")
+
+# ExpPhase model
+model.expphase.Acc = brm(Hit.Rate ~ ExpPhase + (ExpPhase|ParticipantNo),
+                     data=data.final,
+                     family=gaussian(),
+                     warmup = 2000,
+                     iter = 10000,
+                     save_all_pars = TRUE,
+                     control = list(adapt_delta = 0.99),
+                     cores = 4)
+saveRDS(model.expphase.Acc,file="expphasemodel.Acc.rds")
+
+# Condition model
+model.condition.Acc = brm(Hit.Rate ~ Condition + (Condition|ParticipantNo),
+                      data=data.final,
+                      family=gaussian(),
+                      warmup = 2000,
+                      iter = 10000,
+                      save_all_pars = TRUE,
+                      control = list(adapt_delta = 0.99),
+                      cores = 4)
+saveRDS(model.expphase.Acc,file="model.condition.Acc.rds")
+
+# # Two main effects model
+model.twomaineffects.Acc = brm(Hit.Rate ~ ExpPhase + Condition + (ExpPhase + Condition|ParticipantNo),
+                           data=data.final,
+                           family=gaussian(),
+                           warmup = 2000,
+                           iter = 10000,
+                           save_all_pars = TRUE,
+                           control = list(adapt_delta = 0.99),
+                           cores = 4)
+saveRDS(model.twomaineffects.Acc,file="model.twomaineffects.Acc.rds")
+
+#Interaction model
+model.full.Acc = brm(Hit.Rate ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+                 data=data.final,
+                 family=gaussian(),
+                 warmup = 2000,
+                 iter = 10000,
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99),
+                 cores = 4)
+saveRDS(model.full.Acc,file="model.full.Acc.rds")
+
+#read in the models and comparisons
+# model.null.Acc = readRDS("nullmodel.Acc.rds")
+# model.condition.Acc = readRDS("model.condition.Acc.rds")
+# model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
+# model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
+#model.full.Acc = readRDS("model.full.Acc_nocorrelationvarying.rds")
+#compare.loo.Acc = readRDS("compare.Acc.loo")
+# compare.waic.Acc = readRDS("compare.Acc.waic")
+
+#WAIC
+compare.Acc.waic = WAIC(model.null.Acc,model.condition.Acc,model.expphase.Acc,model.twomaineffects.Acc,model.full.Acc, compare = FALSE)
+saveRDS(compare.Acc.waic,file="compare.Acc.waic")
+
+# #LOO crossvalidation
+# compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
+# saveRDS(compare.RT.loo,file="compare.Acc.loo")
