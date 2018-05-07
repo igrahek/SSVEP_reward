@@ -1,5 +1,5 @@
 ---
-title: "SSVEP reward - EEG results"
+title: "SSVEP reward - behavioral results"
 author: 'Ivan Grahek & Antonio Schettino'
 date: '`r Sys.Date()`'
 output:

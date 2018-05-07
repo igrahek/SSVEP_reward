@@ -427,70 +427,94 @@ saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.rds")
 # compare.EEG.loo = LOO(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, reloo = TRUE)
 # saveRDS(compare.EEG.loo,file="compare.threefactors.EEG.loo.allsubs.rds")
 
-# Summary of the best model
-# print(summary(full), digits = 2)
-# 
-# library(broom)
-# 
-# tidy(print(fixef(model.full.threefactors))) %>%
-#   mutate_if(is.numeric, round, digits = 2)  # This just rounds the values
-# 
-# print(fixef(model.full.threefactors), digits = 2)
-# 
-# # Plot chains
-# plot(full, pars = "^b_", N = 12)
-# 
-# posterior_samples(model.full.threefactors)
-# 
-# # # Plot parameter estimates
-# # pairs(model.full.threefactors, pars = parnames(model.full.threefactors)[1:12], exact_match = TRUE)
-# 
-# # Plot marginal effects for each predictor
-# conditions = data.frame(Condition = c("High Reward Attended", "Low Reward Attended"))
-# plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:ConditionRecording", conditions = conditions),ask=FALSE)
-# 
-# pp_check(model.full.threefactors)
-# 
-# full %>%
-#   plot(
-#     combo = c("hist", "trace"), widths = c(1, 1.5),
-#     theme = theme_bw(base_size = 10)
-#   )
-# 
-# # Bayes factor - marginal likelihoods
-# bayes_factor(threemain, full)
-# bayes_R2(full)
-# bridge_sampler(attention)
-# bayes_factor(model.condition.threefactors,model.null.threefactors)
-# bayes_factor(model.attention.threefactors,model.null.threefactors)
-# bayes_factor(model.expphase.threefactors,model.null.threefactors)
-# bayes_factor(model.phaseANDattention.threefactors,model.null.threefactors)
-# bayes_factor(model.rewardmagnitudeANDattention.threefactors,model.null.threefactors)
-# bayes_factor(model.threemaineffects.threefactors,model.null.threefactors)
-# bayes_factor(model.full.threefactors,model.null.threefactors)
-# 
-# # Compute the posterior model probabilities
-# post_prob(model.condition.threefactors,model.null.threefactors)
-# post_prob(model.attention.threefactors,model.null.threefactors)
-# post_prob(model.expphase.threefactors,model.null.threefactors)
-# post_prob(model.phaseANDattention.threefactors,model.null.threefactors)
-# post_prob(model.rewardmagnitudeANDattention.threefactors,model.null.threefactors)
-# post_prob(model.threemaineffects.threefactors,model.null.threefactors)
-# post_prob(model.full.threefactors,model.null.threefactors)
-# 
-# # read in the models and comparisons
-# null = readRDS("null.EEG.allsub.rds")
-# condition = readRDS("condition.EEG.allsubs.rds")
-# attention = readRDS("attention.EEG.allsubs.rds")
-# expphase = readRDS("expphase.EEG.allsubs.rds")
-# rewardANDattention = readRDS("rewardANDattention.EEG.allsubs.rds")
-# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
-# threemain = readRDS("threemain.EEG.allsubs.rds")
-# full = readRDS("full.EEG.allsubs.rds")
-# compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
-# compare.threefactors.EEG.waic = readRDS("compare.threefactors.EEG.waic.allsubs.rds")
+# Sample from the posterior
+post = posterior_samples(full, "^b")
+
+################################################ Baseline ####
+
+##################### Attended
+
+######### High reward
+Baseline_High_Attended = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low_Attended = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+##################### Not Attended
+
+######### High reward
+Baseline_High_NotAttended = post[["b_Intercept"]] + 
+  post[["b_AttentionNotAtt"]]
+######### Low reward
+Baseline_Low_NotAttended = post[["b_Intercept"]] + 
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ConditionLow_Rew:AttentionNotAtt"]]
+
+################################################ Acquistion
+
+##################### Attended
+
+######### High reward
+Acquisition_High_Attended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low_Attended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseAcq"]]
+
+##################### Not Attended
+
+######### High reward
+Acquisition_High_NotAttended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_AttentionNotAtt"]]
+######### Low reward
+Acquisition_Low_NotAttended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:AttentionNotAtt"]] +
+  post[["b_ConditionLow_Rew:ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt"]]
+
+################################################ Extinction
+
+##################### Attended
+
+######### High reward
+Extinction_High_Attended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low_Attended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseExt"]]
+
+##################### Not Attended
+
+######### High reward
+Extinction_High_NotAttended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_AttentionNotAtt"]]
+######### Low reward
+Extinction_Low_NotAttended = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:AttentionNotAtt"]] +
+  post[["b_ConditionLow_Rew:ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
 
 
-# ```{r setup, include=FALSE}
-# knitr::opts_chunk$set(echo = FALSE,fig.width = 10,fig.height = 6)
-# 
+#Check the difference between high and low reward in acquisition attended
+
+# Difference between high and low reward in acquisition attended
+Diff_Rew_Acq_Att = Acquisition_High_Attended - Acquisition_Low_Attended
+plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = TRUE, ROPE = c(0,1))
+
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "0 > b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
+print(h1)
+plot(h1)

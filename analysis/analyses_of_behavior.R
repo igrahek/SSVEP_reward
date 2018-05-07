@@ -250,8 +250,14 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
 # referencing for easier interpretation
-data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
-data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+# data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+# data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+
+# Contrast coding
+subset(data.final$ExpPhase, data.final$ExpPhase=="Bsln") = -0.5
+data.final$ExpPhase["Bsln"] = -0.5
+
+data.final$ExpPhase[data.final$ExpPhase == "Acq"] <- 5
 
 
 # Null model
