@@ -432,7 +432,7 @@ full = readRDS("full.EEG.allsubs.rds")
 compare.EEG.waic = WAIC(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, compare = FALSE)
 saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.rds")
 #LOO crossvalidation
-compare.EEG.loo = LOO(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, reloo = TRUE)
+compare.EEG.loo = LOO(null, condition, expphase, attention, threemain, reloo = TRUE, compare = FALSE)
 saveRDS(compare.EEG.loo,file="compare.EEG.loo.allsubs.rds")
 
 # Sample from the posterior
