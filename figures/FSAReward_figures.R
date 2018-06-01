@@ -34,51 +34,40 @@ topo_10Hz <- topos %>%
   select(-"12 Hz") %>%
   rename(amplitude = "10 Hz") %>%
   topoplot(.,
-    time_lim = NULL,
     limits = c(0, 1),
     chanLocs = electrodeLocs,
     method = "Biharmonic",
-    r = NULL,
-    grid_res = 67,
     palette = "viridis",
     interp_limit = "skirt",
     contour = TRUE,
     chan_marker = "point",
-    quantity = "amplitude",
-    montage = NULL
-  ) + theme(plot.margin = unit(c(6, 0, 6, 0), "pt"))
+    quantity = "amplitude"
+  ) +
+  ggtitle("10 Hz") +
+  theme(
+    plot.title = element_text(size = 22, hjust = .5, face = "bold"),
+    plot.margin = unit(c(6, 0, 6, 0), "pt")
+  )
 
 # 12 Hz
-
 topo_12Hz <- topos %>%
   select(-"10 Hz") %>%
   rename(amplitude = "12 Hz") %>%
   topoplot(.,
-    time_lim = NULL,
     limits = c(0, 1),
     chanLocs = electrodeLocs,
     method = "Biharmonic",
-    r = NULL,
-    grid_res = 67,
     palette = "viridis",
     interp_limit = "skirt",
     contour = TRUE,
     chan_marker = "point",
-    quantity = "amplitude",
-    montage = NULL
-  ) + theme(plot.margin = unit(c(6, 0, 6, 0), "pt"))
-
-# arrange the plots in a single row
-prow <- plot_grid(topo_10Hz + theme(legend.position = "none"),
-  topo_12Hz + theme(legend.position = "none"),
-  align = "vh",
-  labels = c("A", "B"),
-  hjust = -1,
-  nrow = 1
-)
-
-legend <- get_legend(topo_10Hz) # extract legend
-plot_grid(prow, legend, rel_widths = c(3, .3)) # plots & legend
+    quantity = "amplitude"
+  ) +
+  ggtitle("12 Hz") +
+  theme(
+    plot.title = element_text(size = 22, hjust = .5, face = "bold"),
+    plot.margin = unit(c(6, 0, 6, 0), "pt")
+  )
 
 ################################################################################################
 ########################################### SPECTRA ############################################
@@ -88,21 +77,21 @@ plot_grid(prow, legend, rel_widths = c(3, .3)) # plots & legend
 # https://craddm.github.io/2016/11/28/erp-visualization-within-subject-confidence-intervals/
 spectra <- read_csv(paste0(getwd(), "/figures/spectra.csv")) %>% # load data
   gather(
-    key = frequency, # grouping column
-    value = amplitude, # value column
-    "0":"511.8181818" # columns that need gathering
+    key = frequency,
+    value = amplitude,
+    "0":"511.8181818"
   ) %>%
   mutate(
-    participant = as.factor(participant), # convert participant as factor
+    participant = as.factor(participant),
     condition = recode(
-      factor(condition), # convert condition as factor and rename levels
+      factor(condition),
       "1" = "BslnRedAttended", "2" = "BslnBlueAttended",
       "3" = "AcqRedAttended", "4" = "AcqBlueAttended",
       "5" = "ExtRedAttended", "6" = "ExtBlueAttended"
     ),
-    frequency = as.numeric(frequency) # convert frequency as numeric
+    frequency = as.numeric(frequency) # convert frequency as numeric, or subsequent filtering won't work
   ) %>%
-  filter(frequency <= 16) # filter out frequencies not in graph
+  filter(frequency <= 16)
 
 # summarized data from each time point, including within-subject 95% CIs
 spectra.pointsummary <- spectra %>%
@@ -115,18 +104,18 @@ spectra.pointsummary <- spectra %>%
   ))
 
 # extract within-subject 95% CIs
-spectra..withinssjCI <- map_df(spectra.pointsummary, magrittr::extract) %>%
+spectra.withinssjCI <- map_df(spectra.pointsummary, magrittr::extract) %>%
   mutate(frequency = rep(unique(spectra$frequency), each = length(unique(spectra$condition))))
 
 # plot (frequency range: 0-16 Hz)
-ggplot(spectra, aes(frequency, amplitude)) + # basic plot
-  stat_summary(aes(colour = condition), # lines: means
-    fun.y = mean,
-    geom = "line",
-    size = 1.3
+spectra_all <- ggplot(spectra, aes(frequency, amplitude)) +
+  stat_summary(aes(colour = condition),
+               fun.y = mean,
+               geom = "line",
+               size = 1.3
   ) +
   geom_ribbon( # ribbons: 95% CI
-    data = spectra..withinssjCI,
+    data = spectra.withinssjCI,
     aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = condition),
     linetype = "solid",
     alpha = .2
@@ -138,7 +127,6 @@ ggplot(spectra, aes(frequency, amplitude)) + # basic plot
   scale_y_continuous(breaks = seq(0, 1.6, .2)) +
   scale_x_continuous(breaks = seq(0, 16, 2)) +
   labs(
-    title = "Amplitude (0 - 16 Hz)",
     x = "frequency (Hz)",
     y = expression(paste("amplitude (", mu, "V)"))
   ) +
@@ -150,7 +138,7 @@ ggplot(spectra, aes(frequency, amplitude)) + # basic plot
   )
 
 # plot (frequency range: 9-11 Hz)
-filter(spectra, frequency >= 9 & frequency <= 11) %>%
+spectra_10Hz <- filter(spectra, frequency >= 9 & frequency <= 11) %>%
   ggplot(., aes(frequency, amplitude)) +
   stat_summary(aes(colour = condition),
     fun.y = mean,
@@ -158,7 +146,7 @@ filter(spectra, frequency >= 9 & frequency <= 11) %>%
     size = 1.3
   ) +
   geom_ribbon(
-    data = filter(spectra..withinssjCI, frequency >= 9 & frequency <= 11),
+    data = filter(spectra.withinssjCI, frequency >= 9 & frequency <= 11),
     aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = condition),
     linetype = "solid",
     alpha = .2
@@ -169,8 +157,8 @@ filter(spectra, frequency >= 9 & frequency <= 11) %>%
   geom_hline(yintercept = seq(0, 1.6, .2), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
   scale_y_continuous(breaks = seq(0, 1.6, .2)) +
   scale_x_continuous(breaks = seq(9, 11, 1)) +
-  coord_cartesian(
-    ylim = c(.6, 1.6), # zoom in
+  coord_cartesian(                               # zoom in
+    ylim = c(.6, 1.6),
     xlim = c(9.5, 10.5)
   ) +
   labs(
@@ -186,7 +174,7 @@ filter(spectra, frequency >= 9 & frequency <= 11) %>%
   )
 
 # plot (frequency range: 11-13 Hz)
-filter(spectra, frequency >= 11 & frequency <= 13) %>%
+spectra_12Hz <- filter(spectra, frequency >= 11 & frequency <= 13) %>%
   ggplot(., aes(frequency, amplitude)) +
   stat_summary(aes(colour = condition),
     fun.y = mean,
@@ -194,7 +182,7 @@ filter(spectra, frequency >= 11 & frequency <= 13) %>%
     size = 1.3
   ) +
   geom_ribbon(
-    data = filter(spectra..withinssjCI, frequency >= 11 & frequency <= 13),
+    data = filter(spectra.withinssjCI, frequency >= 11 & frequency <= 13),
     aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = condition),
     linetype = "solid",
     alpha = .2
@@ -205,8 +193,8 @@ filter(spectra, frequency >= 11 & frequency <= 13) %>%
   geom_hline(yintercept = seq(.5, 1, .1), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
   scale_y_continuous(breaks = seq(.5, 1, .1)) +
   scale_x_continuous(breaks = seq(11, 13, 1)) +
-  coord_cartesian(
-    ylim = c(.5, 1), # zoom in
+  coord_cartesian(                               # zoom in
+    ylim = c(.5, 1),
     xlim = c(11.5, 12.5)
   ) +
   labs(
@@ -222,5 +210,34 @@ filter(spectra, frequency >= 11 & frequency <= 13) %>%
   )
 
 ################################################################################################
+######################################## ARRANGE PLOTS #########################################
 ################################################################################################
-################################################################################################
+
+# arrange topographies in a single row
+topo.row <- plot_grid(topo_10Hz + theme(legend.position = "none"),
+                      topo_12Hz + theme(legend.position = "none"),
+                      align = "vh",
+                      hjust = -1,
+                      nrow = 1
+)
+
+legend <- get_legend(topo_10Hz) # extract legend
+
+plot_grid(topo.row, 
+          legend, 
+          spectra_all,
+          rel_widths = c(3, .3)) %>%
+
+save_plot(paste0(getwd(), "/figures/topos_spectra.png"), 
+          ., 
+          base_height = 8,
+          base_aspect_ratio = 1.1)
+
+
+
+
+
+
+
+
+
