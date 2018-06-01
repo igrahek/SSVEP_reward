@@ -17,7 +17,7 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,lme4)
+pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,lme4, BEST, brmstools)
 # set seed
 set.seed(42) 
 # import data
@@ -427,6 +427,9 @@ rewardANDattention = readRDS("rewardANDattention.EEG.allsubs.rds")
 phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
 threemain = readRDS("threemain.EEG.allsubs.rds")
 full = readRDS("full.EEG.allsubs.rds")
+
+loo.5.factors = readRDS("compare.EEG.loo.allsubs.rds")
+loo.full.model = readRDS("compare.EEG.fullmodel.loo.allsubs.rds")
 
 #WAIC
 compare.EEG.waic = WAIC(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, compare = FALSE)

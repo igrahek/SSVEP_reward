@@ -321,7 +321,7 @@ compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.rds")
 ## Model comparison with WAIC
 
 ```{r, warning=FALSE, message=FALSE}
-#print(compare.threefactors.EEG.waic)
+print(compare.threefactors.EEG.waic)
 ```
 
 ## Checking the best model
@@ -329,14 +329,14 @@ compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.rds")
 Plotting the chains
 ```{r, warning=FALSE, message=FALSE}
 # Plot chains
-#plot(model.full.threefactors, pars = "^b_", ask = FALSE, N=6)
+plot(model.full.threefactors, pars = "^b_", ask = FALSE, N=6)
 ```
 
 Summary of the best model 
 
 ```{r, warning=FALSE, message=FALSE}
 # Summary of the best model
-#print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
+print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
 ```
 
 ## Plotting the best model
@@ -345,8 +345,8 @@ Attended color (plot 1) and Not attended color (plot 2)
 
 ```{r, warning=FALSE, message=FALSE}
 # Plot the interaction between Phase and Attention in two conditions of reward probability
-#conditions = data.frame(Attention = c("Att", "NotAtt"))
-#plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
+conditions = data.frame(Attention = c("Att", "NotAtt"))
+plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
 ```
 
 ## Inference about the best model
