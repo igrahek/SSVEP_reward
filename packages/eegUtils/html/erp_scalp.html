@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Plot ERPs on the scalp</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for erp_scalp {eegUtils}"><tr><td>erp_scalp {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Plot ERPs on the scalp</h2>
+
+<h3>Description</h3>
+
+<p>Creates an ERP figure for each electrode and layouts them on the scalp.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+erp_scalp(data, electrode = "electrode", amplitude = "amplitude",
+  time = "time", color = NULL, size = 0.8, baseline = NULL,
+  show_guide = TRUE, montage = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>An EEG dataset.</p>
+</td></tr>
+<tr valign="top"><td><code>electrode</code></td>
+<td>
+<p>Column name containing electrode names in data.
+Defaults to &quot;electrode&quot;.</p>
+</td></tr>
+<tr valign="top"><td><code>amplitude</code></td>
+<td>
+<p>Column name containing amplitudes in data.
+Defaults to &quot;amplitude&quot;.</p>
+</td></tr>
+<tr valign="top"><td><code>time</code></td>
+<td>
+<p>Column name containing time in data. Defaults to &quot;time&quot;.</p>
+</td></tr>
+<tr valign="top"><td><code>color</code></td>
+<td>
+<p>Variable to color lines by. If no variable is passed, only
+one line is drawn for each electrode.</p>
+</td></tr>
+<tr valign="top"><td><code>size</code></td>
+<td>
+<p>Size of line(s).</p>
+</td></tr>
+<tr valign="top"><td><code>baseline</code></td>
+<td>
+<p>Character vector of times to subtract for baseline correct.</p>
+</td></tr>
+<tr valign="top"><td><code>show_guide</code></td>
+<td>
+<p>Should a guide be shown.</p>
+</td></tr>
+<tr valign="top"><td><code>montage</code></td>
+<td>
+<p>Name of an existing montage set. Defaults to NULL; (currently
+only 'biosemi64alpha' available other than default 10/20 system)</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>The function uses default electrode names and locations contained
+in the package.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Returns a ggplot2 plot object.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matti Vuorre, <a href="mailto:mv2521@columbia.edu">mv2521@columbia.edu</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

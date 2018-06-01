@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Plot electrode locations</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for plot_electrodes {eegUtils}"><tr><td>plot_electrodes {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Plot electrode locations</h2>
+
+<h3>Description</h3>
+
+<p>Produces either a 2D plot of the electrode locations or an interactive plot
+of electrode locations in 3D space.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+plot_electrodes(data, interact = FALSE, ...)
+
+## Default S3 method:
+plot_electrodes(data, interact = FALSE, ...)
+
+## S3 method for class 'eeg_data'
+plot_electrodes(data, interact = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>Data with associated electrode locations to be plotted.</p>
+</td></tr>
+<tr valign="top"><td><code>interact</code></td>
+<td>
+<p>Choose 2D cartesian layout, or, if set to TRUE, an
+interactive 3D plot of electrode locations. Defaults to FALSE.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>other parameters</p>
+</td></tr>
+</table>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>default</code>: generic plot electrodes function
+</p>
+</li>
+<li> <p><code>eeg_data</code>: Plot electrodes associated with an <code>eeg_data</code> object.
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

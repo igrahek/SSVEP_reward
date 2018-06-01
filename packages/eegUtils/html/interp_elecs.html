@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Channel interpolation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for interp_elecs {eegUtils}"><tr><td>interp_elecs {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Channel interpolation</h2>
+
+<h3>Description</h3>
+
+<p>Interpolate EEG channels using a spherical spline (Perrin et al., 1989). The
+data must have channel locations attached.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+interp_elecs(data, bad_elecs, ...)
+
+## S3 method for class 'eeg_data'
+interp_elecs(data, bad_elecs, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>Data as a <code>eeg_data</code> or <code>eeg_epochs</code> object.</p>
+</td></tr>
+<tr valign="top"><td><code>bad_elecs</code></td>
+<td>
+<p>Name(s) of electrode(s) to interpolate.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Other parameters passed to the functions.</p>
+</td></tr>
+</table>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>eeg_data</code>: Interpolate EEG channel(s)
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

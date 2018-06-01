@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Butterworth IIR filter</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for iir_filt {eegUtils}"><tr><td>iir_filt {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Butterworth IIR filter</h2>
+
+<h3>Description</h3>
+
+<p>Construct a Butterworth IIR filter and filter input data. This uses
+<code>signal::filt_filt</code>, which filters the signal twice to - once forwards,
+then again backwards).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+iir_filt(data, ...)
+
+## S3 method for class 'data.frame'
+iir_filt(data, low_freq = NULL, high_freq = NULL,
+  filter_order = 4, srate, silent = FALSE, ...)
+
+## S3 method for class 'eeg_data'
+iir_filt(data, low_freq = NULL, high_freq = NULL,
+  filter_order = 4, silent = FALSE, ...)
+
+## S3 method for class 'eeg_epochs'
+iir_filt(data, low_freq = NULL, high_freq = NULL,
+  filter_order = 4, silent = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>Data to be filtered.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Parameters passed to S3 methods</p>
+</td></tr>
+<tr valign="top"><td><code>low_freq</code></td>
+<td>
+<p>Low passband edge.</p>
+</td></tr>
+<tr valign="top"><td><code>high_freq</code></td>
+<td>
+<p>High passband edge.</p>
+</td></tr>
+<tr valign="top"><td><code>filter_order</code></td>
+<td>
+<p>Order of the Butterworth filter.</p>
+</td></tr>
+<tr valign="top"><td><code>srate</code></td>
+<td>
+<p>Sampling rate of the signal.</p>
+</td></tr>
+<tr valign="top"><td><code>silent</code></td>
+<td>
+<p>Turns off filtering messages.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>low_freq and high_freq are passband edges. Pass low freq or high freq alone
+to perform high-pass or low-pass filtering respectively. For band-pass or
+band-stop filters, pass both low_freq and high_freq.
+</p>
+<p>If low_freq &lt; high_freq, bandpass filtering is performed.
+</p>
+<p>If low_freq &gt; high_freq, bandstop filtering is performed.
+</p>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>data.frame</code>: Filter a data frame
+</p>
+</li>
+<li> <p><code>eeg_data</code>: Filter eeg_data
+</p>
+</li>
+<li> <p><code>eeg_epochs</code>: Filter eeg_epochs
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

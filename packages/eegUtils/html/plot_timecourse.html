@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Plot 1-D timecourse data.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for plot_timecourse {eegUtils}"><tr><td>plot_timecourse {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Plot 1-D timecourse data.</h2>
+
+<h3>Description</h3>
+
+<p>Typically event-related potentials/fields, but could also be timecourses from
+frequency analyses for single frequencies. Averages over all submitted
+electrodes. Output is a ggplot2 object.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+plot_timecourse(data, time_lim = NULL, group = NULL, facet = NULL,
+  add_CI = FALSE, baseline = NULL, colour = NULL, electrode = NULL,
+  color = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>EEG dataset. Should have multiple timepoints.</p>
+</td></tr>
+<tr valign="top"><td><code>time_lim</code></td>
+<td>
+<p>Character vector. Numbers in whatever time unit is used
+specifying beginning and end of time-range to plot. e.g. c(-100,300)</p>
+</td></tr>
+<tr valign="top"><td><code>group</code></td>
+<td>
+<p>(not yet implemented)</p>
+</td></tr>
+<tr valign="top"><td><code>facet</code></td>
+<td>
+<p>Create multiple plots for a specified grouping variable.</p>
+</td></tr>
+<tr valign="top"><td><code>add_CI</code></td>
+<td>
+<p>Add confidence intervals to the graph. Defaults to 95 percent
+between-subject CIs.</p>
+</td></tr>
+<tr valign="top"><td><code>baseline</code></td>
+<td>
+<p>Character vector. Times to use as a baseline. Takes the mean
+over the specified period and subtracts. e.g. c(-100,0)</p>
+</td></tr>
+<tr valign="top"><td><code>colour</code></td>
+<td>
+<p>Variable to colour lines by. If no variable is passed, only one
+line is drawn.</p>
+</td></tr>
+<tr valign="top"><td><code>electrode</code></td>
+<td>
+<p>Electrode(s) to plot.</p>
+</td></tr>
+<tr valign="top"><td><code>color</code></td>
+<td>
+<p>Alias for colour.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>Returns a ggplot2 plot object
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock, <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

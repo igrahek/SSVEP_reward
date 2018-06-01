@@ -1,0 +1,11 @@
+aws.signature-package	aws.signature-package
+aws.signature	aws.signature-package
+canonical_request	canonical_request
+default_credentials_file	read_credentials
+locate_credentials	credentials
+read_credentials	read_credentials
+signature_v2_auth	signature_v2_auth
+signature_v4	signature_v4
+signature_v4_auth	signature_v4_auth
+string_to_sign	string_to_sign
+use_credentials	read_credentials

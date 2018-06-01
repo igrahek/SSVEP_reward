@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Select electrodes from a given dataset.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for select_elecs {eegUtils}"><tr><td>select_elecs {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Select electrodes from a given dataset.</h2>
+
+<h3>Description</h3>
+
+<p>This is a generic function for selection of electrodes from an EEG dataset.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+select_elecs(data, ...)
+
+## Default S3 method:
+select_elecs(data, electrode = NULL, keep = TRUE, ...)
+
+## S3 method for class 'eeg_data'
+select_elecs(data, electrode, keep = TRUE,
+  df_out = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>An EEG dataset.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Arguments used with related methods</p>
+</td></tr>
+<tr valign="top"><td><code>electrode</code></td>
+<td>
+<p>A character vector of electrode labels for selection or
+removal.</p>
+</td></tr>
+<tr valign="top"><td><code>keep</code></td>
+<td>
+<p>Defaults to TRUE. Set to false to *remove* the selected
+electrodes.</p>
+</td></tr>
+<tr valign="top"><td><code>df_out</code></td>
+<td>
+<p>Defaults to FALSE. Set to TRUE to return a dataframe rather
+than an <code>eeg_data</code> object.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>Data frame with only data from the chosen electrodes
+</p>
+<p><code>eeg_data</code> object with selected electrodes removed/kept.
+</p>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>default</code>: Select electrodes from a generic data frame.
+</p>
+</li>
+<li> <p><code>eeg_data</code>: Select electrodes from a <code>eeg_data</code> object.
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock, <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

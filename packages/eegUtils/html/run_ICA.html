@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: ICA for EEG data</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for run_ICA {eegUtils}"><tr><td>run_ICA {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>ICA for EEG data</h2>
+
+<h3>Description</h3>
+
+<p>Implements SOBI ICA. Although SOBI exists in R already, thanks to the JADE
+package, it doesn't respect epoch boundaries when computing correlations
+across different time lags. This is a port of SOBI from EEGLAB. Currently
+only works on epoched data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+run_ICA(data, ...)
+
+## S3 method for class 'eeg_epochs'
+run_ICA(data, method = "sobi", ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>Data frame to be ICAed.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Other parameters passed to function.</p>
+</td></tr>
+<tr valign="top"><td><code>method</code></td>
+<td>
+<p>Only SOBI is currently implemented, so this is ignored.</p>
+</td></tr>
+</table>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>eeg_epochs</code>: Run ICA on an <code>eeg_epochs</code> object
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

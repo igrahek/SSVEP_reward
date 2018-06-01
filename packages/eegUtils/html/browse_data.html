@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Browse EEG data.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for browse_data {eegUtils}"><tr><td>browse_data {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Browse EEG data.</h2>
+
+<h3>Description</h3>
+
+<p>A Shiny gadget for browsing EEG data interactively. Data can be viewed
+as a butterfly plot (all electrodes overlaid) or as individual traces
+(electrodes &quot;stacked&quot;). Currently, the scale cannot be manually set and is
+determined by the range of the viewable data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+browse_data(data, ...)
+
+## S3 method for class 'eeg_data'
+browse_data(data, sig_length = 5, n_elecs = NULL,
+  downsample = FALSE, ...)
+
+## S3 method for class 'eeg_epochs'
+browse_data(data, sig_length = 5, n_elecs = NULL,
+  downsample = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p><code>eeg_data</code> object to be plotted.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Other parameters passed to browsing functions.</p>
+</td></tr>
+<tr valign="top"><td><code>sig_length</code></td>
+<td>
+<p>Length of signal to be plotted initially (seconds if
+continuous, epochs if epoched).</p>
+</td></tr>
+<tr valign="top"><td><code>n_elecs</code></td>
+<td>
+<p>Number of electrodes to be plotted on a single screen. (not yet
+implemented)</p>
+</td></tr>
+<tr valign="top"><td><code>downsample</code></td>
+<td>
+<p>Only works on <code>eeg_data</code> objects. Reduces size of data
+by only plotting every 4th point, speeding up plotting considerably.</p>
+</td></tr>
+</table>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>eeg_data</code>: Browse continuous EEG data.
+</p>
+</li>
+<li> <p><code>eeg_epochs</code>: Browse epoched EEG data.
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

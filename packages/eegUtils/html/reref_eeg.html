@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Referencing</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for reref_eeg {eegUtils}"><tr><td>reref_eeg {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Referencing</h2>
+
+<h3>Description</h3>
+
+<p>Used to reference the EEG data to specified electrode or electrodes. Defaults
+to average reference. Note that this stores the reference channel in the
+<code>eeg_data</code> structure; if one already exists, it is added back to the
+data before further referencing takes place.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+reref_eeg(data, ref_chans = "average", exclude = NULL, robust = FALSE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>Data to re-reference. Primarily meant for use with data of class
+<code>eeg_data</code>. Long format is expected if a data-frame is submitted.</p>
+</td></tr>
+<tr valign="top"><td><code>ref_chans</code></td>
+<td>
+<p>Channels to reference data to. Defaults to &quot;average&quot; i.e.
+average of all electrodes in data. Character vector of channel names or numbers.</p>
+</td></tr>
+<tr valign="top"><td><code>exclude</code></td>
+<td>
+<p>Electrodes to exclude from average reference calculation.</p>
+</td></tr>
+<tr valign="top"><td><code>robust</code></td>
+<td>
+<p>Use median instead of mean; only applied for average reference.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>object of class <code>eeg_data</code>, re-referenced as requested.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>
