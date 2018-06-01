@@ -3,9 +3,10 @@ pkgdir <- paste0(getwd(), "/packages") # set package directory
 .libPaths(c(pkgdir, .libPaths())) # add package directory
 
 library(tidyverse)
-library(eegUtils)
 library(viridis)
 library(cowplot)
+# devtools::install_github('craddm/eegUtils', dependencies = TRUE, lib = pkgdir)
+library(eegUtils)
 
 ################################################################################################
 ######################################### TOPOGRAPHIES #########################################
