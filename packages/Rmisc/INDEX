@@ -1,0 +1,13 @@
+CI                      Confidence Interval
+STDERR                  Standard Error
+group.CI                Group Confidence Interval
+group.STDERR            Group Standard Error Interval
+group.UCL               Group Upper-Center-Lower
+lr.glover               Likelihood Ratio Test
+multiplot               Multiple plot function
+normDataWithin          Normalize within-group data
+panel.circle            Circle Drawing
+rounder                 Round to Increment
+rsi                     Run Start Indices
+summarySE               Summarizes data
+summarySEwithin         Summarize within-subjects data
