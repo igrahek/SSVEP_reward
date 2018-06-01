@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Linear and Non-linear formulas in 'brms'</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for brmsformula-helpers {brms}"><tr><td>brmsformula-helpers {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Linear and Non-linear formulas in <span class="pkg">brms</span></h2>
+
+<h3>Description</h3>
+
+<p>Helper functions to specify linear and non-linear
+formulas for use with <code><a href="brmsformula.html">brmsformula</a></code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+nlf(formula, ..., flist = NULL, dpar = NULL, resp = NULL)
+
+lf(..., flist = NULL, dpar = NULL, resp = NULL)
+
+set_nl(nl = TRUE, dpar = NULL, resp = NULL)
+
+set_rescor(rescor = TRUE)
+
+set_mecor(mecor = TRUE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>formula</code></td>
+<td>
+<p>Non-linear formula for a distributional parameter.
+The name of the distributional parameter can either be specified
+on the left-hand side of <code>formula</code> or via argument <code>dpar</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Additional <code>formula</code> objects to specify 
+predictors of non-linear and distributional parameters. 
+Formulas can either be named directly or contain
+names on their left-hand side. 
+The following are distributional parameters of specific families
+(all other parameters are treated as non-linear parameters):
+<code>sigma</code> (residual standard deviation or scale of
+the <code>gaussian</code>, <code>student</code>, <code>skew_normal</code>, 
+<code>lognormal</code> <code>exgaussian</code>, and <code>asym_laplace</code> families);
+<code>shape</code> (shape parameter of the <code>Gamma</code>,
+<code>weibull</code>, <code>negbinomial</code>, and related
+zero-inflated / hurdle families); <code>nu</code> (degrees of freedom 
+parameter of the <code>student</code> and <code>frechet</code> families);
+<code>phi</code> (precision parameter of the <code>beta</code> 
+and <code>zero_inflated_beta</code> families);
+<code>kappa</code> (precision parameter of the <code>von_mises</code> family);
+<code>beta</code> (mean parameter of the exponential component
+of the <code>exgaussian</code> family);
+<code>quantile</code> (quantile parameter of the <code>asym_laplace</code> family);
+<code>zi</code> (zero-inflation probability); 
+<code>hu</code> (hurdle probability);
+<code>zoi</code> (zero-one-inflation probability);
+<code>coi</code> (conditional one-inflation probability);
+<code>disc</code> (discrimination) for ordinal models;
+<code>bs</code>, <code>ndt</code>, and <code>bias</code> (boundary separation,
+non-decision time, and initial bias of the <code>wiener</code>
+diffusion model).
+By default, distributional parameters are modeled 
+on the log scale if they can be positive only or on the 
+logit scale if the can only be within the unit interval.
+See 'Details' for more explanation.</p>
+</td></tr>
+<tr valign="top"><td><code>flist</code></td>
+<td>
+<p>Optional list of formulas, which are treated in the 
+same way as formulas passed via the <code>...</code> argument.</p>
+</td></tr>
+<tr valign="top"><td><code>dpar</code></td>
+<td>
+<p>Optional character string specifying the distributional 
+parameter to which the formulas passed via <code>...</code> and
+<code>flist</code> belong.</p>
+</td></tr>
+<tr valign="top"><td><code>resp</code></td>
+<td>
+<p>Optional character string specifying the response 
+variable to which the formulas passed via <code>...</code> and
+<code>flist</code> belong. Only relevant in multivariate models.</p>
+</td></tr>
+<tr valign="top"><td><code>nl</code></td>
+<td>
+<p>Logical; Indicates whether <code>formula</code> should be
+treated as specifying a non-linear model. By default, <code>formula</code> 
+is treated as an ordinary linear model formula.</p>
+</td></tr>
+<tr valign="top"><td><code>rescor</code></td>
+<td>
+<p>Logical; Indicates if residual correlation between
+the response variables should be modeled. Currently this is only
+possible in multivariate <code>gaussian</code> and <code>student</code> models.
+Only relevant in multivariate models.</p>
+</td></tr>
+<tr valign="top"><td><code>mecor</code></td>
+<td>
+<p>Logical; Indicates if correlations between latent variables
+defined by <code><a href="me.html">me</a></code> terms should be modeled. Defaults to <code>TRUE</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>For <code>lf</code> and <code>nlf</code> a <code>list</code> that can be 
+passed to <code><a href="brmsformula.html">brmsformula</a></code> or added 
+to an existing <code>brmsformula</code> or <code>mvbrmsformula</code> object. 
+For <code>set_nl</code> and <code>set_rescor</code> a logical value that can be 
+added to an existing <code>brmsformula</code> or <code>mvbrmsformula</code> object.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="brmsformula.html">brmsformula</a></code>, <code><a href="mvbrmsformula.html">mvbrmsformula</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+# add more formulas to the model
+bf(y ~ 1) + 
+  nlf(sigma ~ a * exp(b * x), a ~ x) + 
+  lf(b ~ z + (1|g), dpar = "sigma") +
+  gaussian()
+
+# specify 'nl' later on
+bf(y ~ a * inv_logit(x * b)) +
+  lf(a + b ~ z) +
+  set_nl(TRUE)
+  
+# specify a multivariate model
+bf(y1 ~ x + (1|g)) + 
+  bf(y2 ~ z) +
+  set_rescor(TRUE)
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

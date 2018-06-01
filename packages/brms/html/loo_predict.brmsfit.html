@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Compute Weighted Expectations Using LOO</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for loo_predict.brmsfit {brms}"><tr><td>loo_predict.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Compute Weighted Expectations Using LOO</h2>
+
+<h3>Description</h3>
+
+<p>These functions are wrappers around the <code><a href="../../loo/html/E_loo.html">E_loo</a></code> 
+function of the <span class="pkg">loo</span> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+loo_predict(object, type = c("mean", "var", "quantile"),
+  probs = 0.5, psis_object = NULL, resp = NULL, ...)
+
+## S3 method for class 'brmsfit'
+loo_linpred(object, type = c("mean", "var", "quantile"),
+  probs = 0.5, psis_object = NULL, resp = NULL, scale = "linear", ...)
+
+## S3 method for class 'brmsfit'
+loo_predictive_interval(object, prob = 0.9,
+  psis_object = NULL, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>object</code></td>
+<td>
+<p>An object of class <code>brmsfit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>type</code></td>
+<td>
+<p>The statistic to be computed on the results. 
+Can by either <code>"mean"</code> (default), <code>"var"</code>, or
+<code>"quantile"</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>probs</code></td>
+<td>
+<p>A vector of quantiles to compute. 
+Only used if <code>type = quantile</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>psis_object</code></td>
+<td>
+<p>An optional object returend by <code><a href="../../loo/html/psis.html">psis</a></code>. 
+If <code>psis_object</code> is missing then <code><a href="../../loo/html/psis.html">psis</a></code> is executed 
+internally, which may be time consuming for models fit to very large datasets.</p>
+</td></tr>
+<tr valign="top"><td><code>resp</code></td>
+<td>
+<p>Optional names of response variables.
+If specified, fitted values of these response variables are returned.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Optional arguments passed to the underlying methods that is 
+<code><a href="log_lik.brmsfit.html">log_lik</a></code>, as well as
+<code><a href="predict.brmsfit.html">predict</a></code> or
+<code><a href="fitted.brmsfit.html">fitted</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>scale</code></td>
+<td>
+<p>Passed to <code><a href="fitted.brmsfit.html">fitted</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>prob</code></td>
+<td>
+<p>For <code>loo_predictive_interval</code>, a scalar in <i>(0,1)</i>
+indicating the desired probability mass to include in the intervals. The
+default is <code>prob = 0.9</code> (<i>90</i>% intervals).</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p><code>loo_predict</code> and <code>loo_linpred</code> return a vector with one 
+element per observation. The only exception is if <code>type = "quantile"</code> 
+and <code>length(probs) &gt;= 2</code>, in which case a separate vector for each 
+element of <code>probs</code> is computed and they are returned in a matrix with 
+<code>length(probs)</code> rows and one column per observation.
+</p>
+<p><code>loo_predictive_interval</code> returns a matrix with one row per 
+observation and two columns. 
+<code>loo_predictive_interval(..., prob = p)</code> is equivalent to 
+<code>loo_predict(..., type = "quantile", probs = c(a, 1-a))</code> with 
+<code>a = (1 - p)/2</code>, except it transposes the result and adds informative 
+column names.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+## data from help("lm")
+ctl &lt;- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+trt &lt;- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+d &lt;- data.frame(
+  weight = c(ctl, trt), 
+  group = gl(2, 10, 20, labels = c("Ctl", "Trt"))
+) 
+fit &lt;- brm(weight ~ group, data = d)
+loo_predictive_interval(fit, prob = 0.8)
+
+## optionally log-weights can be pre-computed and reused
+psis &lt;- loo::psis(-log_lik(fit), cores = 2)
+loo_predictive_interval(fit, prob = 0.8, psis_object = psis)
+loo_predict(fit, type = "var", psis_object = psis)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

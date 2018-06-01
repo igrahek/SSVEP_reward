@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Trace and Density Plots for MCMC Samples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for plot.brmsfit {brms}"><tr><td>plot.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Trace and Density Plots for MCMC Samples</h2>
+
+<h3>Description</h3>
+
+<p>Trace and Density Plots for MCMC Samples
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+plot(x, pars = NA, combo = c("dens", "trace"), N = 5,
+  exact_match = FALSE, theme = NULL, plot = TRUE, ask = TRUE,
+  newpage = TRUE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An object of class <code>brmsfit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>pars</code></td>
+<td>
+<p>Names of the parameters to plot, as given by a character vector 
+or a regular expression. By default, all parameters except 
+for group-level and smooth effects are plotted.</p>
+</td></tr>
+<tr valign="top"><td><code>combo</code></td>
+<td>
+<p>A character vector with at least two elements. 
+Each element of <code>combo</code> corresponds to a column in the resulting 
+graphic and should be the name of one of the available 
+<code><a href="../../bayesplot/html/MCMC-overview.html">MCMC</a></code> functions 
+(omitting the <code>mcmc_</code> prefix).</p>
+</td></tr>
+<tr valign="top"><td><code>N</code></td>
+<td>
+<p>The number of parameters plotted per page.</p>
+</td></tr>
+<tr valign="top"><td><code>exact_match</code></td>
+<td>
+<p>Indicates whether parameter names 
+should be matched exactly or treated as regular expression. 
+Default is <code>FALSE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>theme</code></td>
+<td>
+<p>A <code><a href="../../ggplot2/html/theme.html">theme</a></code> object 
+modifying the appearance of the plots. 
+For some basic themes see <code><a href="../../ggplot2/html/ggtheme.html">ggtheme</a></code>
+and <code><a href="../../bayesplot/html/theme_default.html">theme_default</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>plot</code></td>
+<td>
+<p>logical; indicates if plots should be
+plotted directly in the active graphic device.
+Defaults to <code>TRUE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>ask</code></td>
+<td>
+<p>logical; indicates if the user is prompted 
+before a new page is plotted. 
+Only used if <code>plot</code> is <code>TRUE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>newpage</code></td>
+<td>
+<p>logical; indicates if the first set of plots
+should be plotted to a new page. 
+Only used if <code>plot</code> is <code>TRUE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Further arguments passed to 
+<code><a href="../../bayesplot/html/mcmc_combo.html">mcmc_combo</a></code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>An invisible list of 
+<code><a href="../../gtable/html/gtable.html">gtable</a></code> objects.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul-Christian Buerkner <a href="mailto:paul.buerkner@gmail.com">paul.buerkner@gmail.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run:  
+fit &lt;- brm(count ~ log_Age_c + log_Base4_c * Trt_c 
+           + (1|patient) + (1|visit), 
+           data = epilepsy, family = "poisson")
+plot(fit)
+## plot population-level effects only
+plot(fit, pars = "^b_") 
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

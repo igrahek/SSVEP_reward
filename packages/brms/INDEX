@@ -1,0 +1,161 @@
+AsymLaplace             The Asymmetric Laplace Distribution
+ExGaussian              The Exponentially Modified Gaussian
+                        Distribution
+Frechet                 The Frechet Distribution
+GenExtremeValue         The Generalized Extreme Value Distribution
+InvGaussian             The Inverse Gaussian Distribution
+MultiNormal             The Multivariate Normal Distribution
+MultiStudentT           The Multivariate Student-t Distribution
+Shifted_Lognormal       The Shifted Log Normal Distribution
+SkewNormal              The Skew-Normal Distribution
+StudentT                The Student-t Distribution
+VarCorr.brmsfit         Extract Variance and Correlation Components
+VonMises                The von Mises Distribution
+Wiener                  The Wiener Diffusion Model Distribution
+add_ic                  Add information criteria and fit indices to
+                        fitted model objects
+addition-terms          Additional Response Information
+as.mcmc.brmsfit         Extract posterior samples for use with the
+                        'coda' package
+autocor                 Extract Autocorrelation Structures
+bayes_R2.brmsfit        Compute a Bayesian version of R-squared for
+                        regression models
+bayes_factor.brmsfit    Bayes Factors from Marginal Likelihoods
+bridge_sampler.brmsfit
+                        Log Marginal Likelihood via Bridge Sampling
+brm                     Fit Bayesian Generalized (Non-)Linear
+                        Multivariate Multilevel Models
+brm_multiple            Run the same 'brms' model on multiple datasets
+brms-package            Bayesian Regression Models using 'Stan'
+brmsfamily              Special Family Functions for 'brms' Models
+brmsfit-class           Class 'brmsfit' of models fitted with the
+                        'brms' package
+brmsformula             Set up a model formula for use in 'brms'
+brmsformula-helpers     Linear and Non-linear formulas in 'brms'
+brmshypothesis          Descriptions of 'brmshypothesis' Objects
+coef.brmsfit            Extract Model Coefficients
+combine_models          Combine Models fitted with 'brms'
+compare_ic              Compare Information Criteria of Different
+                        Models
+control_params.brmsfit
+                        Extract Control Parameters of the NUTS Sampler
+cor_ar                  AR(p) correlation structure
+cor_arma                ARMA(p,q) correlation structure
+cor_arr                 ARR(r) correlation structure
+cor_brms                Correlation structure classes for the 'brms'
+                        package
+cor_bsts                Basic Bayesian Structural Time Series
+cor_car                 Spatial conditional autoregressive (CAR)
+                        structures
+cor_fixed               Fixed user-defined covariance matrices
+cor_ma                  MA(q) correlation structure
+cor_sar                 Spatial simultaneous autoregressive (SAR)
+                        structures
+cs                      Category Specific Predictors in 'brms' Models
+custom_family           Custom Families in 'brms' Models
+epilepsy                Epileptic seizure counts
+expose_functions.brmsfit
+                        Expose user-defined 'Stan' functions
+expp1                   Exponential function plus one.
+fitted.brmsfit          Extract Model Fitted Values of 'brmsfit'
+                        Objects
+fixef.brmsfit           Extract Population-Level Estimates
+get_prior               Overview on Priors for 'brms' Models
+gp                      Set up Gaussian process terms in 'brms'
+gr                      Set up basic grouping terms in 'brms'
+horseshoe               Set up a horseshoe prior in 'brms'
+hypothesis.brmsfit      Non-Linear Hypothesis Testing
+inhaler                 Clarity of inhaler instructions
+inv_logit_scaled        Scaled inverse logit-link
+is.brmsfit              Checks if argument is a 'brmsfit' object
+is.brmsformula          Checks if argument is a 'brmsformula' object
+is.brmsprior            Checks if argument is a 'brmsprior' object
+is.brmsterms            Checks if argument is a 'brmsterms' object
+is.cor_brms             Check if argument is a correlation structure
+is.mvbrmsformula        Checks if argument is a 'mvbrmsformula' object
+is.mvbrmsterms          Checks if argument is a 'mvbrmsterms' object
+kfold.brmsfit           K-Fold Cross-Validation
+kidney                  Infections in kidney patients
+lasso                   Set up a lasso prior in 'brms'
+launch_shinystan.brmsfit
+                        Interface to 'shinystan'
+log_lik.brmsfit         Compute the Pointwise Log-Likelihood
+log_posterior.brmsfit   Extract Diagnostic Quantities of 'brms' Models
+logit_scaled            Scaled logit-link
+logm1                   Logarithm with a minus one offset.
+loo.brmsfit             Compute the LOO information criterion
+loo_model_weights.brmsfit
+                        Model averaging via stacking or pseudo-BMA
+                        weighting.
+loo_predict.brmsfit     Compute Weighted Expectations Using LOO
+make_conditions         Prepare Fully Crossed Conditions
+make_stancode           Stan Code for 'brms' Models
+make_standata           Data for 'brms' Models
+marginal_effects.brmsfit
+                        Display Marginal Effects of Predictors
+marginal_smooths.brmsfit
+                        Display Smooth Terms
+me                      Predictors with Measurement Error in 'brms'
+                        Models
+mi                      Predictors with Missing Values in 'brms' Models
+mixture                 Finite Mixture Families in 'brms'
+mm                      Set up multi-membership grouping terms in
+                        'brms'
+mmc                     Multi-Membership Covariates
+mo                      Monotonic Predictors in 'brms' Models
+model_weights.brmsfit   Model Weighting Methods
+mvbrmsformula           Set up a multivariate model formula for use in
+                        'brms'
+ngrps.brmsfit           Number of levels
+nsamples.brmsfit        Number of Posterior Samples
+pairs.brmsfit           Create a matrix of output plots from a
+                        'brmsfit' object
+parnames                Extract Parameter Names
+parse_bf                Parse Formulas of 'brms' Models
+plot.brmsfit            Trace and Density Plots for MCMC Samples
+post_prob.brmsfit       Posterior Model Probabilities from Marginal
+                        Likelihoods
+posterior_average.brmsfit
+                        Posterior samples of parameters averaged across
+                        models
+posterior_interval.brmsfit
+                        Compute posterior uncertainty intervals
+posterior_samples.brmsfit
+                        Extract posterior samples
+posterior_summary.brmsfit
+                        Summarize Posterior Samples
+posterior_table         Table Creation for Posterior Samples
+pp_average.brmsfit      Posterior predictive samples averaged across
+                        models
+pp_check.brmsfit        Posterior Predictive Checks for 'brmsfit'
+                        Objects
+pp_mixture.brmsfit      Posterior Probabilities of Mixture Component
+                        Memberships
+predict.brmsfit         Model Predictions of 'brmsfit' Objects
+print.brmsfit           Print a summary for a fitted model represented
+                        by a 'brmsfit' object
+print.brmsprior         Print method for 'brmsprior' objects
+prior_samples.brmsfit   Extract prior samples
+prior_summary.brmsfit   Extract Priors of a Bayesian Model Fitted with
+                        'brms'
+ranef.brmsfit           Extract Group-Level Estimates
+reloo                   Compute exact cross-validation for problematic
+                        observations
+residuals.brmsfit       Extract Model Residuals from brmsfit Objects
+restructure             Restructure Old 'brmsfit' Objects
+rows2labels             Convert Rows to Labels
+s                       Defining smooths in 'brms' formulas
+set_prior               Prior Definitions for 'brms' Models
+stancode.brmsfit        Extract Stan model code
+standata.brmsfit        Extract Data passed to Stan
+stanplot.brmsfit        MCMC Plots Implemented in 'bayesplot'
+stanvar                 User-defined variables passed to Stan
+summary.brmsfit         Create a summary of a fitted model represented
+                        by a 'brmsfit' object
+theme_black             Black Theme for 'ggplot2' Graphics
+theme_default           Default 'bayesplot' Theme for 'ggplot2'
+                        Graphics
+update.brmsfit          Update 'brms' models
+vcov.brmsfit            Covariance and Correlation Matrix of
+                        Population-Level Effects
+waic.brmsfit            Compute the WAIC

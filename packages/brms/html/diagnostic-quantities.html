@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Extract Diagnostic Quantities of 'brms' Models</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for log_posterior.brmsfit {brms}"><tr><td>log_posterior.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Extract Diagnostic Quantities of <span class="pkg">brms</span> Models</h2>
+
+<h3>Description</h3>
+
+<p>Extract quantities that can be used to diagnose sampling behavior
+of the algorithms applied by <span class="pkg">Stan</span> at the back-end of <span class="pkg">brms</span>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+log_posterior(object, ...)
+
+## S3 method for class 'brmsfit'
+nuts_params(object, pars = NULL, ...)
+
+## S3 method for class 'brmsfit'
+rhat(object, pars = NULL, ...)
+
+## S3 method for class 'brmsfit'
+neff_ratio(object, pars = NULL, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>object</code></td>
+<td>
+<p>A <code>brmsfit</code> object.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Arguments passed to individual methods.</p>
+</td></tr>
+<tr valign="top"><td><code>pars</code></td>
+<td>
+<p>An optional character vector of parameter names. 
+For <code>nuts_params</code> these will be NUTS sampler parameter 
+names rather than model parameters. If pars is omitted 
+all parameters are included.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>For more details see 
+<code><a href="../../bayesplot/html/bayesplot-extractors.html">bayesplot-extractors</a></code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The exact form of the output depends on the method.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit &lt;- brm(time ~ age * sex, data = kidney)
+
+lp &lt;- log_posterior(fit)
+head(lp)
+
+np &lt;- nuts_params(fit)
+str(np)
+# extract the number of divergence transitions
+sum(subset(np, Parameter == "divergent__")$Value)
+
+head(rhat(fit))
+head(neff_ratio(fit))
+
+## End(Not run)
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

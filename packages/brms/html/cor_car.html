@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Spatial conditional autoregressive (CAR) structures</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for cor_car {brms}"><tr><td>cor_car {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Spatial conditional autoregressive (CAR) structures</h2>
+
+<h3>Description</h3>
+
+<p>These functions are constructors for the <code>cor_car</code> class
+implementing spatial conditional autoregressive structures.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+cor_car(W, formula = ~1, type = c("escar", "esicar", "icar"))
+
+cor_icar(W, formula = ~1)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>W</code></td>
+<td>
+<p>Adjacency matrix of locations. 
+All non-zero entries are treated as if the two locations 
+are adjacent. If <code>formula</code> contains a grouping factor,
+the row names of <code>W</code> have to match the levels
+of the grouping factor.</p>
+</td></tr>
+<tr valign="top"><td><code>formula</code></td>
+<td>
+<p>An optional one-sided formula of the form 
+<code>~ 1 | g</code>, where <code>g</code> is a grouping factor mapping
+observations to spatial locations. If not specified,
+each observation is treated as a separate location.
+It is recommended to always specify a grouping factor
+to allow for handling of new data in post-processing methods.</p>
+</td></tr>
+<tr valign="top"><td><code>type</code></td>
+<td>
+<p>Type of the CAR structure. Currently implemented
+are <code>"escar"</code> (exact sparse CAR) and <code>"esicar"</code>
+(exact sparse intrinsic CAR) and <code>"icar"</code> (intrinsic CAR). 
+More information is provided in the 'Details' section.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>The <code>escar</code> and <code>esicar</code> types are 
+implemented based on the case study of Max Joseph
+(<a href="https://github.com/mbjoseph/CARstan">https://github.com/mbjoseph/CARstan</a>). The <code>icar</code>
+type is implemented based on the case study of Mitzi Morris
+(<a href="http://mc-stan.org/users/documentation/case-studies/icar_stan.html">http://mc-stan.org/users/documentation/case-studies/icar_stan.html</a>).
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+# generate some spatial data
+east &lt;- north &lt;- 1:10
+Grid &lt;- expand.grid(east, north)
+K &lt;- nrow(Grid)
+
+# set up distance and neighbourhood matrices
+distance &lt;- as.matrix(dist(Grid))
+W &lt;- array(0, c(K, K))
+W[distance == 1] &lt;- 1 	
+
+# generate the covariates and response data
+x1 &lt;- rnorm(K)
+x2 &lt;- rnorm(K)
+theta &lt;- rnorm(K, sd = 0.05)
+phi &lt;- rmulti_normal(
+  1, mu = rep(0, K), Sigma = 0.4 * exp(-0.1 * distance)
+)
+eta &lt;- x1 + x2 + phi
+prob &lt;- exp(eta) / (1 + exp(eta))
+size &lt;- rep(50, K)
+y &lt;- rbinom(n = K, size = size, prob = prob)
+dat &lt;- data.frame(y, size, x1, x2)
+
+# fit a CAR model
+fit &lt;- brm(y | trials(size) ~ x1 + x2, data = dat, 
+           family = binomial(), autocor = cor_car(W)) 
+summary(fit)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

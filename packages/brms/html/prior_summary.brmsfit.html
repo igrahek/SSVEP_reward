@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Extract Priors of a Bayesian Model Fitted with 'brms'</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for prior_summary.brmsfit {brms}"><tr><td>prior_summary.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Extract Priors of a Bayesian Model Fitted with <span class="pkg">brms</span></h2>
+
+<h3>Description</h3>
+
+<p>Extract Priors of a Bayesian Model Fitted with <span class="pkg">brms</span>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+prior_summary(object, all = TRUE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>object</code></td>
+<td>
+<p>A <code>brmsfit</code> object</p>
+</td></tr>
+<tr valign="top"><td><code>all</code></td>
+<td>
+<p>Logical; Show all parameters in the model which may have 
+priors (<code>TRUE</code>) or only those with proper priors (<code>FALSE</code>)?</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Further arguments passed to or from other methods.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>For <code>brmsfit</code> objects, an object of class <code>brmsprior</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit &lt;- brm(count ~ log_Age_c + log_Base4_c * Trt_c  
+             + (1|patient) + (1|obs), 
+           data = epilepsy, family = poisson(), 
+           prior = c(prior(student_t(5,0,10), class = b),
+                     prior(cauchy(0,2), class = sd)))
+                   
+prior_summary(fit)
+prior_summary(fit, all = FALSE)
+print(prior_summary(fit, all = FALSE), show_df = FALSE)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

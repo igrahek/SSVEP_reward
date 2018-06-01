@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Predictors with Measurement Error in 'brms' Models</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for me {brms}"><tr><td>me {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Predictors with Measurement Error in <span class="pkg">brms</span> Models</h2>
+
+<h3>Description</h3>
+
+<p>Specify predictors with measurement error.
+This function is almost solely useful when
+called in formulas passed to the <span class="pkg">brms</span> package.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+me(x, sdx = NULL, gr = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>The variable measured with error.</p>
+</td></tr>
+<tr valign="top"><td><code>sdx</code></td>
+<td>
+<p>Known measurement error of <code>x</code>
+treated as standard deviation.</p>
+</td></tr>
+<tr valign="top"><td><code>gr</code></td>
+<td>
+<p>Optional grouping factor to specify which
+values of <code>x</code> correspond to the same value of the
+latent variable. If <code>NULL</code> (the default) each
+observation will have its own value of the latent variable.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>For detailed documentation see <code>help(brmsformula)</code>. 
+</p>
+<p>By default, latent noise-free variables are assumed
+to be correlated. To change that, add <code>set_mecor(FALSE)</code>
+to your model formula object (see examples).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="brmsformula.html">brmsformula</a></code>, <code><a href="brmsformula-helpers.html">brmsformula-helpers</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+# sample some data
+N &lt;- 100
+dat &lt;- data.frame(
+  y = rnorm(N), x1 = rnorm(N), 
+  x2 = rnorm(N), sdx = abs(rnorm(N, 1))
+ )
+# fit a simple error-in-variables model 
+fit1 &lt;- brm(y ~ me(x1, sdx) + me(x2, sdx), data = dat, 
+           save_mevars = TRUE)
+summary(fit1)
+
+# turn off modeling of correlations
+bform &lt;- bf(y ~ me(x1, sdx) + me(x2, sdx)) + set_mecor(FALSE)
+fit2 &lt;- brm(bform, data = dat, save_mevars = TRUE)
+summary(fit2)
+
+## End(Not run) 
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

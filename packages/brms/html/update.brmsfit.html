@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Update 'brms' models</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for update.brmsfit {brms}"><tr><td>update.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Update <span class="pkg">brms</span> models</h2>
+
+<h3>Description</h3>
+
+<p>This method allows to update an existing <code>brmsfit</code> object
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+update(object, formula., newdata = NULL, recompile = NULL,
+  ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>object</code></td>
+<td>
+<p>An object of class <code>brmsfit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>formula.</code></td>
+<td>
+<p>Changes to the formula; for details see 
+<code><a href="../../stats/html/update.formula.html">update.formula</a></code> and <code><a href="brmsformula.html">brmsformula</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>newdata</code></td>
+<td>
+<p>Optional <code>data.frame</code> 
+to update the model with new data.</p>
+</td></tr>
+<tr valign="top"><td><code>recompile</code></td>
+<td>
+<p>Logical, indicating whether the Stan model should 
+be recompiled. If <code>NULL</code> (the default), <code>update</code> tries
+to figure out internally, if recompilation is necessary. 
+Setting it to <code>FALSE</code> will cause all Stan code changing 
+arguments to be ignored.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Other arguments passed to <code><a href="brm.html">brm</a></code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Sometimes, when updating the model formula, 
+it may happen that <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> complains about a mismatch
+between <code>model frame</code> and <code>formula</code>.
+This error can be avoided by supplying your original data
+again via argument <code>newdata</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit1 &lt;- brm(time | cens(censored) ~ age * sex + disease + (1|patient), 
+            data = kidney, family = gaussian("log"))
+summary(fit1)
+
+## remove effects of 'disease'
+fit2 &lt;- update(fit1, formula. = ~ . - disease)
+summary(fit2)
+
+## remove the group specific term of 'patient' and
+## change the data (just take a subset in this example)
+fit3 &lt;- update(fit1, formula. = ~ . - (1|patient), 
+               newdata = kidney[1:38, ])
+summary(fit3)
+
+## use another family and add population-level priors
+fit4 &lt;- update(fit1, family = weibull(), inits = "0",
+               prior = set_prior("normal(0,5)"))
+summary(fit4)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

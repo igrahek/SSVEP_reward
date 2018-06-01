@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Set up Gaussian process terms in 'brms'</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for gp {brms}"><tr><td>gp {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Set up Gaussian process terms in <span class="pkg">brms</span></h2>
+
+<h3>Description</h3>
+
+<p>Function used to set up a Gaussian process term in <span class="pkg">brms</span>.
+The function does not evaluate its arguments &ndash;
+it exists purely to help set up a model with Gaussian process terms.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+gp(..., by = NA, cov = "exp_quad", scale = TRUE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>One or more predictors for the Gaussian process.</p>
+</td></tr>
+<tr valign="top"><td><code>by</code></td>
+<td>
+<p>A numeric or factor variable of the same length as 
+each predictor. In the numeric vector case, the elements multiply 
+the values returned by the Gaussian process. In the factor variable 
+case, a separate Gaussian process is fitted for each factor level.</p>
+</td></tr>
+<tr valign="top"><td><code>cov</code></td>
+<td>
+<p>Name of the covariance kernel. By default, 
+the exponentiated-quadratic kernel <code>"exp_quad"</code> is used.</p>
+</td></tr>
+<tr valign="top"><td><code>scale</code></td>
+<td>
+<p>Logical; If <code>TRUE</code> (the default), predictors are
+scaled so that the maximum Euclidean distance between two points
+is 1. Since the default prior on <code>lscale</code> expects scaled
+predictors, it is recommended to manually specify priors
+on <code>lscale</code>, if <code>scale</code> is set to <code>FALSE</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>A Gaussian process is a stochastic process, which
+describes the relation between one or more predictors 
+<i>x = (x_1, ..., x_d)</i> and a response <i>f(x)</i>, where 
+<i>d</i> is the number of predictors. A Gaussian process is the
+generalization of the multivariate normal distribution
+to an infinite number of dimensions. Thus, it can be
+interpreted as a prior over functions. Any finite sample 
+realized from this stochastic process is jointly multivariate 
+normal, with a covariance matrix defined by the covariance
+kernel <i>k_p(x)</i>, where <i>p</i> is the vector of parameters
+of the Gaussian process:
+</p>
+<p style="text-align: center;"><i>f(x) ~ MVN(0, k_p(x))</i></p>
+
+<p>The smoothness and general behavior of the function <i>f</i> 
+depends only on the choice of covariance kernel. 
+For a more detailed introduction to Gaussian processes,
+see <a href="https://en.wikipedia.org/wiki/Gaussian_process">https://en.wikipedia.org/wiki/Gaussian_process</a>.
+</p>
+<p>Below, we describe the currently supported covariance kernels:
+</p>
+
+<ul>
+<li><p>&quot;exp_quad&quot;: The exponentiated-quadratic kernel is defined as
+<i>k(x_i, x_j) = sdgp^2 exp(- || x_i - x_j || / (2 lscale^2)</i>,
+where <i>|| . ||</i> is the Euclidean norm, <i>sdgp</i> is a 
+standard deviation parameter, and <i>lscale</i> is characteristic 
+length-scale parameter. The latter practically measures how close two 
+points <i>x_i</i> and <i>x_j</i> have to be to influence each other 
+substantially.
+</p>
+</li></ul>
+
+<p>In the current implementation, <code>"exp_quad"</code> is the only supported 
+covariance kernel. More options will follow in the future.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>'gpterm'</code>, which is a list 
+of arguments to be interpreted by the formula 
+parsing functions of <code>brms</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="brmsformula.html">brmsformula</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+# simulate data using the mgcv package
+dat &lt;- mgcv::gamSim(1, n = 30, scale = 2)
+
+# fit a simple gaussian process model
+fit1 &lt;- brm(y ~ gp(x2), dat, chains = 2)
+summary(fit1)
+me1 &lt;- marginal_effects(fit1, nsamples = 200, spaghetti = TRUE)
+plot(me1, ask = FALSE, points = TRUE)
+
+# fit a more complicated gaussian process model
+fit2 &lt;- brm(y ~ gp(x0) + x1 + gp(x2) + x3, dat, chains = 2)
+summary(fit2)
+me2 &lt;- marginal_effects(fit2, nsamples = 200, spaghetti = TRUE)
+plot(me2, ask = FALSE, points = TRUE)
+
+# fit a multivariate gaussian process model
+fit3 &lt;- brm(y ~ gp(x1, x2), dat, chains = 2)
+summary(fit3)
+me3 &lt;- marginal_effects(fit3, nsamples = 200, spaghetti = TRUE)
+plot(me3, ask = FALSE, points = TRUE)
+
+# compare model fit
+LOO(fit1, fit2, fit3)
+
+# simulate data with a factor covariate
+dat2 &lt;- mgcv::gamSim(4, n = 90, scale = 2)
+
+# fit separate gaussian processes for different levels of 'fac'
+fit4 &lt;- brm(y ~ gp(x2, by = fac), dat2, chains = 2)
+summary(fit4)
+plot(marginal_effects(fit4), points = TRUE)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

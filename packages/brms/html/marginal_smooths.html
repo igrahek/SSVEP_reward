@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Display Smooth Terms</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for marginal_smooths.brmsfit {brms}"><tr><td>marginal_smooths.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Display Smooth Terms</h2>
+
+<h3>Description</h3>
+
+<p>Display smooth <code>s</code> and <code>t2</code> terms of models
+fitted with <span class="pkg">brms</span>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+marginal_smooths(x, smooths = NULL, int_conditions = NULL,
+  probs = c(0.025, 0.975), spaghetti = FALSE, resolution = 100,
+  too_far = 0, subset = NULL, nsamples = NULL, ...)
+
+marginal_smooths(x, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object usually of class <code>brmsfit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>smooths</code></td>
+<td>
+<p>Optional character vector of smooth terms
+to display. If <code>NULL</code> (the default) all smooth terms
+are shown.</p>
+</td></tr>
+<tr valign="top"><td><code>int_conditions</code></td>
+<td>
+<p>An optional named <code>list</code> whose elements are numeric
+vectors of values of the second variables in two-way interactions. 
+At these values, predictions are evaluated. The names of 
+<code>int_conditions</code> have to match the variable names exactly.
+Additionally, the elements of the numeric vectors may be named themselves,
+in which case their names appear as labels for the conditions in the plots.
+Instead of vectors, functions returning vectors may be passed and are
+applied on the original values of the corresponding variable.
+If <code>NULL</code> (the default), predictions are evaluated at the 
+<i>mean</i> and at <i>mean +/- sd</i>.</p>
+</td></tr>
+<tr valign="top"><td><code>probs</code></td>
+<td>
+<p>The quantiles to be used in the computation of credible
+intervals (defaults to 2.5 and 97.5 percent quantiles)</p>
+</td></tr>
+<tr valign="top"><td><code>spaghetti</code></td>
+<td>
+<p>Logical. Indicates if predictions should
+be visualized via spaghetti plots. Only applied for numeric
+predictors. If <code>TRUE</code>, it is recommended 
+to set argument <code>nsamples</code> to a relatively small value 
+(e.g. <code>100</code>) in order to reduce computation time.</p>
+</td></tr>
+<tr valign="top"><td><code>resolution</code></td>
+<td>
+<p>Number of support points used to generate 
+the plots. Higher resolution leads to smoother plots. 
+Defaults to <code>100</code>. If <code>surface</code> is <code>TRUE</code>,
+this implies <code>10000</code> support points for interaction terms,
+so it might be necessary to reduce <code>resolution</code> 
+when only few RAM is available.</p>
+</td></tr>
+<tr valign="top"><td><code>too_far</code></td>
+<td>
+<p>Positive number. 
+For surface plots only: Grid points that are too 
+far away from the actual data points can be excluded from the plot. 
+<code>too_far</code> determines what is too far. The grid is scaled into 
+the unit square and then grid points more than <code>too_far</code> 
+from the predictor variables are excluded. By default, all
+grid points are used. Ignored for non-surface plots.</p>
+</td></tr>
+<tr valign="top"><td><code>subset</code></td>
+<td>
+<p>A numeric vector specifying
+the posterior samples to be used. 
+If <code>NULL</code> (the default), all samples are used.</p>
+</td></tr>
+<tr valign="top"><td><code>nsamples</code></td>
+<td>
+<p>Positive integer indicating how many 
+posterior samples should be used. 
+If <code>NULL</code> (the default) all samples are used.
+Ignored if <code>subset</code> is not <code>NULL</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Currently ignored.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Two-dimensional smooth terms will be visualized using
+either contour or raster plots.
+</p>
+
+
+<h3>Value</h3>
+
+<p>For the <code>brmsfit</code> method, 
+an object of class <code>brmsMarginalEffects</code>. See
+<code><a href="marginal_effects.html">marginal_effects</a></code> for 
+more details and documentation of the related plotting function.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+set.seed(0) 
+dat &lt;- mgcv::gamSim(1, n = 200, scale = 2)
+fit &lt;- brm(y ~ s(x0) + s(x1) + s(x2) + s(x3), data = dat)
+# show all smooth terms
+plot(marginal_smooths(fit), rug = TRUE, ask = FALSE)
+# show only the smooth term s(x2)
+plot(marginal_smooths(fit, smooths = "s(x2)"), ask = FALSE)
+
+# fit and plot a two-dimensional smooth term
+fit2 &lt;- brm(y ~ t2(x0, x2), data = dat)
+ms &lt;- marginal_smooths(fit2)
+plot(ms, stype = "contour")
+plot(ms, stype = "raster")
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

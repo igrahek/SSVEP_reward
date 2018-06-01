@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Clarity of inhaler instructions</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for inhaler {brms}"><tr><td>inhaler {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Clarity of inhaler instructions</h2>
+
+<h3>Description</h3>
+
+<p>Ezzet and Whitehead (1991) analyze data from a two-treatment, 
+two-period crossover trial to compare 2 inhalation devices for 
+delivering the drug salbutamol in 286 asthma patients. 
+Patients were asked to rate the clarity of leaflet instructions 
+accompanying each device, using a 4-point ordinal scale.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+inhaler
+</pre>
+
+
+<h3>Format</h3>
+
+<p>A dataframe of 572 observations containing 
+information on the following 5 variables. 
+</p>
+
+<dl>
+<dt>subject</dt><dd><p>The subject number</p>
+</dd>
+<dt>rating</dt><dd><p>The rating of the inhaler instructions 
+on a scale ranging from 1 to 4</p>
+</dd>
+<dt>treat</dt><dd><p>A contrast to indicate which of 
+the two inhaler devices was used</p>
+</dd> 
+<dt>period</dt><dd><p>A contrast to indicate the time of administration</p>
+</dd>
+<dt>carry</dt><dd><p>A contrast to indicate possible carry over effects</p>
+</dd>
+</dl>
+
+
+<h3>Source</h3>
+
+<p>Ezzet, F., &amp; Whitehead, J. (1991). 
+A random effects model for ordinal responses from a crossover trial. 
+<em>Statistics in Medicine, 10(6)</em>, 901-907.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+## ordinal regression with family "sratio"
+fit1 &lt;- brm(rating ~ treat + period + carry, 
+            data = inhaler, family = sratio(), 
+            prior = set_prior("normal(0,5)"))
+summary(fit1) 
+plot(fit1)
+       
+## ordinal regression with family "cumulative" 
+## and random intercept over subjects             
+fit2 &lt;- brm(rating ~ treat + period + carry + (1|subject), 
+              data = inhaler, family = cumulative(), 
+              prior = set_prior("normal(0,5)"))
+summary(fit2) 
+plot(fit2)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

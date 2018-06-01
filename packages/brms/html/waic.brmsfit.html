@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Compute the WAIC</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for waic.brmsfit {brms}"><tr><td>waic.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Compute the WAIC</h2>
+
+<h3>Description</h3>
+
+<p>Compute the widely applicable information criterion (WAIC)
+based on the posterior likelihood using the <span class="pkg">loo</span> package.
+For more details see <code><a href="../../loo/html/waic.html">waic</a></code>
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+waic(x, ..., compare = TRUE, resp = NULL,
+  pointwise = FALSE, model_names = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A fitted model object.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>More fitted model objects or further arguments
+passed to the underlying post-processing functions.</p>
+</td></tr>
+<tr valign="top"><td><code>compare</code></td>
+<td>
+<p>A flag indicating if the information criteria
+of the models should be compared to each other
+via <code><a href="compare_ic.html">compare_ic</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>resp</code></td>
+<td>
+<p>Optional names of response variables.
+If specified, fitted values of these response variables are returned.</p>
+</td></tr>
+<tr valign="top"><td><code>pointwise</code></td>
+<td>
+<p>A flag indicating whether to compute the full
+log-likelihood matrix at once or separately for each observation. 
+The latter approach is usually considerably slower but 
+requires much less working memory. Accordingly, if one runs 
+into memory issues, <code>pointwise = TRUE</code> is the way to go.</p>
+</td></tr>
+<tr valign="top"><td><code>model_names</code></td>
+<td>
+<p>If <code>NULL</code> (the default) will use model names 
+derived from deparsing the call. Otherwise will use the passed 
+values as model names.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>When comparing models fitted to the same data, 
+the smaller the WAIC, the better the fit. For <code>brmsfit</code> 
+objects, <code>WAIC</code> is an alias of <code>waic</code>.
+Use method <code><a href="add_ic.html">add_ic</a></code> to store
+information criteria in the fitted model object for later usage.
+</p>
+
+
+<h3>Value</h3>
+
+<p>If just one object is provided, an object of class <code>ic</code>. 
+If multiple objects are provided, an object of class <code>iclist</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul-Christian Buerkner <a href="mailto:paul.buerkner@gmail.com">paul.buerkner@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Vehtari, A., Gelman, A., &amp; Gabry J. (2016). Practical Bayesian model
+evaluation using leave-one-out cross-validation and WAIC. In Statistics 
+and Computing, doi:10.1007/s11222-016-9696-4. arXiv preprint arXiv:1507.04544.
+</p>
+<p>Gelman, A., Hwang, J., &amp; Vehtari, A. (2014). 
+Understanding predictive information criteria for Bayesian models. 
+Statistics and Computing, 24, 997-1016.
+</p>
+<p>Watanabe, S. (2010). Asymptotic equivalence of Bayes cross validation 
+and widely applicable information criterion in singular learning theory. 
+The Journal of Machine Learning Research, 11, 3571-3594.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+# model with population-level effects only
+fit1 &lt;- brm(rating ~ treat + period + carry,
+            data = inhaler, family = "gaussian")
+waic(fit1)
+
+# model with an additional varying intercept for subjects
+fit2 &lt;- brm(rating ~ treat + period + carry + (1|subject),
+            data = inhaler, family = "gaussian")
+# compare both models
+waic(fit1, fit2)                          
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Model averaging via stacking or pseudo-BMA weighting.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for loo_model_weights.brmsfit {brms}"><tr><td>loo_model_weights.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Model averaging via stacking or pseudo-BMA weighting.</h2>
+
+<h3>Description</h3>
+
+<p>Compute model weights for <code>brmsfit</code> objects via stacking 
+or pseudo-BMA weighting. For more details, see
+<code><a href="../../loo/html/loo_model_weights.html">loo::loo_model_weights</a></code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+loo_model_weights(x, ..., model_names = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A fitted model object.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>More fitted model objects or further arguments
+passed to the underlying post-processing functions.</p>
+</td></tr>
+<tr valign="top"><td><code>model_names</code></td>
+<td>
+<p>If <code>NULL</code> (the default) will use model names 
+derived from deparsing the call. Otherwise will use the passed 
+values as model names.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A named vector of model weights.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+# model with population-level effects only
+fit1 &lt;- brm(rating ~ treat + period + carry,
+            data = inhaler, family = "gaussian")
+# model with an additional varying intercept for subjects
+fit2 &lt;- brm(rating ~ treat + period + carry + (1|subject),
+            data = inhaler, family = "gaussian")
+loo_model_weights(fit1, fit2)   
+
+## End(Not run)  
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Spatial simultaneous autoregressive (SAR) structures</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for cor_sar {brms}"><tr><td>cor_sar {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Spatial simultaneous autoregressive (SAR) structures</h2>
+
+<h3>Description</h3>
+
+<p>These functions are constructors for the <code>cor_sar</code> class
+implementing spatial simultaneous autoregressive structures.
+The <code>lagsar</code> structure implements SAR of the response values:
+</p>
+<p style="text-align: center;"><i>y = &rho; W y + &eta; + e</i></p>
+
+<p>The <code>errorsar</code> structure implements SAR of the residuals:
+</p>
+<p style="text-align: center;"><i>y = &eta; + u, u = &rho; W u + e</i></p>
+
+<p>In the above equations, <i>&eta;</i> is the predictor term and
+<i>e</i> are independent normally or t-distributed residuals.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+cor_sar(W, type = c("lag", "error"))
+
+cor_lagsar(W)
+
+cor_errorsar(W)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>W</code></td>
+<td>
+<p>An object specifying the spatial weighting matrix.
+Can be either the spatial weight matrix itself or an 
+object of class <code>listw</code> or <code>nb</code>, from which
+the spatial weighting matrix can be computed.</p>
+</td></tr>
+<tr valign="top"><td><code>type</code></td>
+<td>
+<p>Type of the SAR structure. Either <code>"lag"</code> 
+(for SAR of the response values) or <code>"error"</code> 
+(for SAR of the residuals).</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Currently, only families <code>gaussian</code> and <code>student</code> 
+support SAR structures.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>cor_sar</code> to be used in calls to
+<code><a href="brm.html">brm</a></code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+data(oldcol, package = "spdep")
+fit1 &lt;- brm(CRIME ~ INC + HOVAL, data = COL.OLD, 
+            autocor = cor_lagsar(COL.nb), 
+            chains = 2, cores = 2)
+summary(fit1)
+plot(fit1)
+
+fit2 &lt;- brm(CRIME ~ INC + HOVAL, data = COL.OLD, 
+            autocor = cor_errorsar(COL.nb), 
+            chains = 2, cores = 2)
+summary(fit2)
+plot(fit2)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

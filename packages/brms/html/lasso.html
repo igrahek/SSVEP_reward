@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Set up a lasso prior in 'brms'</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for lasso {brms}"><tr><td>lasso {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Set up a lasso prior in <span class="pkg">brms</span></h2>
+
+<h3>Description</h3>
+
+<p>Function used to set up a lasso prior for population-level effects 
+in <span class="pkg">brms</span>. The function does not evaluate its arguments &ndash;
+it exists purely to help set up the model.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+lasso(df = 1, scale = 1)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>df</code></td>
+<td>
+<p>Degrees of freedom of the chi-square prior of the inverse tuning
+parameter. Defaults to <code>1</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>scale</code></td>
+<td>
+<p>Scale of the lasso prior. Defaults to <code>1</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>The lasso prior is the Bayesian equivalent to the LASSO method for performing
+variable selection (Park &amp; Casella, 2008).
+With this prior, independent Laplace (i.e. double exponential) priors 
+are placed on the population-level effects. 
+The scale of the Laplace priors depends on a tuning parameter
+that controls the amount of shrinkage. In <span class="pkg">brms</span>, the inverse
+of the tuning parameter is used so that smaller values imply
+more shrinkage. The inverse tuning parameter has a chi-square distribution
+and with degrees of freedom controlled via argument <code>df</code>
+of function <code>lasso</code> (defaults to <code>1</code>). For instance,
+one can specify a lasso prior using <code>set_prior("lasso(1)")</code>.
+To make sure that shrinkage can equally affect all coefficients, 
+predictors should be one the same scale.
+If you do not want to standardized all variables,
+you can adjust the general scale of the lasso prior via argument
+<code>scale</code>, for instance, <code>lasso(1, scale = 10)</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A character string obtained by <code>match.call()</code> with
+additional arguments.
+</p>
+
+
+<h3>References</h3>
+
+<p>Park, T., &amp; Casella, G. (2008). The Bayesian Lasso. Journal of the American 
+Statistical Association, 103(482), 681-686.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="set_prior.html">set_prior</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+set_prior(lasso(df = 1, scale = 10))
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

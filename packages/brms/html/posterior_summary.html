@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Summarize Posterior Samples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for posterior_summary.brmsfit {brms}"><tr><td>posterior_summary.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Summarize Posterior Samples</h2>
+
+<h3>Description</h3>
+
+<p>Summarizes posterior samples based on point estimates (mean or median),
+estimation errors (SD or MAD) and quantiles.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+posterior_summary(x, pars = NA, probs = c(0.025, 0.975),
+  robust = FALSE, ...)
+
+posterior_summary(x, ...)
+
+## Default S3 method:
+posterior_summary(x, probs = c(0.025, 0.975),
+  robust = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object.</p>
+</td></tr>
+<tr valign="top"><td><code>pars</code></td>
+<td>
+<p>Names of parameters for which posterior samples 
+should be returned, as given by a character vector or regular expressions.
+By default, all posterior samples of all parameters are extracted.</p>
+</td></tr>
+<tr valign="top"><td><code>probs</code></td>
+<td>
+<p>The percentiles to be computed by the 
+<code>quantile</code> function.</p>
+</td></tr>
+<tr valign="top"><td><code>robust</code></td>
+<td>
+<p>If <code>FALSE</code> (the default) the mean is used as 
+the measure of central tendency and the standard deviation as 
+the measure of variability. If <code>TRUE</code>, the median and the 
+median absolute deviation (MAD) are applied instead.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>More arguments passed to or from other methods.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A matrix where rows indicate parameters 
+and columns indicate the summary estimates.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit &lt;- brm(time ~ age * sex, data = kidney)
+posterior_summary(fit)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

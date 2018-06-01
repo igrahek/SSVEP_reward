@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Log Marginal Likelihood via Bridge Sampling</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for bridge_sampler.brmsfit {brms}"><tr><td>bridge_sampler.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Log Marginal Likelihood via Bridge Sampling</h2>
+
+<h3>Description</h3>
+
+<p>Computes log marginal likelihood via bridge sampling,
+which can be used in the computation of bayes factors
+and posterior model probabilities.
+The <code>brmsfit</code> method is just a thin wrapper around
+the corresponding method for <code>stanfit</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+bridge_sampler(samples, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>samples</code></td>
+<td>
+<p>A <code>brmsfit</code> object.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Additional arguments passed to 
+<code><a href="../../bridgesampling/html/bridge_sampler.html">bridge_sampler.stanfit</a></code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Computing the marginal likelihood requires samples 
+of all variables defined in Stan's <code>parameters</code> block
+to be saved. Otherwise <code>bridge_sampler</code> cannot be computed.
+Thus, please set <code>save_all_pars = TRUE</code> in the call to <code>brm</code>,
+if you are planning to apply <code>bridge_sampler</code> to your models.
+</p>
+<p>More details are provided under
+<code><a href="../../bridgesampling/html/bridge_sampler.html">bridge_sampler</a></code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>
+  <a href="bayes_factor.html">bayes_factor</a>,
+  <a href="post_prob.html">post_prob</a>
+</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+# model with the treatment effect
+fit1 &lt;- brm(
+  count ~ log_Age_c + log_Base4_c + Trt_c,
+  data = epilepsy, family = negbinomial(), 
+  prior = prior(normal(0, 1), class = b),
+  save_all_pars = TRUE
+)
+summary(fit1)
+bridge_sampler(fit1)
+
+# model without the treatment effect
+fit2 &lt;- brm(
+  count ~ log_Age_c + log_Base4_c,
+  data = epilepsy, family = negbinomial(), 
+  prior = prior(normal(0, 1), class = b),
+  save_all_pars = TRUE
+)
+summary(fit2)
+bridge_sampler(fit2)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

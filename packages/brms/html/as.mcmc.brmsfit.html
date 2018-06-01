@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Extract posterior samples for use with the 'coda' package</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for as.mcmc.brmsfit {brms}"><tr><td>as.mcmc.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Extract posterior samples for use with the <span class="pkg">coda</span> package</h2>
+
+<h3>Description</h3>
+
+<p>Extract posterior samples for use with the <span class="pkg">coda</span> package
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+as.mcmc(x, pars = NA, exact_match = FALSE,
+  combine_chains = FALSE, inc_warmup = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An <code>R</code> object typically of class <code>brmsfit</code></p>
+</td></tr>
+<tr valign="top"><td><code>pars</code></td>
+<td>
+<p>Names of parameters for which posterior samples 
+should be returned, as given by a character vector or regular expressions.
+By default, all posterior samples of all parameters are extracted.</p>
+</td></tr>
+<tr valign="top"><td><code>exact_match</code></td>
+<td>
+<p>Indicates whether parameter names 
+should be matched exactly or treated as regular expression. 
+Default is <code>FALSE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>combine_chains</code></td>
+<td>
+<p>Indicates whether chains should be combined.</p>
+</td></tr>
+<tr valign="top"><td><code>inc_warmup</code></td>
+<td>
+<p>Indicates if the warmup samples should be included.
+Default is <code>FALSE</code>. Warmup samples are used to tune the 
+parameters of the sampling algorithm and should not be analyzed.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>currently unused</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>If <code>combine_chains = TRUE</code> an <code>mcmc</code> object is returned.
+If <code>combine_chains = FALSE</code> an <code>mcmc.list</code> object is returned.
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

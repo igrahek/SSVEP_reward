@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Extract posterior samples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for posterior_samples.brmsfit {brms}"><tr><td>posterior_samples.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Extract posterior samples</h2>
+
+<h3>Description</h3>
+
+<p>Extract posterior samples of specified parameters
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+posterior_samples(x, pars = NA, exact_match = FALSE,
+  add_chain = FALSE, subset = NULL, as.matrix = FALSE, as.array = FALSE,
+  ...)
+
+## S3 method for class 'brmsfit'
+as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+
+## S3 method for class 'brmsfit'
+as.matrix(x, ...)
+
+## S3 method for class 'brmsfit'
+as.array(x, ...)
+
+posterior_samples(x, pars = NA, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An <code>R</code> object typically of class <code>brmsfit</code></p>
+</td></tr>
+<tr valign="top"><td><code>pars</code></td>
+<td>
+<p>Names of parameters for which posterior samples 
+should be returned, as given by a character vector or regular expressions.
+By default, all posterior samples of all parameters are extracted.</p>
+</td></tr>
+<tr valign="top"><td><code>exact_match</code></td>
+<td>
+<p>Indicates whether parameter names 
+should be matched exactly or treated as regular expression. 
+Default is <code>FALSE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>add_chain</code></td>
+<td>
+<p>A flag indicating if the returned <code>data.frame</code> 
+should contain two additional columns. The <code>chain</code> column 
+indicates the chain in which each sample was generated, the <code>iter</code> 
+column indicates the iteration number within each chain.</p>
+</td></tr>
+<tr valign="top"><td><code>subset</code></td>
+<td>
+<p>A numeric vector indicating the rows 
+(i.e., posterior samples) to be returned. 
+If <code>NULL</code> (the default), all  posterior samples are returned.</p>
+</td></tr>
+<tr valign="top"><td><code>as.matrix</code></td>
+<td>
+<p>Should the output be a <code>matrix</code> 
+instead of a <code>data.frame</code>? Defaults to <code>FALSE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>as.array</code></td>
+<td>
+<p>Should the output be an <code>array</code> 
+instead of a <code>data.frame</code>? Defaults to <code>FALSE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>For <code>as.data.frame</code>, <code>as.matrix</code>, and <code>as.array</code>:
+Further arguments to be passed to <code>posterior_samples</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>row.names, optional</code></td>
+<td>
+<p>See <code><a href="../../base/html/as.data.frame.html">as.data.frame</a></code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Currently there are methods for <code>brmsfit</code> objects.
+<code>as.data.frame.brmsfit</code>, <code>as.matrix.brmsfit</code>, and
+<code>as.array.brmsfit</code> are basically aliases of 
+<code>posterior_samples.brmsfit</code> and differ from
+each other only in type of the returned object.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A data frame (matrix or array) containing the posterior samples, 
+with one column per parameter. In case an array is returned,
+it contains one additional dimension for the chains.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul-Christian Buerkner <a href="mailto:paul.buerkner@gmail.com">paul.buerkner@gmail.com</a>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit &lt;- brm(rating ~ treat + period + carry + (1|subject), 
+           data = inhaler, family = "cumulative")
+
+# extract posterior samples of population-level effects 
+samples1 &lt;- posterior_samples(fit, "^b")
+head(samples1)
+
+# extract posterior samples of group-level standard deviations
+samples2 &lt;- posterior_samples(fit, "^sd_")
+head(samples2)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

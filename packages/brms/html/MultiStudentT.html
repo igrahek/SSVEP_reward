@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: The Multivariate Student-t Distribution</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for MultiStudentT {brms}"><tr><td>MultiStudentT {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>The Multivariate Student-t Distribution</h2>
+
+<h3>Description</h3>
+
+<p>Density function and random generation for the multivariate Student-t
+distribution with location vector <code>mu</code>, covariance matrix <code>Sigma</code>,
+and degrees of freedom <code>df</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+dmulti_student_t(x, df, mu, Sigma, log = FALSE, check = FALSE)
+
+rmulti_student_t(n, df, mu, Sigma, check = FALSE)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>Vector or matrix of quantiles. If <code>x</code> is a matrix, 
+each row is taken to be a quantile.</p>
+</td></tr>
+<tr valign="top"><td><code>df</code></td>
+<td>
+<p>Vector of degrees of freedom.</p>
+</td></tr>
+<tr valign="top"><td><code>mu</code></td>
+<td>
+<p>Location vector with length equal to the number of dimensions.</p>
+</td></tr>
+<tr valign="top"><td><code>Sigma</code></td>
+<td>
+<p>Covariance matrix.</p>
+</td></tr>
+<tr valign="top"><td><code>log</code></td>
+<td>
+<p>Logical; If <code>TRUE</code>, values are returned on the log scale.</p>
+</td></tr>
+<tr valign="top"><td><code>check</code></td>
+<td>
+<p>Logical; Indicates whether several input checks
+should be performed. Defaults to <code>FALSE</code> to improve
+efficiency.</p>
+</td></tr>
+<tr valign="top"><td><code>n</code></td>
+<td>
+<p>Number of samples to draw from the distribution.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>See the Stan user's manual <a href="http://mc-stan.org/documentation/">http://mc-stan.org/documentation/</a>
+for details on the parameterization
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

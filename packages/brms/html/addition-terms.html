@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Additional Response Information</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for addition-terms {brms}"><tr><td>addition-terms {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Additional Response Information</h2>
+
+<h3>Description</h3>
+
+<p>Provide additional information on the response variable 
+in <span class="pkg">brms</span> models, such as censoring, truncation, or
+known measurement error.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+resp_se(x, sigma = FALSE)
+
+resp_weights(x, scale = FALSE)
+
+resp_trials(x)
+
+resp_cat(x)
+
+resp_dec(x)
+
+resp_cens(x, y2 = NULL)
+
+resp_trunc(lb = -Inf, ub = Inf)
+
+resp_mi(sdy = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A vector; usually a variable defined in the
+data. Allowed values depend on the function:
+<code>resp_se</code> and <code>resp_weights</code> require positive numeric values.
+<code>resp_trials</code> and <code>resp_cat</code> require positive integers.
+<code>resp_dec</code> requires <code>0</code> and <code>1</code>, or alternatively
+<code>'lower'</code> and <code>'upper'</code>; 
+<code>resp_cens</code> requires <code>'left'</code>, <code>'none'</code>, <code>'right'</code>,
+and <code>'interval'</code> (or equivalently <code>-1</code>, <code>0</code>, <code>1</code>,
+and <code>2</code>) to indicate left, no, right, or interval censoring.</p>
+</td></tr>
+<tr valign="top"><td><code>sigma</code></td>
+<td>
+<p>Logical; Indicates whether the residual standard deviation
+parameter <code>sigma</code> should be included in addition to the known
+measurement error. Defaults to <code>FALSE</code> for backwards compatibility,
+but setting it to <code>TRUE</code> is usually the better choice.</p>
+</td></tr>
+<tr valign="top"><td><code>scale</code></td>
+<td>
+<p>Logical; Indicates whether weights should be scaled
+so that the average weight equals one. Defaults to <code>FALSE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>y2</code></td>
+<td>
+<p>A vector specifying the upper bounds in interval censoring.</p>
+</td></tr>
+<tr valign="top"><td><code>lb</code></td>
+<td>
+<p>A numeric vector or single numeric value specifying 
+the lower truncation bound.</p>
+</td></tr>
+<tr valign="top"><td><code>ub</code></td>
+<td>
+<p>A numeric vector or single numeric value specifying 
+the upper truncation bound.</p>
+</td></tr>
+<tr valign="top"><td><code>sdy</code></td>
+<td>
+<p>Optional known measurement error of the response
+treated as standard deviation. If specified, handles
+measurement error and (completely) missing values
+at the same time using the plausible-values-technique.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>These functions are almost solely useful when
+called in formulas passed to the <span class="pkg">brms</span> package.
+Within formulas, the <code>resp_</code> prefix may be omitted.
+More information is given in the 'Details' section
+of <code><a href="brmsformula.html">brmsformula</a></code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>A vector containing additional information on the response
+variable in an appropriate format.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="brm.html">brm</a></code>, 
+<code><a href="brmsformula.html">brmsformula</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+## Random effects meta-analysis
+nstudies &lt;- 20
+true_effects &lt;- rnorm(nstudies, 0.5, 0.2)
+sei &lt;- runif(nstudies, 0.05, 0.3)
+outcomes &lt;- rnorm(nstudies, true_effects, sei)
+data1 &lt;- data.frame(outcomes, sei)
+fit1 &lt;- brm(outcomes | se(sei, sigma = TRUE) ~ 1,
+            data = data1)
+summary(fit1)
+
+## Probit regression using the binomial family
+n &lt;- sample(1:10, 100, TRUE)  # number of trials
+success &lt;- rbinom(100, size = n, prob = 0.4)
+x &lt;- rnorm(100)
+data2 &lt;- data.frame(n, success, x)
+fit2 &lt;- brm(success | trials(n) ~ x, data = data2,
+            family = binomial("probit"))
+summary(fit2)
+
+## Survival regression modeling the time between the first 
+## and second recurrence of an infection in kidney patients.
+fit3 &lt;- brm(time | cens(censored) ~ age * sex + disease + (1|patient), 
+            data = kidney, family = lognormal())
+summary(fit3)
+
+## Poisson model with truncated counts  
+fit4 &lt;- brm(count | trunc(ub = 104) ~ log_Base4_c * Trt_c, 
+            data = epilepsy, family = poisson())
+summary(fit4)
+
+## End(Not run)
+  
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

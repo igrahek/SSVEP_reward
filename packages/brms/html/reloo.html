@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Compute exact cross-validation for problematic observations</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for reloo {brms}"><tr><td>reloo {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Compute exact cross-validation for problematic observations</h2>
+
+<h3>Description</h3>
+
+<p>Compute exact cross-validation for problematic observations
+for which approximate leave-one-out cross-validation may
+return incorrect results.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+reloo(x, ...)
+
+## S3 method for class 'loo'
+reloo(x, fit, k_threshold = 0.7, check = TRUE, resp = NULL,
+  ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object typically of class <code>loo</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Further arguments passed to 
+<code><a href="update.brmsfit.html">update.brmsfit</a></code> such
+as <code>iter</code>, <code>chains</code>, or <code>cores</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>fit</code></td>
+<td>
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object typically of class <code>brmsfit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>k_threshold</code></td>
+<td>
+<p>The threshold at which pareto <i>k</i> 
+estimates are treated as problematic. Defaults to <code>0.7</code>. 
+See <code><a href="../../loo/html/pareto_k_ids.html">pareto_k_ids</a></code>
+for more details.</p>
+</td></tr>
+<tr valign="top"><td><code>check</code></td>
+<td>
+<p>Logical; If <code>TRUE</code> (the default), a crude 
+check is performed if the <code>loo</code> object was generated
+from the <code>brmsfit</code> object passed to argument <code>fit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>resp</code></td>
+<td>
+<p>Optional names of response variables.
+If specified, fitted values of these response variables are returned.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Warnings about Pareto <i>k</i> estimates indicate observations
+for which the approximation to LOO is problematic (this is described in
+detail in Vehtari, Gelman, and Gabry (2017) and the 
+<span class="pkg"><a href="../../loo/html/loo-package.html">loo</a></span> package documentation).
+If there are <i>J</i> observations with <i>k</i> estimates above
+<code>k_threshold</code>, then <code>reloo</code> will refit the original model 
+<i>J</i> times, each time leaving out one of the <i>J</i> 
+problematic observations. The pointwise contributions of these observations
+to the total ELPD are then computed directly and substituted for the
+previous estimates from these <i>J</i> observations that are stored in the
+original <code>loo</code> object.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the class as <code>x</code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="loo.brmsfit.html">loo</a></code>, <code><a href="kfold.html">kfold</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit1 &lt;- brm(count ~ log_Age_c + log_Base4_c * Trt + (1|patient),
+           data = epilepsy, family = poisson())
+# throws warning about some pareto k estimates being too high
+(loo1 &lt;- loo(fit1))
+(loo1 &lt;- reloo(loo1, fit1))
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

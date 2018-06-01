@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Predictors with Missing Values in 'brms' Models</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for mi {brms}"><tr><td>mi {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Predictors with Missing Values in <span class="pkg">brms</span> Models</h2>
+
+<h3>Description</h3>
+
+<p>Predictors with Missing Values in <span class="pkg">brms</span> Models
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+mi(x)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>The variable containing missings.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>For detailed documentation see <code>help(brmsformula)</code>. 
+</p>
+<p>This function is almost solely useful when
+called in formulas passed to the <span class="pkg">brms</span> package.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="brmsformula.html">brmsformula</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+data("nhanes", package = "mice")
+bform &lt;- bf(bmi | mi() ~ age * mi(chl)) +
+  bf(chl | mi() ~ age) + set_rescor(FALSE)
+fit &lt;- brm(bform, data = nhanes)
+summary(fit)
+plot(marginal_effects(fit, resp = "bmi"), ask = FALSE)
+LOO(fit, newdata = na.omit(fit$data))
+
+## End(Not run) 
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Stan Code for 'brms' Models</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for make_stancode {brms}"><tr><td>make_stancode {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Stan Code for <span class="pkg">brms</span> Models</h2>
+
+<h3>Description</h3>
+
+<p>Generate Stan code for <span class="pkg">brms</span> models
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+make_stancode(formula, data, family = gaussian(), prior = NULL,
+  autocor = NULL, cov_ranef = NULL, sparse = FALSE,
+  sample_prior = c("no", "yes", "only"), stanvars = NULL,
+  stan_funs = NULL, save_model = NULL, silent = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>formula</code></td>
+<td>
+<p>An object of class 
+<code><a href="../../stats/html/formula.html">formula</a></code>,
+<code><a href="brmsformula.html">brmsformula</a></code>, or <code><a href="mvbrmsformula.html">mvbrmsformula</a></code>
+(or one that can be coerced to that classes): 
+A symbolic description of the model to be fitted. 
+The details of model specification are explained in 
+<code><a href="brmsformula.html">brmsformula</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>An object of class <code>data.frame</code> 
+(or one that can be coerced to that class) 
+containing data of all variables used in the model.</p>
+</td></tr>
+<tr valign="top"><td><code>family</code></td>
+<td>
+<p>A description of the response distribution and link function 
+to be used in the model. This can be a family function, 
+a call to a family function or a character string naming the family.
+Every family function has a <code>link</code> argument allowing to specify
+the link function to be applied on the response variable.
+If not specified, default links are used.
+For details of supported families see 
+<code><a href="brmsfamily.html">brmsfamily</a></code>.
+By default, a linear <code>gaussian</code> model is applied.
+In multivariate models, <code>family</code> might also be a list of families.</p>
+</td></tr>
+<tr valign="top"><td><code>prior</code></td>
+<td>
+<p>One or more <code>brmsprior</code> objects created by
+<code><a href="set_prior.html">set_prior</a></code> or related functions 
+and combined using the <code>c</code> method or the <code>+</code> operator.
+See also  <code><a href="get_prior.html">get_prior</a></code> for more help.</p>
+</td></tr>
+<tr valign="top"><td><code>autocor</code></td>
+<td>
+<p>An optional <code><a href="cor_brms.html">cor_brms</a></code> object describing 
+the correlation structure within the response variable 
+(i.e., the 'autocorrelation'). 
+See the documentation of <code><a href="cor_brms.html">cor_brms</a></code> for a description 
+of the available correlation structures. Defaults to <code>NULL</code>, 
+corresponding to no correlations.
+In multivariate models, <code>autocor</code> might also be a list 
+of autocorrelation structures.</p>
+</td></tr>
+<tr valign="top"><td><code>cov_ranef</code></td>
+<td>
+<p>A list of matrices that are proportional to the 
+(within) covariance structure of the group-level effects. 
+The names of the matrices should correspond to columns 
+in <code>data</code> that are used as grouping factors. 
+All levels of the grouping factor should appear as rownames 
+of the corresponding matrix. This argument can be used,
+among others to model pedigrees and phylogenetic effects.
+See <code>vignette("brms_phylogenetics")</code> for more details.</p>
+</td></tr>
+<tr valign="top"><td><code>sparse</code></td>
+<td>
+<p>Logical; indicates whether the population-level 
+design matrices should be treated as sparse (defaults to <code>FALSE</code>). 
+For design matrices with many zeros, this can considerably 
+reduce required memory. Sampling speed is currently not 
+improved or even slightly decreased.</p>
+</td></tr>
+<tr valign="top"><td><code>sample_prior</code></td>
+<td>
+<p>Indicate if samples from all specified 
+proper priors should be drawn additionally to the posterior samples
+(defaults to <code>"no"</code>). Among others, these samples can be used 
+to calculate Bayes factors for point hypotheses. 
+If set to <code>"only"</code>, samples are drawn solely from
+the priors ignoring the likelihood. In this case, 
+all parameters must have proper priors.</p>
+</td></tr>
+<tr valign="top"><td><code>stanvars</code></td>
+<td>
+<p>An optional <code>stanvars</code> object generated
+by function <code><a href="stanvar.html">stanvar</a></code> to define additional variables
+in the data block of <span class="pkg">Stan</span>.</p>
+</td></tr>
+<tr valign="top"><td><code>stan_funs</code></td>
+<td>
+<p>An optional character string containing self-defined 
+<span class="pkg">Stan</span> functions, which will be included in the functions block 
+of the generated <span class="pkg">Stan</span> code.</p>
+</td></tr>
+<tr valign="top"><td><code>save_model</code></td>
+<td>
+<p>Either <code>NULL</code> or a character string. 
+In the latter case, the model code is
+saved in a file named after the string supplied in <code>save_model</code>, 
+which may also contain the full path where to save the file.
+If only a name is given, the file is saved in the current working directory.</p>
+</td></tr>
+<tr valign="top"><td><code>silent</code></td>
+<td>
+<p>logical; If <code>TRUE</code>, warnings of
+the Stan parser will be suppressed.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Other arguments for internal usage only</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A character string containing the fully commented <span class="pkg">Stan</span> code 
+to fit a <span class="pkg">brms</span> model.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+make_stancode(rating ~ treat + period + carry + (1|subject), 
+              data = inhaler, family = "cumulative")
+
+make_stancode(count ~ log_Age_c + log_Base4_c * Trt_c 
+              + (1|patient) + (1|visit), 
+              data = epilepsy, family = "poisson")
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

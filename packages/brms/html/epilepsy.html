@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Epileptic seizure counts</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for epilepsy {brms}"><tr><td>epilepsy {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Epileptic seizure counts</h2>
+
+<h3>Description</h3>
+
+<p>Breslow and Clayton (1993) analyze data initially 
+provided by Thall and Vail (1990) concerning 
+seizure counts in a randomized trial of anti-convulsant 
+therapy in epilepsy. Covariates are treatment, 
+8-week baseline seizure counts, and age of the patients in years.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+epilepsy
+</pre>
+
+
+<h3>Format</h3>
+
+<p>A dataframe of 236 observations containing information 
+on the following 9 variables. 
+</p>
+
+<dl>
+<dt>Age</dt><dd><p>The age of the patients in years</p>
+</dd>
+<dt>Base</dt><dd><p>The seizure count at 8-weeks baseline</p>
+</dd>
+<dt>Trt</dt><dd><p>Either <code>0</code> or <code>1</code> indicating 
+if the patient received anti-convulsant therapy</p>
+</dd> 
+<dt>log_Age_c</dt><dd><p>The logarithm of Age centered around its mean</p>
+</dd>
+<dt>log_Base4_c</dt><dd><p>The logarithm of Base divided by 4 
+(i.e. log(Base/4)) centered around its mean</p>
+</dd>
+<dt>Trt_c</dt><dd><p>Trt centered around its mean</p>
+</dd>
+<dt>visit</dt><dd><p>The session number from <code>1</code> (first visit) 
+to <code>4</code> (last visit)</p>
+</dd>
+<dt>count</dt><dd><p>The seizure count between two visits</p>
+</dd>
+<dt>patient</dt><dd><p>The patient number</p>
+</dd>
+<dt>obs</dt><dd><p>The observation number, 
+i.e. a unique identifier for each observation</p>
+</dd>
+</dl>
+
+
+<h3>Source</h3>
+
+<p>Thall, P. F., &amp; Vail, S. C. (1990). 
+Some covariance models for longitudinal count data with overdispersion. 
+<em>Biometrics, 46(2)</em>, 657-671. <br />
+</p>
+<p>Breslow, N. E., &amp; Clayton, D. G. (1993). 
+Approximate inference in generalized linear mixed models. 
+<em>Journal of the American Statistical Association, 88(421)</em>, 9-25.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+## poisson regression without random effects. 
+fit1 &lt;- brm(count ~ log_Age_c + log_Base4_c * Trt_c, 
+            data = epilepsy, family = poisson())
+summary(fit1) 
+plot(fit1)             
+    
+## poisson regression with random intercepts of patients and visits
+## as well as normal priors for fixed effects parameters.    
+fit2 &lt;- brm(count ~ log_Age_c + log_Base4_c * Trt_c 
+            + (1|patient) + (1|visit), 
+            data = epilepsy, family = poisson(), 
+            prior = set_prior("normal(0,5)"))
+summary(fit2) 
+plot(fit2)
+
+## End(Not run)
+ 
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

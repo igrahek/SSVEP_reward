@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Add information criteria and fit indices to fitted model...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for add_ic {brms}"><tr><td>add_ic {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Add information criteria and fit indices to fitted model objects</h2>
+
+<h3>Description</h3>
+
+<p>Add information criteria and fit indices to fitted model objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+add_ic(x, ...)
+
+## S3 method for class 'brmsfit'
+add_ic(x, ic = "loo", model_name = NULL, ...)
+
+add_ic(x, ...) &lt;- value
+
+add_loo(x, ...)
+
+add_waic(x, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object typically of class <code>brmsfit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Further arguments passed to the underlying 
+functions computing the information criteria or fit indices.</p>
+</td></tr>
+<tr valign="top"><td><code>ic, value</code></td>
+<td>
+<p>Names of the information criteria / fit indices 
+to compute. Currently supported are <code>"loo"</code>, 
+<code>"waic"</code>, <code>"kfold"</code>, <code>"R2"</code> (R-squared), and 
+<code>"marglik"</code> (log marginal likelihood).</p>
+</td></tr>
+<tr valign="top"><td><code>model_name</code></td>
+<td>
+<p>Optional name of the model. If <code>NULL</code>
+(the default) the name is taken from the call to <code>x</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>The methods <code>add_loo</code> and add <code>add_waic</code>
+are just convenient wrappers around <code>add_ic</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of the same class as <code>x</code>, but
+with information criteria added for later usage.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit &lt;- brm(count ~ Trt, epilepsy, poisson())
+# add both LOO and WAIC at once
+fit &lt;- add_ic(fit, ic = c("loo", "waic"))
+print(fit$loo)
+print(fit$waic)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

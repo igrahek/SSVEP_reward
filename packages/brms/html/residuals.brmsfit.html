@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Extract Model Residuals from brmsfit Objects</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for residuals.brmsfit {brms}"><tr><td>residuals.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Extract Model Residuals from brmsfit Objects</h2>
+
+<h3>Description</h3>
+
+<p>Extract Model Residuals from brmsfit Objects
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+residuals(object, newdata = NULL, re_formula = NULL,
+  type = c("ordinary", "pearson"), method = c("fitted", "predict"),
+  allow_new_levels = FALSE, sample_new_levels = "uncertainty",
+  new_objects = list(), incl_autocor = TRUE, resp = NULL, subset = NULL,
+  nsamples = NULL, sort = FALSE, nug = NULL, summary = TRUE,
+  robust = FALSE, probs = c(0.025, 0.975), ...)
+
+## S3 method for class 'brmsfit'
+predictive_error(object, newdata = NULL,
+  re_formula = NULL, re.form = NULL, allow_new_levels = FALSE,
+  sample_new_levels = "uncertainty", new_objects = list(),
+  incl_autocor = TRUE, resp = NULL, subset = NULL, nsamples = NULL,
+  sort = FALSE, nug = NULL, robust = FALSE, probs = c(0.025, 0.975),
+  ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>object</code></td>
+<td>
+<p>An object of class <code>brmsfit</code></p>
+</td></tr>
+<tr valign="top"><td><code>newdata</code></td>
+<td>
+<p>An optional data.frame for which to evaluate predictions.
+If <code>NULL</code> (default), the original data of the model is used.</p>
+</td></tr>
+<tr valign="top"><td><code>re_formula</code></td>
+<td>
+<p>formula containing group-level effects 
+to be considered in the prediction. 
+If <code>NULL</code> (default), include all group-level effects; 
+if <code>NA</code>, include no group-level effects.</p>
+</td></tr>
+<tr valign="top"><td><code>type</code></td>
+<td>
+<p>The type of the residuals, 
+either <code>"ordinary"</code> or <code>"pearson"</code>. 
+More information is provided under 'Details'.</p>
+</td></tr>
+<tr valign="top"><td><code>method</code></td>
+<td>
+<p>Indicates the method to compute
+model implied values. Either <code>"fitted"</code>
+(predicted values of the regression curve) or
+<code>"predict"</code> (predicted response values). 
+Using <code>"predict"</code> is recommended
+but <code>"fitted"</code> is the current default for 
+reasons of backwards compatibility.</p>
+</td></tr>
+<tr valign="top"><td><code>allow_new_levels</code></td>
+<td>
+<p>A flag indicating if new
+levels of group-level effects are allowed 
+(defaults to <code>FALSE</code>). 
+Only relevant if <code>newdata</code> is provided.</p>
+</td></tr>
+<tr valign="top"><td><code>sample_new_levels</code></td>
+<td>
+<p>Indicates how to sample new levels 
+for grouping factors specified in <code>re_formula</code>.
+This argument is only relevant if <code>newdata</code> is provided and 
+<code>allow_new_levels</code> is set to <code>TRUE</code>.
+If <code>"uncertainty"</code> (default), include group-level uncertainty
+in the predictions based on the variation of the existing levels. 
+If <code>"gaussian"</code>, sample new levels from the (multivariate) 
+normal distribution implied by the group-level standard deviations 
+and correlations. This options may be useful for conducting 
+Bayesian power analysis. 
+If <code>"old_levels"</code>, directly sample new levels from the
+existing levels.</p>
+</td></tr>
+<tr valign="top"><td><code>new_objects</code></td>
+<td>
+<p>A named <code>list</code> of objects containing 
+new data, which cannot be passed via argument <code>newdata</code>.
+Currently, only required for objects passed to 
+<code><a href="cor_sar.html">cor_sar</a></code> and 
+<code><a href="cor_fixed.html">cor_fixed</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>incl_autocor</code></td>
+<td>
+<p>A flag indicating if ARMA autocorrelation
+parameters should be included in the predictions. Defaults to 
+<code>TRUE</code>. Setting it to <code>FALSE</code> will not affect other 
+correlation structures such as <code><a href="cor_bsts.html">cor_bsts</a></code>,
+or <code><a href="cor_fixed.html">cor_fixed</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>resp</code></td>
+<td>
+<p>Optional names of response variables.
+If specified, fitted values of these response variables are returned.</p>
+</td></tr>
+<tr valign="top"><td><code>subset</code></td>
+<td>
+<p>A numeric vector specifying
+the posterior samples to be used. 
+If <code>NULL</code> (the default), all samples are used.</p>
+</td></tr>
+<tr valign="top"><td><code>nsamples</code></td>
+<td>
+<p>Positive integer indicating how many 
+posterior samples should be used. 
+If <code>NULL</code> (the default) all samples are used.
+Ignored if <code>subset</code> is not <code>NULL</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>sort</code></td>
+<td>
+<p>Logical. Only relevant for time series models. 
+Indicating whether to return predicted values in the original 
+order (<code>FALSE</code>; default) or in the order of the 
+time series (<code>TRUE</code>).</p>
+</td></tr>
+<tr valign="top"><td><code>nug</code></td>
+<td>
+<p>Small positive number for Gaussian process terms only. 
+For numerical reasons, the covariance matrix of a Gaussian 
+process might not be positive definite. Adding a very small 
+number to the matrix's diagonal often solves this problem. 
+If <code>NULL</code> (the default), <code>nug</code> is chosen internally.</p>
+</td></tr>
+<tr valign="top"><td><code>summary</code></td>
+<td>
+<p>Should summary statistics 
+(i.e. means, sds, and 95% intervals) be returned
+instead of the raw values? Default is <code>TRUE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>robust</code></td>
+<td>
+<p>If <code>FALSE</code> (the default) the mean is used as 
+the measure of central tendency and the standard deviation as 
+the measure of variability. If <code>TRUE</code>, the median and the 
+median absolute deviation (MAD) are applied instead.
+Only used if <code>summary</code> is <code>TRUE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>probs</code></td>
+<td>
+<p>The percentiles to be computed by the <code>quantile</code> 
+function. Only used if <code>summary</code> is <code>TRUE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Currently ignored.</p>
+</td></tr>
+<tr valign="top"><td><code>re.form</code></td>
+<td>
+<p>Alias of <code>re_formula</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Residuals of type <code>ordinary</code> 
+are of the form <i>R = Y - Yp</i>, where <i>Y</i> is the observed 
+and <i>Yp</i> is the predicted response.
+Residuals of type <code>pearson</code> are 
+of the form <i>R = (Y - Yp) / SD(Y)</i>,
+where <i>SD(Y)</i> is an estimation of the standard deviation 
+of <i>Y</i>. 
+</p>
+<p>Currently, <code>residuals.brmsfit</code> does not support 
+<code>categorical</code> or ordinal models. 
+</p>
+<p>Method <code>predictive_error.brmsfit</code> is an alias of 
+<code>residuals.brmsfit</code> with <code>method = "predict"</code> and
+<code>summary = FALSE</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>Model residuals. If <code>summary = TRUE</code> 
+this is a N x C matrix and if <code>summary = FALSE</code> 
+a S x N matrix, where S is the number of samples, 
+N is the number of observations, and C is equal to 
+<code>length(probs) + 2</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+## fit a model
+fit &lt;- brm(rating ~ treat + period + carry + (1|subject), 
+           data = inhaler, cores = 2)
+
+## extract residuals 
+res &lt;- residuals(fit, summary = TRUE)
+head(res)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

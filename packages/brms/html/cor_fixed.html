@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Fixed user-defined covariance matrices</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for cor_fixed {brms}"><tr><td>cor_fixed {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Fixed user-defined covariance matrices</h2>
+
+<h3>Description</h3>
+
+<p>Define a fixed covariance matrix of the response variable
+for instance to model multivariate effect sizes in meta-analysis.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+cor_fixed(V)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>V</code></td>
+<td>
+<p>Known covariance matrix of the response variable.
+If a vector is passed, it will be used as diagonal entries 
+(variances) and covariances will be set to zero.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>cor_fixed</code>.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+dat &lt;- data.frame(y = rnorm(3))
+V &lt;- cbind(c(0.5, 0.3, 0.2), c(0.3, 1, 0.1), c(0.2, 0.1, 0.2))
+fit &lt;- brm(y~1, data = dat, autocor = cor_fixed(V))
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

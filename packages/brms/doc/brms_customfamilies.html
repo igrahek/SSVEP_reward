@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Paul Bürkner" />
+
+<meta name="date" content="2018-05-14" />
+
+<title>Define Custom Response Distributions with brms</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Define Custom Response Distributions with brms</h1>
+<h4 class="author"><em>Paul Bürkner</em></h4>
+<h4 class="date"><em>2018-05-14</em></h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#a-case-study">A Case Study</a></li>
+<li><a href="#the-beta-binomial-distribution">The Beta-Binomial Distribution</a></li>
+<li><a href="#fitting-custom-family-models">Fitting Custom Family Models</a></li>
+<li><a href="#post-processing-custom-family-models">Post-Processing Custom Family Models</a></li>
+<li><a href="#turning-a-custom-family-into-a-native-family">Turning a Custom Family into a Native Family</a></li>
+</ul>
+</div>
+
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Define custom response distributions with brms}
+%\VignetteEncoding{UTF-8}
+-->
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The <strong>brms</strong> package comes with a lot of built-in response distributions – usually called <em>families</em> in R – to specify among others linear, count data, survival, response times, or ordinal models (see <code>help(brmsfamily)</code> for an overview). Despite supporting over two dozen families, there is still a long list of distributions, which are not natively supported. The present vignette will explain how to specify such <em>custom families</em> in <strong>brms</strong>. By doing that, users can benefit from the modeling flexibility and post-processing options of <strong>brms</strong> even when using self-defined response distributions.</p>
+</div>
+<div id="a-case-study" class="section level2">
+<h2>A Case Study</h2>
+<p>As a case study, we will use the <code>cbpp</code> data of the <strong>lme4</strong> package, which describes the development of the CBPP disease of cattle in Africa. The data set contains four variables: <code>period</code> (the time period), <code>herd</code> (a factor identifying the cattle herd), <code>incidence</code> (number of new disease cases for a given herd and time period), as well as <code>size</code> (the herd size at the beginning of a given time period).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;cbpp&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;lme4&quot;</span>)
+<span class="kw">head</span>(cbpp)</code></pre></div>
+<pre><code>  herd incidence size period
+1    1         2   14      1
+2    1         3   12      2
+3    1         4    9      3
+4    1         0    5      4
+5    2         3   22      1
+6    2         1   18      2</code></pre>
+<p>In a first step, we will be predicting <code>incidence</code> using a simple binomial model, which will serve as our baseline model. For observed number of events <span class="math inline">\(y\)</span> (<code>incidence</code> in our case) and total number of trials <span class="math inline">\(T\)</span> (<code>size</code>), the probability mass function of the binomial distribution is defined as</p>
+<p><span class="math display">\[
+P(y | T, p) = \binom{T}{y} p^{y} (1 - p)^{N-y}
+\]</span></p>
+<p>where <span class="math inline">\(p\)</span> is the event probability. In the classical binomial model, we will directly predict <span class="math inline">\(p\)</span> on the logit-scale, which means that for each observation <span class="math inline">\(i\)</span> we compute the success probability <span class="math inline">\(p_i\)</span> as</p>
+<p><span class="math display">\[
+p_i = \frac{\exp(\eta_i)}{1 + \exp(\eta_i)}
+\]</span></p>
+<p>where <span class="math inline">\(\eta_i\)</span> is the linear predictor term of observation <span class="math inline">\(i\)</span> (see <code>vignette(&quot;brms_overview&quot;)</code> for more details on linear predictors in <strong>brms</strong>). Predicting <code>incidence</code> by <code>period</code> and a varying intercept of <code>herd</code> is straight forward in <strong>brms</strong>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit1 &lt;-<span class="st"> </span><span class="kw">brm</span>(incidence <span class="op">|</span><span class="st"> </span><span class="kw">trials</span>(size) <span class="op">~</span><span class="st"> </span>period <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span><span class="op">|</span>herd), 
+            <span class="dt">data =</span> cbpp, <span class="dt">family =</span> <span class="kw">binomial</span>())</code></pre></div>
+<p>In the summary output, we see that the incidence probability varies substantially over herds, but reduces over the cource of the time as indicated by the negative coefficients of <code>period</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(fit1)</code></pre></div>
+<pre><code> Family: binomial 
+  Links: mu = logit 
+Formula: incidence | trials(size) ~ period + (1 | herd) 
+   Data: cbpp (Number of observations: 56) 
+Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+         total post-warmup samples = 4000
+
+Group-Level Effects: 
+~herd (Number of levels: 15) 
+              Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(Intercept)     0.77      0.23     0.39     1.30       1186 1.00
+
+Population-Level Effects: 
+          Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+Intercept    -1.42      0.27    -1.96    -0.91       1791 1.00
+period2      -1.00      0.31    -1.61    -0.41       4000 1.00
+period3      -1.14      0.34    -1.84    -0.50       4000 1.00
+period4      -1.62      0.44    -2.52    -0.81       4000 1.00
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<p>A drawback of the binomial model is that – after taking into account the linear predictor – its variance is fixed to <span class="math inline">\(\text{Var}(y_i) = T_i p_i (1 - p_i)\)</span>. All variance exceeding this value cannot be not taken into account by the model. There are multiple ways of dealing with this so called <em>overdispersion</em> and the solution described below will serve as an illustrative example of how to define custom families in <strong>brms</strong>.</p>
+</div>
+<div id="the-beta-binomial-distribution" class="section level2">
+<h2>The Beta-Binomial Distribution</h2>
+<p>The so called <em>beta-binomial</em> model is a generalization of the <em>binomial</em> model with an additional parameter to account for overdispersion. In the beta-binomial model, we do not predict the binomial probability <span class="math inline">\(p_i\)</span> directly, but assume it to be beta distributed with hyperparameters <span class="math inline">\(\alpha &gt; 0\)</span> and <span class="math inline">\(\beta &gt; 0\)</span>:</p>
+<p><span class="math display">\[
+p_i \sim \text{Beta}(\alpha_i, \beta_i)
+\]</span></p>
+<p>The <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> parameters are both hard to interprete and generally not recommended for use in regression models. Thus, we will apply a different parameterization with parameters <span class="math inline">\(\mu \in [0, 1]\)</span> and <span class="math inline">\(\phi &gt; 0\)</span>, which we will call <span class="math inline">\(\text{Beta2}\)</span>:</p>
+<p><span class="math display">\[
+\text{Beta2}(\mu, \phi) = \text{Beta}(\mu \phi, (1-\mu) \phi)
+\]</span></p>
+<p>The parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\phi\)</span> specify the mean and precision parameter, respectively. By defining</p>
+<p><span class="math display">\[
+\mu_i = \frac{\exp(\eta_i)}{1 + \exp(\eta_i)}
+\]</span></p>
+<p>we still predict the expected probability by means of our transformed linear predictor (as in the original binomial model), but account for potential overdispersion via the parameter <span class="math inline">\(\phi\)</span>.</p>
+</div>
+<div id="fitting-custom-family-models" class="section level2">
+<h2>Fitting Custom Family Models</h2>
+<p>The beta-binomial distribution is not natively supported in <strong>brms</strong> and so we will have to define it ourselves using the <code>custom_family</code> function. This function requires the family’s name, the names of its parameters (<code>mu</code> and <code>phi</code> in our case), corresponding link functions (only applied if parameters are prediced), their theoretical lower and upper bounds (only applied if parameters are not predicted), information on whether the distribuion is discrete or continuous, and finally, whether additional non-parameter variables need to be passed to the distribution. For our beta-binomial example, this results in the following custom family:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">beta_binomial2 &lt;-<span class="st"> </span><span class="kw">custom_family</span>(
+  <span class="st">&quot;beta_binomial2&quot;</span>, <span class="dt">dpars =</span> <span class="kw">c</span>(<span class="st">&quot;mu&quot;</span>, <span class="st">&quot;phi&quot;</span>),
+  <span class="dt">links =</span> <span class="kw">c</span>(<span class="st">&quot;logit&quot;</span>, <span class="st">&quot;log&quot;</span>), <span class="dt">lb =</span> <span class="kw">c</span>(<span class="ot">NA</span>, <span class="dv">0</span>),
+  <span class="dt">type =</span> <span class="st">&quot;int&quot;</span>, <span class="dt">vars =</span> <span class="st">&quot;trials[n]&quot;</span>
+)</code></pre></div>
+<p>Next, we have to provide the relevant <strong>Stan</strong> functions if the distribution is not defined in <strong>Stan</strong> itself. For the <code>beta_binomial2</code> distribution, this is straight forward since the ordinal <code>beta_binomial</code> distribution is already implemented.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stan_funs &lt;-<span class="st"> &quot;</span>
+<span class="st">  real beta_binomial2_lpmf(int y, real mu, real phi, int T) {</span>
+<span class="st">    return beta_binomial_lpmf(y | T, mu * phi, (1 - mu) * phi);</span>
+<span class="st">  }</span>
+<span class="st">  int beta_binomial2_rng(real mu, real phi, int T) {</span>
+<span class="st">    return beta_binomial_rng(T, mu * phi, (1 - mu) * phi);</span>
+<span class="st">  }</span>
+<span class="st">&quot;</span></code></pre></div>
+<p>For the model fitting, we will only need <code>beta_binomial2_lpmf</code>, but <code>beta_binomial2_rng</code> will come in handy when it comes to post-processing. If additional data needs to be passed to the distribution, we need it to prepared as well. In our running example, this is the case for the <code>size</code> of the herd and so we define:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stanvars &lt;-<span class="st"> </span><span class="kw">stanvar</span>(<span class="kw">as.integer</span>(cbpp<span class="op">$</span>size), <span class="dt">name =</span> <span class="st">&quot;trials&quot;</span>)</code></pre></div>
+<p>Actually, for this particular example, we could more elegantly apply the addition argument <code>trials()</code> as in the basic binomial model. However, since the present vignette is ment to give a general overview of the topic, we will go with the more general method of specifying custom data via <code>stanvar</code>.</p>
+<p>We now have all components together to fit our custom beta-binomial model:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit2 &lt;-<span class="st"> </span><span class="kw">brm</span>(
+  incidence <span class="op">~</span><span class="st"> </span>period <span class="op">+</span><span class="st"> </span>(<span class="dv">1</span><span class="op">|</span>herd), <span class="dt">data =</span> cbpp, 
+  <span class="dt">family =</span> beta_binomial2, <span class="dt">stan_funs =</span> stan_funs,
+  <span class="dt">stanvars =</span> stanvars
+)</code></pre></div>
+<p>The summary output reveals that the uncertainty in the coefficients of <code>period</code> is somewhat larger than in the basic binomial model, which is the result of including the overdispersion parameter <code>phi</code> in the model. Aparat from that, the results looks pretty similar.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(fit2)</code></pre></div>
+<pre><code> Family: beta_binomial2 
+  Links: mu = logit; phi = identity 
+Formula: incidence ~ period + (1 | herd) 
+   Data: cbpp (Number of observations: 56) 
+Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+         total post-warmup samples = 4000
+
+Group-Level Effects: 
+~herd (Number of levels: 15) 
+              Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(Intercept)     0.37      0.25     0.02     0.92        975 1.01
+
+Population-Level Effects: 
+          Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+Intercept    -1.36      0.26    -1.89    -0.87       4000 1.00
+period2      -1.02      0.41    -1.85    -0.22       3521 1.00
+period3      -1.26      0.46    -2.28    -0.43       4000 1.00
+period4      -1.56      0.52    -2.67    -0.60       3254 1.00
+
+Family Specific Parameters: 
+    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+phi    16.98     14.42     5.31    51.94       1317 1.00
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+</div>
+<div id="post-processing-custom-family-models" class="section level2">
+<h2>Post-Processing Custom Family Models</h2>
+<p>Some post-proecssing methods such as <code>summary</code> or <code>plot</code> work out of the box for custom family models. However, there are three particularily important methods, which require additional input by the user. These are <code>fitted</code>, <code>predict</code> and <code>log_lik</code> computing predicted mean values, predicted response values, and log-likelihood values, respectively. They are not only relevant for their own sake, but also provide the basis of many other post-processing methods. For instance, we may be interested in comparing the fit of the binomial model with that of the beta-binomial model by means of approximate leave-one-out cross-validation implemented in method <code>loo</code>, which in turn requires <code>log_lik</code> to be working.</p>
+<p>The <code>log_lik</code> function of a family should be named <code>log_lik_&lt;family-name&gt;</code> and have the two arguments <code>i</code> (indicating observations) and <code>draws</code>. You don’t have to worry too much about how <code>draws</code> is created. Instead, all you need to know is that parameters are stored in slot <code>dpars</code> and data are stored in slot <code>data</code>. Generally, parameters take on the form of a <span class="math inline">\(S \times N\)</span> matrix (with <span class="math inline">\(S =\)</span> number of posterior samples and <span class="math inline">\(N =\)</span> number of observations) if they are predicted (as is <code>mu</code> in our example) and a vector of size <span class="math inline">\(N\)</span> if the are not predicted (as is <code>phi</code>).</p>
+<p>We could define the complete log-likelihood function R directly, or we can expose the self-defined <strong>Stan</strong> functions and apply them. The latter approach is usually more convenient, but the former is more stable and the only option when implementing custom families in other R packages building upon <strong>brms</strong>. For the purpose of the present vignette, we will go with the latter approach</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">expose_functions</span>(fit2, <span class="dt">vectorize =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<p>and define the required <code>log_lik</code> functions with a few lines of code.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">log_lik_beta_binomial2 &lt;-<span class="st"> </span><span class="cf">function</span>(i, draws) {
+  mu &lt;-<span class="st"> </span>draws<span class="op">$</span>dpars<span class="op">$</span>mu[, i]
+  phi &lt;-<span class="st"> </span>draws<span class="op">$</span>dpars<span class="op">$</span>phi
+  N &lt;-<span class="st"> </span>draws<span class="op">$</span>data<span class="op">$</span>trials[i]
+  y &lt;-<span class="st"> </span>draws<span class="op">$</span>data<span class="op">$</span>Y[i]
+  <span class="kw">beta_binomial2_lpmf</span>(y, mu, phi, N)
+}</code></pre></div>
+<p>With that being done, all of the post-processing methods requiring <code>log_lik</code> will work as well. For instance, model comparison can simply be performed via</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">loo</span>(fit1, fit2)</code></pre></div>
+<pre><code>             LOOIC    SE
+fit1        199.80 20.39
+fit2        189.85 16.69
+fit1 - fit2   9.95  8.92</code></pre>
+<p>Since smaller <code>LOOIC</code> values indicate better fit, we see that the beta-binomial model fits somewhat better, although the corresponding standard error reveals that the difference is not that substantial.</p>
+<p>Next, we will define the function necessary for the <code>predict</code> method:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">predict_beta_binomial2 &lt;-<span class="st"> </span><span class="cf">function</span>(i, draws, ...) {
+  mu &lt;-<span class="st"> </span>draws<span class="op">$</span>dpars<span class="op">$</span>mu[, i]
+  phi &lt;-<span class="st"> </span>draws<span class="op">$</span>dpars<span class="op">$</span>phi
+  N &lt;-<span class="st"> </span>draws<span class="op">$</span>data<span class="op">$</span>trials[i]
+  <span class="kw">beta_binomial2_rng</span>(mu, phi, N)
+}</code></pre></div>
+<p>The <code>predict</code> function looks pretty similar to the corresponding <code>log_lik</code> function, except that we are now creating random samples of the response instead of log-liklihood values. Again, we are using an exposed <strong>Stan</strong> function for convenience. Make sure to add a <code>...</code> argument to your `<code>predict</code> function even if you are not using it, since some families require additional arguments. With <code>predict</code> to be working, we can engage for instance in posterior-predictive checking:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">pp_check</span>(fit2)</code></pre></div>
+<p><img src="data:image/png;base64,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" width="60%" style="display: block; margin: auto;" /></p>
+<p>When defining the <code>fitted</code> function, you have to keep in mind that it has only a <code>draws</code> argument and should compute the mean response values for all observations at once. Since the mean of the beta-binomial distribution is <span class="math inline">\(\text{E}(y) = \mu T\)</span> definition of the corresponding <code>fitted</code> function is not too complicated, but we need to get the dimension of parameters and data in line.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fitted_beta_binomial2 &lt;-<span class="st"> </span><span class="cf">function</span>(draws) {
+  mu &lt;-<span class="st"> </span>draws<span class="op">$</span>dpars<span class="op">$</span>mu
+  trials &lt;-<span class="st"> </span>draws<span class="op">$</span>data<span class="op">$</span>trials
+  trials &lt;-<span class="st"> </span><span class="kw">matrix</span>(trials, <span class="dt">nrow =</span> <span class="kw">nrow</span>(mu), <span class="dt">ncol =</span> <span class="kw">ncol</span>(mu), <span class="dt">byrow =</span> <span class="ot">TRUE</span>)
+  mu <span class="op">*</span><span class="st"> </span>trials
+}</code></pre></div>
+<p>A post-processing method relying directly on <code>fitted</code> is <code>marginal_effects</code>, which allows to visualize effects of predictors.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">marginal_effects</span>(fit2, <span class="dt">new_objects =</span> <span class="kw">list</span>(<span class="dt">trials =</span> <span class="dv">1</span>))</code></pre></div>
+<p><img src="data:image/png;base64,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" width="60%" style="display: block; margin: auto;" /></p>
+<p>For ease of interpretation we have set <code>trials</code> to 1 so that the y-axis of the above plot indicates probabilities.</p>
+</div>
+<div id="turning-a-custom-family-into-a-native-family" class="section level2">
+<h2>Turning a Custom Family into a Native Family</h2>
+<p>Family functions built natively into <strong>brms</strong> are saver to use and more convenient, as they require much less user input. If you think that your custom family is general enough to be useful to other users, please feel free to open an issue on <a href="https://github.com/paul-buerkner/brms/issues">GitHub</a> so that we can discuss all the details. Provided that we agree it makes sense to implement your family natively in brms, the following steps are required (<code>foo</code> is a placeholder for the family name):</p>
+<ul>
+<li>In <code>family-lists.R</code>, add function <code>.family_foo</code> which should contain basic information about your family (you will find lots of examples for other families there).</li>
+<li>In <code>families.R</code>, add family function <code>foo</code> which should be a simple wrapper around <code>.brmsfamily</code>.</li>
+<li>In <code>stan-likelihood.R</code>, add function <code>stan_llh_foo</code> which provides the likelihood of the family in Stan language.</li>
+<li>If necessary, add self-defined Stan functions in separate files under <code>inst/chunks</code>.</li>
+<li>Add functions <code>predict_foo</code>, <code>fitted_foo</code> and <code>log_lik_foo</code> to <code>predict.R</code>, <code>fitted.R</code> and <code>log_lik.R</code>, respectively.</li>
+<li>If necessary, add distribution functions to <code>distributions.R</code>.</li>
+</ul>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

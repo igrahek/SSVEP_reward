@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Posterior Model Probabilities from Marginal Likelihoods</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for post_prob.brmsfit {brms}"><tr><td>post_prob.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Posterior Model Probabilities from Marginal Likelihoods</h2>
+
+<h3>Description</h3>
+
+<p>Compute posterior model probabilities from marginal likelihoods.
+The <code>brmsfit</code> method is just a thin wrapper around
+the corresponding method for <code>bridge</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+post_prob(x, ..., prior_prob = NULL, model_names = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A fitted model object.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>More fitted model objects or further arguments
+passed to the underlying post-processing functions.</p>
+</td></tr>
+<tr valign="top"><td><code>prior_prob</code></td>
+<td>
+<p>Numeric vector with prior model probabilities. 
+If omitted, a uniform prior is used (i.e., all models are equally 
+likely a priori). The default <code>NULL</code> corresponds to equal 
+prior model weights.</p>
+</td></tr>
+<tr valign="top"><td><code>model_names</code></td>
+<td>
+<p>If <code>NULL</code> (the default) will use model names 
+derived from deparsing the call. Otherwise will use the passed 
+values as model names.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Computing the marginal likelihood requires samples 
+of all variables defined in Stan's <code>parameters</code> block
+to be saved. Otherwise <code>post_prob</code> cannot be computed.
+Thus, please set <code>save_all_pars = TRUE</code> in the call to <code>brm</code>,
+if you are planning to apply <code>post_prob</code> to your models.
+</p>
+<p>More details are provided under 
+<code><a href="../../bridgesampling/html/post_prob.html">post_prob</a></code>.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code>
+  <a href="bridge_sampler.html">bridge_sampler</a>,
+  <a href="bayes_factor.html">bayes_factor</a>
+</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+# model with the treatment effect
+fit1 &lt;- brm(
+  count ~ log_Age_c + log_Base4_c + Trt_c,
+  data = epilepsy, family = negbinomial(), 
+  prior = prior(normal(0, 1), class = b),
+  save_all_pars = TRUE
+)
+summary(fit1)
+
+# model without the treatent effect
+fit2 &lt;- brm(
+  count ~ log_Age_c + log_Base4_c,
+  data = epilepsy, family = negbinomial(), 
+  prior = prior(normal(0, 1), class = b),
+  save_all_pars = TRUE
+)
+summary(fit2)
+
+# compute the posterior model probabilities
+post_prob(fit1, fit2)
+
+# specify prior model probabilities
+post_prob(fit1, fit2, prior_prob = c(0.8, 0.2))
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

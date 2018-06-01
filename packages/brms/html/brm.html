@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Fit Bayesian Generalized (Non-)Linear Multivariate Multilevel...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for brm {brms}"><tr><td>brm {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Fit Bayesian Generalized (Non-)Linear Multivariate Multilevel Models</h2>
+
+<h3>Description</h3>
+
+<p>Fit Bayesian generalized (non-)linear multivariate multilevel models 
+using Stan for full Bayesian inference. A wide range of distributions 
+and link functions are supported, allowing users to fit &ndash; among others &ndash; 
+linear, robust linear, count data, survival, response times, ordinal, 
+zero-inflated, hurdle, and even self-defined mixture models all in a 
+multilevel context. Further modeling options include non-linear and 
+smooth terms, auto-correlation structures, censored data, meta-analytic 
+standard errors, and quite a few more. In addition, all parameters of the 
+response distributions can be predicted in order to perform distributional 
+regression. Prior specifications are flexible and explicitly encourage 
+users to apply prior distributions that actually reflect their beliefs.
+In addition, model fit can easily be assessed and compared with
+posterior predictive checks and leave-one-out cross-validation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+brm(formula, data, family = gaussian(), prior = NULL, autocor = NULL,
+  cov_ranef = NULL, sample_prior = c("no", "yes", "only"), sparse = FALSE,
+  knots = NULL, stanvars = NULL, stan_funs = NULL, fit = NA,
+  save_ranef = TRUE, save_mevars = FALSE, save_all_pars = FALSE,
+  inits = "random", chains = 4, iter = 2000, warmup = floor(iter/2),
+  thin = 1, cores = getOption("mc.cores", 1L), control = NULL,
+  algorithm = c("sampling", "meanfield", "fullrank"),
+  future = getOption("future", FALSE), silent = TRUE, seed = NA,
+  save_model = NULL, save_dso = TRUE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>formula</code></td>
+<td>
+<p>An object of class 
+<code><a href="../../stats/html/formula.html">formula</a></code>,
+<code><a href="brmsformula.html">brmsformula</a></code>, or <code><a href="mvbrmsformula.html">mvbrmsformula</a></code>
+(or one that can be coerced to that classes): 
+A symbolic description of the model to be fitted. 
+The details of model specification are explained in 
+<code><a href="brmsformula.html">brmsformula</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>An object of class <code>data.frame</code> 
+(or one that can be coerced to that class) 
+containing data of all variables used in the model.</p>
+</td></tr>
+<tr valign="top"><td><code>family</code></td>
+<td>
+<p>A description of the response distribution and link function 
+to be used in the model. This can be a family function, 
+a call to a family function or a character string naming the family.
+Every family function has a <code>link</code> argument allowing to specify
+the link function to be applied on the response variable.
+If not specified, default links are used.
+For details of supported families see 
+<code><a href="brmsfamily.html">brmsfamily</a></code>.
+By default, a linear <code>gaussian</code> model is applied.
+In multivariate models, <code>family</code> might also be a list of families.</p>
+</td></tr>
+<tr valign="top"><td><code>prior</code></td>
+<td>
+<p>One or more <code>brmsprior</code> objects created by
+<code><a href="set_prior.html">set_prior</a></code> or related functions 
+and combined using the <code>c</code> method or the <code>+</code> operator.
+See also  <code><a href="get_prior.html">get_prior</a></code> for more help.</p>
+</td></tr>
+<tr valign="top"><td><code>autocor</code></td>
+<td>
+<p>An optional <code><a href="cor_brms.html">cor_brms</a></code> object describing 
+the correlation structure within the response variable 
+(i.e., the 'autocorrelation'). 
+See the documentation of <code><a href="cor_brms.html">cor_brms</a></code> for a description 
+of the available correlation structures. Defaults to <code>NULL</code>, 
+corresponding to no correlations.
+In multivariate models, <code>autocor</code> might also be a list 
+of autocorrelation structures.</p>
+</td></tr>
+<tr valign="top"><td><code>cov_ranef</code></td>
+<td>
+<p>A list of matrices that are proportional to the 
+(within) covariance structure of the group-level effects. 
+The names of the matrices should correspond to columns 
+in <code>data</code> that are used as grouping factors. 
+All levels of the grouping factor should appear as rownames 
+of the corresponding matrix. This argument can be used,
+among others to model pedigrees and phylogenetic effects.
+See <code>vignette("brms_phylogenetics")</code> for more details.</p>
+</td></tr>
+<tr valign="top"><td><code>sample_prior</code></td>
+<td>
+<p>Indicate if samples from all specified 
+proper priors should be drawn additionally to the posterior samples
+(defaults to <code>"no"</code>). Among others, these samples can be used 
+to calculate Bayes factors for point hypotheses. 
+If set to <code>"only"</code>, samples are drawn solely from
+the priors ignoring the likelihood. In this case, 
+all parameters must have proper priors.</p>
+</td></tr>
+<tr valign="top"><td><code>sparse</code></td>
+<td>
+<p>Logical; indicates whether the population-level 
+design matrices should be treated as sparse (defaults to <code>FALSE</code>). 
+For design matrices with many zeros, this can considerably 
+reduce required memory. Sampling speed is currently not 
+improved or even slightly decreased.</p>
+</td></tr>
+<tr valign="top"><td><code>knots</code></td>
+<td>
+<p>Optional list containing user specified knot values to be 
+used for basis construction of smoothing terms. 
+See <code><a href="../../mgcv/html/gamm.html">gamm</a></code> for more details.</p>
+</td></tr>
+<tr valign="top"><td><code>stanvars</code></td>
+<td>
+<p>An optional <code>stanvars</code> object generated
+by function <code><a href="stanvar.html">stanvar</a></code> to define additional variables
+in the data block of <span class="pkg">Stan</span>.</p>
+</td></tr>
+<tr valign="top"><td><code>stan_funs</code></td>
+<td>
+<p>An optional character string containing self-defined 
+<span class="pkg">Stan</span> functions, which will be included in the functions block 
+of the generated <span class="pkg">Stan</span> code.</p>
+</td></tr>
+<tr valign="top"><td><code>fit</code></td>
+<td>
+<p>An instance of S3 class <code>brmsfit</code> derived from a previous fit; 
+defaults to <code>NA</code>. 
+If <code>fit</code> is of class <code>brmsfit</code>, the compiled model associated 
+with the fitted result is re-used and all arguments 
+modifying the model code or data are ignored.
+It is not recommended to use this argument directly, but to call 
+the <code><a href="update.brmsfit.html">update</a></code> method, instead.</p>
+</td></tr>
+<tr valign="top"><td><code>save_ranef</code></td>
+<td>
+<p>A flag to indicate if group-level effects 
+for each level of the grouping factor(s) should be saved 
+(default is <code>TRUE</code>). Set to <code>FALSE</code> to save memory. 
+The argument has no impact on the model fitting itself.</p>
+</td></tr>
+<tr valign="top"><td><code>save_mevars</code></td>
+<td>
+<p>A flag to indicate if samples
+of latent noise-free variables obtained by using <code>me</code> 
+and <code>mi</code> terms should be saved (default is <code>FALSE</code>).
+Saving these samples allows to better use methods such as
+<code>predict</code> with the latent variables but 
+leads to very large <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> objects even for models
+of moderate size and complexity.</p>
+</td></tr>
+<tr valign="top"><td><code>save_all_pars</code></td>
+<td>
+<p>A flag to indicate if samples from
+all variables defined in Stan's <code>parameters</code> block
+should be saved (default is <code>FALSE</code>). Saving these samples 
+is required in order to apply the methods <code>bridge_sampler</code>,
+<code>bayes_factor</code>, and <code>post_prob</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>inits</code></td>
+<td>
+<p>Either <code>"random"</code> or <code>"0"</code>. 
+If inits is <code>"random"</code> (the default), 
+Stan will randomly generate initial values for parameters. 
+If it is <code>"0"</code>, all parameters are initialized to zero. 
+This option is sometimes useful for certain families, 
+as it happens that default (<code>"random"</code>) inits cause samples 
+to be essentially constant. 
+Generally, setting <code>inits = "0"</code> is worth a try, if chains do not behave well.
+Alternatively, <code>inits</code> can be a list of lists containing 
+the initial values, or a function (or function name) generating initial values. 
+The latter options are mainly implemented for internal testing.</p>
+</td></tr>
+<tr valign="top"><td><code>chains</code></td>
+<td>
+<p>Number of Markov chains (defaults to 4).</p>
+</td></tr>
+<tr valign="top"><td><code>iter</code></td>
+<td>
+<p>Number of total iterations per chain (including warmup; defaults to 2000).</p>
+</td></tr>
+<tr valign="top"><td><code>warmup</code></td>
+<td>
+<p>A positive integer specifying number of warmup (aka burnin) iterations. 
+This also specifies the number of iterations used for stepsize adaptation, 
+so warmup samples should not be used for inference. The number of warmup should not 
+be larger than <code>iter</code> and the default is <code>iter/2</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>thin</code></td>
+<td>
+<p>Thinning rate. Must be a positive integer. 
+Set <code>thin &gt; 1</code> to save memory and computation time if <code>iter</code> is large.</p>
+</td></tr>
+<tr valign="top"><td><code>cores</code></td>
+<td>
+<p>Number of cores to use when executing the chains in parallel, 
+which defaults to 1 but we recommend setting the <code>mc.cores</code> option 
+to be as many processors as the hardware and RAM allow (up to the number of chains).
+For non-Windows OS in non-interactive <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> sessions, forking is used
+instead of PSOCK clusters.</p>
+</td></tr>
+<tr valign="top"><td><code>control</code></td>
+<td>
+<p>A named <code>list</code> of parameters to control the sampler's behavior. 
+It defaults to <code>NULL</code> so all the default values are used. 
+The most important control parameters are discussed in the 'Details'
+section below. For a comprehensive overview see <code><a href="../../rstan/html/stan.html">stan</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>algorithm</code></td>
+<td>
+<p>Character string indicating the estimation approach to use. 
+Can be <code>"sampling"</code> for MCMC (the default), <code>"meanfield"</code> for
+variational inference with independent normal distributions, or
+<code>"fullrank"</code> for variational inference with a multivariate normal
+distribution.</p>
+</td></tr>
+<tr valign="top"><td><code>future</code></td>
+<td>
+<p>Logical; If <code>TRUE</code>, the <span class="pkg"><a href="../../future/html/future.html">future</a></span>
+package is used for parallel execution of the chains and argument <code>cores</code>
+will be ignored. Can be set globally for the current <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> session via the 
+<code>future</code> option. The execution type is controlled via 
+<code><a href="../../future/html/plan.html">plan</a></code> (see the examples section below).</p>
+</td></tr>
+<tr valign="top"><td><code>silent</code></td>
+<td>
+<p>logical; If <code>TRUE</code> (the default), most of the
+informational messages of compiler and sampler are suppressed.
+The actual sampling progress is still printed. 
+Set <code>refresh = 0</code> to turn this off as well.</p>
+</td></tr>
+<tr valign="top"><td><code>seed</code></td>
+<td>
+<p>The seed for random number generation to make results
+reproducible. If <code>NA</code> (the default), <span class="pkg">Stan</span> will set
+the seed randomly.</p>
+</td></tr>
+<tr valign="top"><td><code>save_model</code></td>
+<td>
+<p>Either <code>NULL</code> or a character string. 
+In the latter case, the model code is
+saved in a file named after the string supplied in <code>save_model</code>, 
+which may also contain the full path where to save the file.
+If only a name is given, the file is saved in the current working directory.</p>
+</td></tr>
+<tr valign="top"><td><code>save_dso</code></td>
+<td>
+<p>Logical, defaulting to <code>TRUE</code>, indicating whether 
+the dynamic shared object (DSO) compiled from the C++ code for the model 
+will be saved or not. If <code>TRUE</code>, we can draw samples from the same 
+model in another <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> session using the saved DSO 
+(i.e., without compiling the C++ code again).</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Further arguments to be passed to Stan.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Fit a generalized (non-)linear multivariate multilevel model
+via full Bayesian inference using Stan. A general overview is provided 
+in the vignettes <code>vignette("brms_overview")</code> and 
+<code>vignette("brms_multilevel")</code>. For a full list of available 
+vignettes see <code>vignette(package = "brms")</code>.
+</p>
+<p><b>Formula syntax of brms models</b>
+</p>
+<p>Details of the formula syntax applied in <span class="pkg">brms</span> 
+can be found in <code><a href="brmsformula.html">brmsformula</a></code>.
+</p>
+<p><b>Families and link functions</b>
+</p>
+<p>Details of families supported by <span class="pkg">brms</span> 
+can be found in <code><a href="brmsfamily.html">brmsfamily</a></code>.
+</p>
+<p><b>Prior distributions</b>
+</p>
+<p>Priors should be specified using the 
+<code><a href="set_prior.html">set_prior</a></code> function. 
+Its documentation contains detailed information 
+on how to correctly specify priors. To find out on 
+which parameters or parameter classes priors can be defined, 
+use <code><a href="get_prior.html">get_prior</a></code>.
+Default priors are chosen to be non or very weakly informative 
+so that their influence on the results will be negligible and
+you usually don't have to worry about them.
+However, after getting more familiar with Bayesian statistics, 
+I recommend you to start thinking about reasonable informative
+priors for your model parameters: Nearly always, there is at least some
+prior information available that can be used to improve your inference.
+</p>
+<p><b>Adjusting the sampling behavior of <span class="pkg">Stan</span></b>
+</p>
+<p>In addition to choosing the number of iterations, warmup samples, 
+and chains, users can control the behavior of the NUTS sampler, 
+by using the <code>control</code> argument.
+The most important reason to use <code>control</code> is to decrease 
+(or eliminate at best) the number of divergent transitions
+that cause a bias in the obtained posterior samples. 
+Whenever you see the warning
+&quot;There were x divergent transitions after warmup.&quot; 
+you should really think about increasing <code>adapt_delta</code>.
+To do this, write <code>control = list(adapt_delta = &lt;x&gt;)</code>, 
+where <code>&lt;x&gt;</code> should usually be value between <code>0.8</code> 
+(current default) and <code>1</code>. Increasing <code>adapt_delta</code> 
+will slow down the sampler but will decrease the number of 
+divergent transitions threatening the validity of your 
+posterior samples.
+</p>
+<p>Another problem arises when the depth of the tree being evaluated 
+in each iteration is exceeded. This is less common than having 
+divergent transitions, but may also bias the posterior samples.
+When it happens, <span class="pkg">Stan</span> will throw out a warning suggesting 
+to increase <code>max_treedepth</code>, which can be accomplished by 
+writing <code>control = list(max_treedepth = &lt;x&gt;)</code> with a positive 
+integer <code>&lt;x&gt;</code> that should usually be larger than the current 
+default of <code>10</code>. For more details on the <code>control</code> argument 
+see <code><a href="../../rstan/html/stan.html">stan</a></code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p>An object of class <code>brmsfit</code>, which contains the posterior samples along 
+with many other useful information about the model.
+Use <code>methods(class = "brmsfit")</code> for an overview on available methods.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Paul-Christian Buerkner <a href="mailto:paul.buerkner@gmail.com">paul.buerkner@gmail.com</a>
+</p>
+
+
+<h3>References</h3>
+
+<p>Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel 
+Models Using Stan. Journal of Statistical Software, 80(1), 1-28. 
+doi:10.18637/jss.v080.i01
+</p>
+<p>Paul-Christian Buerkner (in review). Advanced Bayesian Multilevel Modeling 
+with the R Package brms. arXiv preprint.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="brms-package.html">brms</a></code>, 
+<code><a href="brmsformula.html">brmsformula</a></code>, 
+<code><a href="brmsfamily.html">brmsfamily</a></code>,
+<code><a href="brmsfit-class.html">brmsfit</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run:  
+# Poisson regression for the number of seizures in epileptic patients
+# using student_t priors for population-level effects 
+# and half cauchy priors for standard deviations of group-level effects
+bprior1 &lt;- prior(student_t(5,0,10), class = b) + 
+  prior(cauchy(0,2), class = sd)
+fit1 &lt;- brm(count ~ log_Age_c + log_Base4_c * Trt + (1|patient),
+            data = epilepsy, family = poisson(), prior = bprior1)
+            
+# generate a summary of the results
+summary(fit1)
+
+# plot the MCMC chains as well as the posterior distributions
+plot(fit1, ask = FALSE)
+
+# predict responses based on the fitted model
+head(predict(fit1))  
+
+# plot marginal effects for each predictor
+plot(marginal_effects(fit1), ask = FALSE)
+
+# investigate model fit
+loo(fit1)
+pp_check(fit1)
+
+
+# Ordinal regression modeling patient's rating of inhaler instructions 
+# category specific effects are estimated for variable 'treat'
+fit2 &lt;- brm(rating ~ period + carry + cs(treat), 
+            data = inhaler, family = sratio("logit"), 
+            prior = set_prior("normal(0,5)"), chains = 2)
+summary(fit2)
+plot(fit2, ask = FALSE) 
+WAIC(fit2)
+
+
+# Survival regression modeling the time between the first 
+# and second recurrence of an infection in kidney patients.
+fit3 &lt;- brm(time | cens(censored) ~ age * sex + disease + (1|patient), 
+            data = kidney, family = lognormal())
+summary(fit3) 
+plot(fit3, ask = FALSE)
+plot(marginal_effects(fit3), ask = FALSE)   
+
+
+# Probit regression using the binomial family
+ntrials &lt;- sample(1:10, 100, TRUE)
+success &lt;- rbinom(100, size = ntrials, prob = 0.4)
+x &lt;- rnorm(100)
+data4 &lt;- data.frame(ntrials, success, x)
+fit4 &lt;- brm(success | trials(ntrials) ~ x, data = data4,
+            family = binomial("probit"))
+summary(fit4)
+
+
+# Simple non-linear gaussian model
+x &lt;- rnorm(100)
+y &lt;- rnorm(100, mean = 2 - 1.5^x, sd = 1)
+data5 &lt;- data.frame(x, y)
+bprior5 &lt;- prior(normal(0, 2), nlpar = a1) +
+  prior(normal(0, 2), nlpar = a2)
+fit5 &lt;- brm(bf(y ~ a1 - a2^x, a1 + a2 ~ 1, nl = TRUE),  
+            data = data5, prior = bprior5)
+summary(fit5)
+plot(marginal_effects(fit5), ask = FALSE)
+
+
+# Normal model with heterogeneous variances
+data_het &lt;- data.frame(
+  y = c(rnorm(50), rnorm(50, 1, 2)),
+  x = factor(rep(c("a", "b"), each = 50))
+)
+fit6 &lt;- brm(bf(y ~ x, sigma ~ 0 + x), data = data_het)
+summary(fit6)
+plot(fit6)
+marginal_effects(fit6)
+
+# extract estimated residual SDs of both groups
+sigmas &lt;- exp(posterior_samples(fit6, "^b_sigma_"))
+ggplot(stack(sigmas), aes(values)) + 
+  geom_density(aes(fill = ind))
+  
+ 
+# Quantile regression predicting the 25%-quantile
+fit7 &lt;- brm(bf(y ~ x, quantile = 0.25), data = data_het, 
+            family = asym_laplace())
+summary(fit7)
+marginal_effects(fit7)
+
+
+# use the future package for more flexible parallelization
+library(future)
+plan(multiprocess)
+fit7 &lt;- update(fit7, future = TRUE)
+
+## End(Not run)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

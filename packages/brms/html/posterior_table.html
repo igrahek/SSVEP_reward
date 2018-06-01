@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Table Creation for Posterior Samples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for posterior_table {brms}"><tr><td>posterior_table {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Table Creation for Posterior Samples</h2>
+
+<h3>Description</h3>
+
+<p>Create a table for unique values of posterior samples. 
+This is usually only useful when summarizing predictions 
+of ordinal models.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+posterior_table(x, levels = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A matrix of posterior samples where rows 
+indicate samples and columns indicate parameters.</p>
+</td></tr>
+<tr valign="top"><td><code>levels</code></td>
+<td>
+<p>Optional values of possible posterior values.
+Defaults to all unique values in <code>x</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A matrix where rows indicate parameters 
+and columns indicate the unique values of 
+posterior samples.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit &lt;- brm(rating ~ period + carry + treat, 
+           data = inhaler, family = cumulative())
+pr &lt;- predict(fit, summary = FALSE)
+posterior_table(pr)
+
+## End(Not run)
+ 
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

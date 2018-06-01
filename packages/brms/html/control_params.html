@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Extract Control Parameters of the NUTS Sampler</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for control_params.brmsfit {brms}"><tr><td>control_params.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Extract Control Parameters of the NUTS Sampler</h2>
+
+<h3>Description</h3>
+
+<p>Extract control parameters of the NUTS sampler such as 
+<code>adapt_delta</code> or <code>max_treedepth</code>.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+control_params(x, pars = NULL, ...)
+
+control_params(x, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>An <span style="font-family: Courier New, Courier; color: #666666;"><b>R</b></span> object</p>
+</td></tr>
+<tr valign="top"><td><code>pars</code></td>
+<td>
+<p>Optional names of the control parameters to be returned.
+If <code>NULL</code> (the default) all control parameters are returned.
+See <code><a href="../../rstan/html/stan.html">stan</a></code> for more details.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Currently ignored.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A named <code>list</code> with control parameter values.
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

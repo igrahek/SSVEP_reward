@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Extract Data passed to Stan</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for standata.brmsfit {brms}"><tr><td>standata.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Extract Data passed to Stan</h2>
+
+<h3>Description</h3>
+
+<p>Extract all data that was used by Stan to fit the model
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+standata(object, newdata = NULL, re_formula = NULL,
+  incl_autocor = TRUE, new_objects = list(), internal = FALSE,
+  control = list(), ...)
+
+standata(object, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>object</code></td>
+<td>
+<p>An object of class <code>brmsfit</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>newdata</code></td>
+<td>
+<p>An optional data.frame for which to evaluate predictions.
+If <code>NULL</code> (default), the original data of the model is used.</p>
+</td></tr>
+<tr valign="top"><td><code>re_formula</code></td>
+<td>
+<p>formula containing group-level effects 
+to be considered in the prediction. 
+If <code>NULL</code> (default), include all group-level effects; 
+if <code>NA</code>, include no group-level effects.</p>
+</td></tr>
+<tr valign="top"><td><code>incl_autocor</code></td>
+<td>
+<p>A flag indicating if ARMA autocorrelation
+parameters should be included in the predictions. Defaults to 
+<code>TRUE</code>. Setting it to <code>FALSE</code> will not affect other 
+correlation structures such as <code><a href="cor_bsts.html">cor_bsts</a></code>,
+or <code><a href="cor_fixed.html">cor_fixed</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>new_objects</code></td>
+<td>
+<p>A named <code>list</code> of objects containing 
+new data, which cannot be passed via argument <code>newdata</code>.
+Currently, only required for objects passed to 
+<code><a href="cor_sar.html">cor_sar</a></code> and 
+<code><a href="cor_fixed.html">cor_fixed</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>internal</code></td>
+<td>
+<p>Logical, indicates if the data should be prepared 
+for internal use in other post-processing methods.</p>
+</td></tr>
+<tr valign="top"><td><code>control</code></td>
+<td>
+<p>A named list currently for internal usage only.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>More arguments passed to <code><a href="make_standata.html">make_standata</a></code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A named list containing the data originally passed to Stan.
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>

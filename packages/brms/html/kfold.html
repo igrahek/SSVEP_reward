@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: K-Fold Cross-Validation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for kfold.brmsfit {brms}"><tr><td>kfold.brmsfit {brms}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>K-Fold Cross-Validation</h2>
+
+<h3>Description</h3>
+
+<p>Perform exact K-fold cross-validation by refitting the model <i>K</i>
+times each leaving out one-<i>K</i>th of the original data.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+## S3 method for class 'brmsfit'
+kfold(x, ..., compare = TRUE, K = 10, Ksub = NULL,
+  exact_loo = FALSE, group = NULL, resp = NULL, model_names = NULL,
+  save_fits = FALSE)
+
+kfold(x, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A fitted model object.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>More fitted model objects or further arguments
+passed to the underlying post-processing functions.</p>
+</td></tr>
+<tr valign="top"><td><code>compare</code></td>
+<td>
+<p>A flag indicating if the information criteria
+of the models should be compared to each other
+via <code><a href="compare_ic.html">compare_ic</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>K</code></td>
+<td>
+<p>The number of subsets of equal (if possible) size
+into which the data will be randomly partitioned for performing
+<i>K</i>-fold cross-validation. The model is refit <code>K</code> times, each time
+leaving out one of the <code>K</code> subsets. If <code>K</code> is equal to the total
+number of observations in the data then <i>K</i>-fold cross-validation is
+equivalent to exact leave-one-out cross-validation.</p>
+</td></tr>
+<tr valign="top"><td><code>Ksub</code></td>
+<td>
+<p>Optional number of subsets (of those subsets defined by <code>K</code>) 
+to be evaluated. If <code>NULL</code> (the default), <i>K</i>-fold cross-validation 
+will be performed on all subsets. If <code>Ksub</code> is a single integer, 
+<code>Ksub</code> subsets (out of all <code>K</code>) subsets will be randomly chosen.
+If <code>Ksub</code> consists of multiple integers, the corresponding subsets 
+will be used. This argument is primarily useful, if evaluation of all 
+subsets is infeasible for some reason.</p>
+</td></tr>
+<tr valign="top"><td><code>exact_loo</code></td>
+<td>
+<p>Logical; If <code>TRUE</code>, exact leave-one-out cross-validation
+will be performed and <code>K</code> will be ignored. This argument alters
+the way argument <code>group</code> is handled as described below. 
+Defaults to <code>FALSE</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>group</code></td>
+<td>
+<p>Optional name of a grouping variable or factor in the model.
+How this variable is handled depends on argument <code>exact_loo</code>.
+If <code>exact_loo</code> is <code>FALSE</code>, the data is split 
+up into subsets, each time omitting all observations of one of the 
+factor levels, while ignoring argument <code>K</code>. 
+If <code>exact_loo</code> is <code>TRUE</code>, all observations corresponding 
+to the factor level of the currently predicted single value are omitted. 
+Thus, in this case, the predicted values are only a subset of the 
+omitted ones.</p>
+</td></tr>
+<tr valign="top"><td><code>resp</code></td>
+<td>
+<p>Optional names of response variables.
+If specified, fitted values of these response variables are returned.</p>
+</td></tr>
+<tr valign="top"><td><code>model_names</code></td>
+<td>
+<p>If <code>NULL</code> (the default) will use model names 
+derived from deparsing the call. Otherwise will use the passed 
+values as model names.</p>
+</td></tr>
+<tr valign="top"><td><code>save_fits</code></td>
+<td>
+<p>If <code>TRUE</code>, a component <code>fits</code> is added to 
+the returned object to store the cross-validated <code>brmsfit</code> 
+objects and the indices of the omitted observations for each fold. 
+Defaults to <code>FALSE</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>The <code>kfold</code> function performs exact <i>K</i>-fold
+cross-validation. First the data are randomly partitioned into <i>K</i>
+subsets of equal (or as close to equal as possible) size. Then the model is
+refit <i>K</i> times, each time leaving out one of the <code>K</code> subsets. If
+<i>K</i> is equal to the total number of observations in the data then
+<i>K</i>-fold cross-validation is equivalent to exact leave-one-out
+cross-validation (to which <code>loo</code> is an efficient approximation). The
+<code>compare_ic</code> function is also compatible with the objects returned
+by <code>kfold</code>.
+</p>
+
+
+<h3>Value</h3>
+
+<p><code>kfold</code> returns an object that has a similar structure as the 
+objects returned by the <code>loo</code> and <code>waic</code> methods.
+</p>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>brmsfit</code>: <code>kfold</code> method for <code>brmsfit</code> objects
+</p>
+</li></ul>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="loo.brmsfit.html">loo</a></code>, <code><a href="reloo.html">reloo</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+## Not run: 
+fit1 &lt;- brm(count ~ log_Age_c + log_Base4_c * Trt + 
+              (1|patient) + (1|obs),
+           data = epilepsy, family = poisson())
+# throws warning about some pareto k estimates being too high
+(loo1 &lt;- loo(fit1))
+# perform 10-fold cross validation
+(kfold1 &lt;- kfold(fit1, chains = 2, cores = 2)
+
+## End(Not run)   
+ 
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>brms</em> version 2.3.0 <a href="00Index.html">Index</a>]</div>
+</body></html>
