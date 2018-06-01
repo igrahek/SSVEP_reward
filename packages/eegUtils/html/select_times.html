@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Select timerange</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for select_times {eegUtils}"><tr><td>select_times {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Select timerange</h2>
+
+<h3>Description</h3>
+
+<p>Generic function for selecting specific time ranges from a given dataset.
+Input can be a dataframe, or an object of class <code>eeg_data</code> or
+<code>eeg_epochs</code>. Note this finds the closest times to those specified, so
+times out may not correspond exactly to requested times.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+select_times(data, ...)
+
+## Default S3 method:
+select_times(data, time_lim = NULL, ...)
+
+## S3 method for class 'eeg_data'
+select_times(data, time_lim = NULL, df_out = FALSE, ...)
+
+## S3 method for class 'eeg_epochs'
+select_times(data, time_lim = NULL, df_out = FALSE,
+  ...)
+
+## S3 method for class 'eeg_evoked'
+select_times(data, time_lim = NULL, df_out = FALSE,
+  ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>Data from which to select</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Further arguments passed to or from other methods.</p>
+</td></tr>
+<tr valign="top"><td><code>time_lim</code></td>
+<td>
+<p>A character vector of two numbers indicating the time range
+to be selected e.g. c(min, max)</p>
+</td></tr>
+<tr valign="top"><td><code>df_out</code></td>
+<td>
+<p>Returns a data frame rather than an object of the same type that was passed in</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>Data frame with only data from within the specified range.
+</p>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>default</code>: Default select times function
+</p>
+</li>
+<li> <p><code>eeg_data</code>: Select times from an eeg_data object
+</p>
+</li>
+<li> <p><code>eeg_epochs</code>: Select times in <code>eeg_epoch</code> objects
+</p>
+</li>
+<li> <p><code>eeg_evoked</code>: Select times in <code>eeg_evoked</code> objects
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock, <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

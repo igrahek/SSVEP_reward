@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Interactive scalp maps</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for interactive_scalp {eegUtils}"><tr><td>interactive_scalp {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Interactive scalp maps</h2>
+
+<h3>Description</h3>
+
+<p>Launches a Shiny Gadget for an interactive version of erp_scalp, allowing
+clicking of individual electrodes to plot them in a separate panel. In that
+panel, they can be averaged over or plotted as individual electrodes.
+Currently buggy with datasets with existing electrode co-ordinates.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+interactive_scalp(data, colour = NULL, baseline = NULL, montage = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>An EEG dataset.</p>
+</td></tr>
+<tr valign="top"><td><code>colour</code></td>
+<td>
+<p>Variable to colour lines by. If no variable is passed, only one
+line is drawn for each electrode.</p>
+</td></tr>
+<tr valign="top"><td><code>baseline</code></td>
+<td>
+<p>Character vector of times to subtract for baseline correct.</p>
+</td></tr>
+<tr valign="top"><td><code>montage</code></td>
+<td>
+<p>Name of an existing montage set. Defaults to NULL; (currently
+only 'biosemi64alpha' available other than default 10/20 system)</p>
+</td></tr>
+</table>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock, <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

@@ -1,0 +1,33 @@
+aws.s3-package          aws.s3-package
+bucket_exists           Bucket exists?
+bucketlist              List Buckets
+copy_object             Copy Objects
+delete_bucket           Delete Bucket
+delete_object           Delete object
+delete_website          Bucket Website configuration
+get_acceleration        Bucket Acceleration
+get_acl                 Get or put bucket/object ACLs
+get_bucket              List bucket contents
+get_bucket_policy       Bucket policies
+get_bucketname          Utility Functions
+get_cors                CORS
+get_encryption          Bucket encryption
+get_lifecycle           Lifecycle
+get_location            Bucket location
+get_notification        Notifications
+get_object              Get object
+get_replication         Bucket replication
+get_requestpayment      requestPayment
+get_tagging             Bucket tagging
+get_torrent             Get object torrent
+get_uploads             Multipart uploads
+get_versions            Bucket versions
+getobject               Deprecated
+put_bucket              Create bucket
+put_object              Put object
+s3HTTP                  S3 HTTP Requests
+s3save                  save/load
+s3saveRDS               saveRDS/readRDS
+s3source                Source from S3
+s3sync                  S3 file sync
+s3write_using           Custom read and write

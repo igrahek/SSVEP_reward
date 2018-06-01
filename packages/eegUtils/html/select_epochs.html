@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Select epochs from eeg_data</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for select_epochs {eegUtils}"><tr><td>select_epochs {eegUtils}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Select epochs from eeg_data</h2>
+
+<h3>Description</h3>
+
+<p>This is a generic function for selecting epochs from an epoched data set.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+select_epochs(data, ...)
+
+## Default S3 method:
+select_epochs(data, ...)
+
+## S3 method for class 'eeg_data'
+select_epochs(data, ...)
+
+## S3 method for class 'eeg_epochs'
+select_epochs(data, epoch_events = NULL,
+  epoch_no = NULL, keep = TRUE, df_out = FALSE, ...)
+
+## S3 method for class 'eeg_ICA'
+select_epochs(data, epoch_events = NULL, epoch_no = NULL,
+  keep = TRUE, df_out = FALSE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p><code>eeg_epochs</code> object from which to select epochs.</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Parameters passed to specific methods</p>
+</td></tr>
+<tr valign="top"><td><code>epoch_events</code></td>
+<td>
+<p>Select epochs containing any of the specified events. Can
+be numeric or a character string. Will override any epoch_no input.</p>
+</td></tr>
+<tr valign="top"><td><code>epoch_no</code></td>
+<td>
+<p>Select epochs by epoch number.</p>
+</td></tr>
+<tr valign="top"><td><code>keep</code></td>
+<td>
+<p>Defaults to TRUE, meaning select the specified epochs. Set to
+FALSE to remove specified epochs.</p>
+</td></tr>
+<tr valign="top"><td><code>df_out</code></td>
+<td>
+<p>Output a data.frame instead of an eeg_data object.</p>
+</td></tr>
+</table>
+
+
+<h3>Methods (by class)</h3>
+
+
+<ul>
+<li> <p><code>default</code>: Select from generic object
+</p>
+</li>
+<li> <p><code>eeg_data</code>: Select epochs from <code>eeg_data</code> objects.
+</p>
+</li>
+<li> <p><code>eeg_epochs</code>: Selection of epochs from <code>eeg_epochs</code> objects.
+</p>
+</li>
+<li> <p><code>eeg_ICA</code>: Selection of epochs from <code>eeg_ICA</code> objects.
+</p>
+</li></ul>
+
+
+<h3>Author(s)</h3>
+
+<p>Matt Craddock, <a href="mailto:matt@mattcraddock.com">matt@mattcraddock.com</a>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>eegUtils</em> version 0.1.15.9001 <a href="00Index.html">Index</a>]</div>
+</body></html>

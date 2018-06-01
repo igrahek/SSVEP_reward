@@ -1,0 +1,8 @@
+aws.signature-package   Amazon Web Services Request Signatures
+canonical_request       Construct a Canonical Request
+locate_credentials      Locate AWS Credentials
+read_credentials        Use Credentials from .aws/credentials File
+signature_v2_auth       Signature Version 2
+signature_v4            Signature Version 4
+signature_v4_auth       Signature Version 4
+string_to_sign          Construct a String To Sign
