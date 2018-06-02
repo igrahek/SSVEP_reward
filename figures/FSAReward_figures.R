@@ -13,9 +13,10 @@ library(eegUtils)
 ######################################### TOPOGRAPHIES #########################################
 ################################################################################################
 
-electrodeLocs <- read_delim(paste0(getwd(), "/figures/Antonio_BioSemi64.locs"), # load electrode locations
-  "\t", # delimiter (tab)
-  col_names = c("chanNo", "theta", "radius", "electrode"), # column names
+# load electrode locations
+electrodeLocs <- read_delim(paste0(getwd(), "/figures/Antonio_BioSemi64.locs"),
+  "\t",
+  col_names = c("chanNo", "theta", "radius", "electrode"),
   escape_double = FALSE, trim_ws = TRUE
 ) %>%
   mutate(
@@ -25,7 +26,7 @@ electrodeLocs <- read_delim(paste0(getwd(), "/figures/Antonio_BioSemi64.locs"), 
     y = radius * cos(radianTheta)
   )
 
-topos <- read_csv(paste0(getwd(), "/figures/topos.csv")) %>% # load data
+topos <- read_csv(paste0(getwd(), "/figures/topos.csv")) %>%
   bind_cols(., electrodeLocs) %>% # bind electrode locations and amplitudes
   select(c("10 Hz", "12 Hz", "electrode", "x", "y"))
 
@@ -218,7 +219,8 @@ topo.row <- plot_grid(topo_10Hz + theme(legend.position = "none"),
                       topo_12Hz + theme(legend.position = "none"),
                       align = "vh",
                       hjust = -1,
-                      nrow = 1
+                      nrow = 1,
+                      scale = .8
 )
 
 legend <- get_legend(topo_10Hz) # extract legend
@@ -227,7 +229,6 @@ plot_grid(topo.row,
           legend, 
           spectra_all,
           rel_widths = c(3, .3)) %>%
-
 save_plot(paste0(getwd(), "/figures/topos_spectra.png"), 
           ., 
           base_height = 8,
