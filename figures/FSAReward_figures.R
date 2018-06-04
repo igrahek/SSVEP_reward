@@ -35,7 +35,7 @@ topo_10Hz <- topos %>%
   select(-"12 Hz") %>%
   rename(amplitude = "10 Hz") %>%
   topoplot(.,
-    limits = c(0, 1),
+    limits = c(0, 1), # min-max amplitude
     chanLocs = electrodeLocs,
     method = "Biharmonic",
     palette = "viridis",
@@ -46,8 +46,8 @@ topo_10Hz <- topos %>%
   ) +
   ggtitle("10 Hz") +
   theme(
-    plot.title = element_text(size = 22, hjust = .5, face = "bold"),
-    plot.margin = unit(c(6, 0, 6, 0), "pt")
+    plot.title = element_text(size = 22, hjust = .5, face = "bold"), # modify plot title
+    plot.margin = unit(c(6, 0, 6, 0), "pt") # decrease plot margins
   )
 
 # 12 Hz
@@ -138,77 +138,78 @@ spectra_all <- ggplot(spectra, aes(frequency, amplitude)) +
     plot.title = element_text(size = 24, hjust = .5)
   )
 
-# plot (frequency range: 9-11 Hz)
-spectra_10Hz <- filter(spectra, frequency >= 9 & frequency <= 11) %>%
-  ggplot(., aes(frequency, amplitude)) +
-  stat_summary(aes(colour = condition),
-    fun.y = mean,
-    geom = "line",
-    size = 1.3
-  ) +
-  geom_ribbon(
-    data = filter(spectra.withinssjCI, frequency >= 9 & frequency <= 11),
-    aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = condition),
-    linetype = "solid",
-    alpha = .2
-  ) +
-  scale_color_viridis(discrete = TRUE) +
-  scale_fill_viridis(discrete = TRUE) +
-  geom_vline(xintercept = seq(9, 11, 1), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
-  geom_hline(yintercept = seq(0, 1.6, .2), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
-  scale_y_continuous(breaks = seq(0, 1.6, .2)) +
-  scale_x_continuous(breaks = seq(9, 11, 1)) +
-  coord_cartesian(                               # zoom in
-    ylim = c(.6, 1.6),
-    xlim = c(9.5, 10.5)
-  ) +
-  labs(
-    title = "Amplitude (10 Hz)",
-    x = "frequency (Hz)",
-    y = expression(paste("amplitude (", mu, "V)"))
-  ) +
-  guides(fill = "none", color = guide_legend(title = NULL)) +
-  theme_classic(base_size = 18) +
-  theme(
-    legend.position = c(.2, .8),
-    plot.title = element_text(size = 24, hjust = .5)
-  )
-
-# plot (frequency range: 11-13 Hz)
-spectra_12Hz <- filter(spectra, frequency >= 11 & frequency <= 13) %>%
-  ggplot(., aes(frequency, amplitude)) +
-  stat_summary(aes(colour = condition),
-    fun.y = mean,
-    geom = "line",
-    size = 1.3
-  ) +
-  geom_ribbon(
-    data = filter(spectra.withinssjCI, frequency >= 11 & frequency <= 13),
-    aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = condition),
-    linetype = "solid",
-    alpha = .2
-  ) +
-  scale_color_viridis(discrete = TRUE) +
-  scale_fill_viridis(discrete = TRUE) +
-  geom_vline(xintercept = seq(11, 13, 1), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
-  geom_hline(yintercept = seq(.5, 1, .1), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
-  scale_y_continuous(breaks = seq(.5, 1, .1)) +
-  scale_x_continuous(breaks = seq(11, 13, 1)) +
-  coord_cartesian(                               # zoom in
-    ylim = c(.5, 1),
-    xlim = c(11.5, 12.5)
-  ) +
-  labs(
-    title = "Amplitude (12 Hz)",
-    x = "frequency (Hz)",
-    y = expression(paste("amplitude (", mu, "V)"))
-  ) +
-  guides(fill = "none", color = guide_legend(title = NULL)) +
-  theme_classic(base_size = 18) +
-  theme(
-    legend.position = c(.2, .8),
-    plot.title = element_text(size = 24, hjust = .5)
-  )
+# # zoom in to relevant frequencies
+# # plot (frequency range: 9-11 Hz)
+# spectra_10Hz <- filter(spectra, frequency >= 9 & frequency <= 11) %>%
+#   ggplot(., aes(frequency, amplitude)) +
+#   stat_summary(aes(colour = condition),
+#     fun.y = mean,
+#     geom = "line",
+#     size = 1.3
+#   ) +
+#   geom_ribbon(
+#     data = filter(spectra.withinssjCI, frequency >= 9 & frequency <= 11),
+#     aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = condition),
+#     linetype = "solid",
+#     alpha = .2
+#   ) +
+#   scale_color_viridis(discrete = TRUE) +
+#   scale_fill_viridis(discrete = TRUE) +
+#   geom_vline(xintercept = seq(9, 11, 1), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
+#   geom_hline(yintercept = seq(0, 1.6, .2), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
+#   scale_y_continuous(breaks = seq(0, 1.6, .2)) +
+#   scale_x_continuous(breaks = seq(9, 11, 1)) +
+#   coord_cartesian(                               # zoom in
+#     ylim = c(.6, 1.6),
+#     xlim = c(9.5, 10.5)
+#   ) +
+#   labs(
+#     title = "Amplitude (10 Hz)",
+#     x = "frequency (Hz)",
+#     y = expression(paste("amplitude (", mu, "V)"))
+#   ) +
+#   guides(fill = "none", color = guide_legend(title = NULL)) +
+#   theme_classic(base_size = 18) +
+#   theme(
+#     legend.position = c(.2, .8),
+#     plot.title = element_text(size = 24, hjust = .5)
+#   )
+# 
+# # plot (frequency range: 11-13 Hz)
+# spectra_12Hz <- filter(spectra, frequency >= 11 & frequency <= 13) %>%
+#   ggplot(., aes(frequency, amplitude)) +
+#   stat_summary(aes(colour = condition),
+#     fun.y = mean,
+#     geom = "line",
+#     size = 1.3
+#   ) +
+#   geom_ribbon(
+#     data = filter(spectra.withinssjCI, frequency >= 11 & frequency <= 13),
+#     aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = condition),
+#     linetype = "solid",
+#     alpha = .2
+#   ) +
+#   scale_color_viridis(discrete = TRUE) +
+#   scale_fill_viridis(discrete = TRUE) +
+#   geom_vline(xintercept = seq(11, 13, 1), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
+#   geom_hline(yintercept = seq(.5, 1, .1), linetype = "dotted", colour = "#999999", size = .8, alpha = .5) +
+#   scale_y_continuous(breaks = seq(.5, 1, .1)) +
+#   scale_x_continuous(breaks = seq(11, 13, 1)) +
+#   coord_cartesian(                               # zoom in
+#     ylim = c(.5, 1),
+#     xlim = c(11.5, 12.5)
+#   ) +
+#   labs(
+#     title = "Amplitude (12 Hz)",
+#     x = "frequency (Hz)",
+#     y = expression(paste("amplitude (", mu, "V)"))
+#   ) +
+#   guides(fill = "none", color = guide_legend(title = NULL)) +
+#   theme_classic(base_size = 18) +
+#   theme(
+#     legend.position = c(.2, .8),
+#     plot.title = element_text(size = 24, hjust = .5)
+#   )
 
 ################################################################################################
 ######################################## ARRANGE PLOTS #########################################
@@ -220,7 +221,7 @@ topo.row <- plot_grid(topo_10Hz + theme(legend.position = "none"),
                       align = "vh",
                       hjust = -1,
                       nrow = 1,
-                      scale = .8
+                      scale = .8 # slightly smaller size
 )
 
 legend <- get_legend(topo_10Hz) # extract legend
@@ -228,7 +229,7 @@ legend <- get_legend(topo_10Hz) # extract legend
 plot_grid(topo.row, 
           legend, 
           spectra_all,
-          rel_widths = c(3, .3)) %>%
+          rel_widths = c(3, .3)) %>% # the second column (containing the legend) is 10 times smaller than the first one (containing the two topographies) 
 save_plot(paste0(getwd(), "/figures/topos_spectra.png"), 
           ., 
           base_height = 8,
