@@ -1,0 +1,5 @@
+Rmisc 1.5
+=========
+  
+* documentation done by roxygen3
+* new functions: multiplot, normDataWithin, summarySE, summarySEwithin, lr.glover
