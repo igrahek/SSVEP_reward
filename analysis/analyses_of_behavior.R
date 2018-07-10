@@ -316,17 +316,20 @@ model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase * Condition|Part
 saveRDS(model.full.RT,file="model.full.RT.rds")
 
 # # read in the models and comparisons
-# model.null.RT = readRDS("nullmodel.RT.rds")
-# model.condition.RT = readRDS("model.condition.RT.rds")
-# model.expphase.RT = readRDS("expphasemodel.RT.rds")
-# model.twomaineffects.RT = readRDS("model.twomaineffects.RT.rds")
-# model.full.RT = readRDS("model.full.RT.rds")
+model.null.RT = readRDS("nullmodel.RT.rds")
+model.condition.RT = readRDS("model.condition.RT.rds")
+model.expphase.RT = readRDS("expphasemodel.RT.rds")
+model.twomaineffects.RT = readRDS("model.twomaineffects.RT.rds")
+model.full.RT = readRDS("model.full.RT.rds")
 #compare.loo = readRDS("compare.RT.loo")
-#compare.waic = readRDS("compare.RT.waic")
+compare.waic = readRDS("compare.RT.waic")
 
 #WAIC
-compare.RT.waic = WAIC(model.null.RT,model.condition.RT,model.expphase.RT,model.twomaineffects.RT,model.full.RT, compare = FALSE)
+compare.RT.waic = WAIC(model.null.RT,model.condition.RT,model.expphase.RT,model.twomaineffects.RT,model.full.RT)
 saveRDS(compare.RT.waic,file="compare.RT.waic")
+
+# Weighted waic
+model_weights(model.null.RT,model.condition.RT,model.expphase.RT,model.twomaineffects.RT,model.full.RT, weights = "waic")
 
 # #LOO crossvalidation
 # compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
@@ -396,17 +399,21 @@ model.full.Acc = brm(Hit.Rate ~ ExpPhase * Condition + (ExpPhase * Condition|Par
 saveRDS(model.full.Acc,file="model.full.Acc.rds")
 
 #read in the models and comparisons
-# model.null.Acc = readRDS("nullmodel.Acc.rds")
-# model.condition.Acc = readRDS("model.condition.Acc.rds")
-# model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
-# model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
-#model.full.Acc = readRDS("model.full.Acc_nocorrelationvarying.rds")
+model.null.Acc = readRDS("nullmodel.Acc.rds")
+model.condition.Acc = readRDS("model.condition.Acc.rds")
+model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
+model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
+model.full.Acc = readRDS("model.full.Acc.rds")
 #compare.loo.Acc = readRDS("compare.Acc.loo")
 # compare.waic.Acc = readRDS("compare.Acc.waic")
 
 #WAIC
-compare.Acc.waic = WAIC(model.null.Acc,model.condition.Acc,model.expphase.Acc,model.twomaineffects.Acc,model.full.Acc, compare = FALSE)
+compare.Acc.waic = WAIC(model.null.Acc,model.condition.Acc,model.expphase.Acc,model.twomaineffects.Acc,model.full.Acc)
 saveRDS(compare.Acc.waic,file="compare.Acc.waic")
+
+# Weighted waic
+model_weights(model.null.Acc,model.condition.Acc,model.expphase.Acc,model.twomaineffects.Acc,model.full.Acc, weights = "waic")
+
 
 # #LOO crossvalidation
 # compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE

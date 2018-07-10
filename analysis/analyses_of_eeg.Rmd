@@ -434,29 +434,51 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
                              post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
 ```
 
+Check the difference between high and low reward in basline attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ConditionLow_Rew")
+print(h1)
+```
+
 Check the difference between high and low reward in acquisition attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Difference between high and low reward in acquisition attended
-Diff_Rew_Acq_Att = Acquisition_High_Attended - Acquisition_Low_Attended
-plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = TRUE, ROPE = c(0,1))
-
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "0 > b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
+h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq > b_Intercept +  b_ExpPhaseAcq + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
 print(h1)
-plot(h1)
+```
 
+Check the difference between high and low reward in extinction attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt > b_Intercept +  b_ExpPhaseExt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt")
+print(h1)
+```
+
+Check the difference between high and low reward in baseline not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept + b_AttentionNotAtt > b_Intercept + b_AttentionNotAtt + b_ConditionLow_Rew")
+print(h2)
 ```
 
 Check the difference between high and low reward in acquisition not attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Difference between high and low reward in acquisition not attended
-Diff_Rew_Acq_NotAtt = Acquisition_High_NotAttended - Acquisition_Low_NotAttended
-plotPost(Diff_Rew_Acq_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = TRUE, ROPE = c(0,1))
-
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "0 > b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq + b_ExpPhaseAcq:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt")
+h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ExpPhaseAcq:AttentionNotAtt > b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq + b_ExpPhaseAcq:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt")
 print(h2)
-plot(h2)
 ```
+
+Check the difference between high and low reward in extinction not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ExpPhaseExt:AttentionNotAtt > b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt + b_ExpPhaseExt:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt")
+print(h2)
+```
+

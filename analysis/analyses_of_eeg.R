@@ -396,6 +396,17 @@ rewardANDattention = brm(Amplitude ~ Condition + Attention + (Condition + Attent
                                            cores = 4)
 saveRDS(rewardANDattention,file="rewardANDattention.EEG.allsubs.rds")
 
+# Interaction between expphase and reward magnitude plus attention
+rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
+                         data=data,
+                         family=gaussian(),
+                         warmup = 2000,
+                         iter = 10000,
+                         save_all_pars = TRUE,
+                         control = list(adapt_delta = 0.99),
+                         cores = 4)
+saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.rds")
+
 # Three main effects
 threemain = brm(Amplitude ~ Condition + ExpPhase + Attention + (Condition + ExpPhase + Attention|Subject),
                                           data=data,
@@ -425,8 +436,53 @@ attention = readRDS("attention.EEG.allsubs.rds")
 expphase = readRDS("expphase.EEG.allsubs.rds")
 rewardANDattention = readRDS("rewardANDattention.EEG.allsubs.rds")
 phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
+rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
 threemain = readRDS("threemain.EEG.allsubs.rds")
 full = readRDS("full.EEG.allsubs.rds")
+waic = readRDS("compare.EEG.waic.allsubs.rds")
+
+# WAIC
+# Weighted waic
+WAIC(attention, rewardTimesPhasePlusAtt, full)
+
+# Weighted waic
+model_weights(attention, rewardTimesPhasePlusAtt, full, weights = "waic")
+
+# Weighted loo
+model_weights(attention, rewardTimesPhasePlusAtt, full, weights = "loo")
+
+# Loo
+loo(attention, rewardTimesPhasePlusAtt)
+
+library(loo)
+
+# Compute waics
+waic_attention = waic(attention)
+waic_condition = waic(condition)
+waic_expphase = waic(expphase)
+waic_int_plus_att = waic(rewardTimesPhasePlusAtt)
+waic_full = waic(full)
+
+# Put them all in one object
+waics <- c(
+  waic_attention$estimates["elpd_waic", 1],
+  waic_condition$estimates["elpd_waic", 1],
+  waic_expphase$estimates["elpd_waic", 1],
+  waic_int_plus_att$estimates["elpd_waic", 1],
+  waic_full$estimates["elpd_waic", 1]
+)
+
+# Calculate weighted waics
+waic_wts <- exp(waics) / sum(exp(waics))
+waic_wts = round(waic_wts)
+
+loo_attention = loo(attention)
+loo_condition = loo(condition)
+loo_expphase = loo(expphase)
+loo_int_plus_att = loo(rewardTimesPhasePlusAtt)
+loo_full = loo(full)
+
+compare(loo_attention, loo_condition, loo_expphase, loo_int_plus_att, loo_full)
 
 loo.5.factors = readRDS("compare.EEG.loo.allsubs.rds")
 loo.full.model = readRDS("compare.EEG.fullmodel.loo.allsubs.rds")
@@ -444,6 +500,8 @@ saveRDS(compare.EEG.loo,file="compare.EEG.fullmodel.loo.allsubs.rds")
 
 # Sample from the posterior
 post = posterior_samples(full, "^b")
+
+pp_check(full)
 
 ################################################ Baseline ####
 

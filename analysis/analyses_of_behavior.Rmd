@@ -299,6 +299,57 @@ plot(marginal_effects(model.full.Acc, effects = "ExpPhase:Condition"),ask=FALSE)
 #plot(marginal_effects(model.full.Acc),ask=FALSE)
 ```
 
+### Inference about the best model
+
+#### Sample from the posterior
+```{r, warning=FALSE, message=FALSE}
+post = posterior_samples(model.full.Acc, "^b")
+```
+
+Check the difference between high and low reward in baseline 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept < b_Intercept + b_ConditionLow_Rew ")
+print(h1)
+plot(h1)
+```
+
+Check the difference between high and low reward in acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept + b_ExpPhaseAcq < b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseAcq:ConditionLow_Rew")
+print(h1)
+plot(h1)
+```
+
+Check the difference between high and low reward in extinction 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept + b_ExpPhaseExt < b_Intercept + b_ExpPhaseExt + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
+print(h1)
+plot(h1)
+```
+
+Check the difference between high reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ExpPhaseAcq")
+print(h1)
+plot(h1)
+```
+
+Check the difference between low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept + b_ConditionLow_Rew > b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
+print(h1)
+plot(h1)
+```
 
 ## Reaction times
 
@@ -478,3 +529,54 @@ plot(marginal_effects(model.full.RT, effects = "ExpPhase:Condition"),ask=FALSE)
 #plot(marginal_effects(model.full.Acc),ask=FALSE)
 ```
 
+### Inference about the best model
+
+#### Sample from the posterior
+```{r, warning=FALSE, message=FALSE}
+post = posterior_samples(model.full.RT, "^b")
+```
+
+Check the difference between high and low reward in baseline 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept < b_Intercept + b_ConditionLow_Rew ")
+print(h1)
+plot(h1)
+```
+
+Check the difference between high and low reward in acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept + b_ExpPhaseAcq < b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseAcq:ConditionLow_Rew")
+print(h1)
+plot(h1)
+```
+
+Check the difference between high and low reward in extinction 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept + b_ExpPhaseExt < b_Intercept + b_ExpPhaseExt + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
+print(h1)
+plot(h1)
+```
+
+Check the difference between high reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ExpPhaseAcq")
+print(h1)
+plot(h1)
+```
+
+Check the difference between low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept + b_ConditionLow_Rew > b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
+print(h1)
+plot(h1)
+```
