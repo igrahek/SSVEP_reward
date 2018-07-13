@@ -250,14 +250,14 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
 # referencing for easier interpretation
-# data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
-# data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
 
 # Contrast coding
-subset(data.final$ExpPhase, data.final$ExpPhase=="Bsln") = -0.5
-data.final$ExpPhase["Bsln"] = -0.5
-
-data.final$ExpPhase[data.final$ExpPhase == "Acq"] <- 5
+# subset(data.final$ExpPhase, data.final$ExpPhase=="Bsln") = -0.5
+# data.final$ExpPhase["Bsln"] = -0.5
+# 
+# data.final$ExpPhase[data.final$ExpPhase == "Acq"] <- 5
 
 
 # Null model
@@ -268,7 +268,8 @@ model.null.RT = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
                  iter = 10000,
                  save_all_pars = TRUE,
                  control = list(adapt_delta = 0.99),
-                 cores = 4)
+                 cores = 4,
+                 sample_prior = TRUE)
 saveRDS(model.null.RT,file="nullmodel.RT.rds")
 
 # ExpPhase model
@@ -279,30 +280,9 @@ model.expphase.RT = brm(Hits.RTs ~ ExpPhase + (ExpPhase|ParticipantNo),
                  iter = 10000,
                  save_all_pars = TRUE,
                  control = list(adapt_delta = 0.99),
-                 cores = 4)
+                 cores = 4,
+                 sample_prior = TRUE)
 saveRDS(model.expphase.RT,file="expphasemodel.RT.rds")
-
-# Condition model
-model.condition.RT = brm(Hits.RTs ~ Condition + (Condition|ParticipantNo),
-                     data=data.final,
-                     family=gaussian(),
-                     warmup = 2000,
-                     iter = 10000,
-                     save_all_pars = TRUE,
-                     control = list(adapt_delta = 0.99),
-                     cores = 4)
-saveRDS(model.condition.RT,file="model.condition.RT.rds")
-
-# # Two main effects model
-model.twomaineffects.RT = brm(Hits.RTs ~ ExpPhase + Condition + (ExpPhase + Condition|ParticipantNo),
-                 data=data.final,
-                 family=gaussian(),
-                 warmup = 2000,
-                 iter = 10000,
-                 save_all_pars = TRUE,
-                 control = list(adapt_delta = 0.99),
-                 cores = 4)
-saveRDS(model.twomaineffects.RT,file="model.twomaineffects.RT.rds")
 
 #Interaction model
 model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
@@ -312,24 +292,26 @@ model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase * Condition|Part
                  iter = 10000,
                  save_all_pars = TRUE,
                  control = list(adapt_delta = 0.99),
-                 cores = 4)
+                 cores = 4,
+                 sample_prior = TRUE)
 saveRDS(model.full.RT,file="model.full.RT.rds")
 
 # # read in the models and comparisons
-model.null.RT = readRDS("nullmodel.RT.rds")
-model.condition.RT = readRDS("model.condition.RT.rds")
-model.expphase.RT = readRDS("expphasemodel.RT.rds")
-model.twomaineffects.RT = readRDS("model.twomaineffects.RT.rds")
-model.full.RT = readRDS("model.full.RT.rds")
-#compare.loo = readRDS("compare.RT.loo")
-compare.waic = readRDS("compare.RT.waic")
+# model.null.RT = readRDS("nullmodel.RT.rds")
+# model.condition.RT = readRDS("model.condition.RT.rds")
+# model.expphase.RT = readRDS("expphasemodel.RT.rds")
+# model.twomaineffects.RT = readRDS("model.twomaineffects.RT.rds")
+# model.full.RT = readRDS("model.full.RT.rds")
+# #compare.loo = readRDS("compare.RT.loo")
+# compare.waic = readRDS("compare.RT.waic")
 
 #WAIC
-compare.RT.waic = WAIC(model.null.RT,model.condition.RT,model.expphase.RT,model.twomaineffects.RT,model.full.RT)
+compare.RT.waic = WAIC(model.null.RT,model.expphase.RT,model.full.RT, comapre = TRUE)
 saveRDS(compare.RT.waic,file="compare.RT.waic")
 
 # Weighted waic
-model_weights(model.null.RT,model.condition.RT,model.expphase.RT,model.twomaineffects.RT,model.full.RT, weights = "waic")
+compare.RT.waic.weights = model_weights(model.null.RT,model.expphase.RT,model.full.RT, weights = "waic")
+saveRDS(compare.RT.waic.weights,file="compare.RT.waic.weights")
 
 # #LOO crossvalidation
 # compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
@@ -351,7 +333,8 @@ model.null.Acc = brm(Hit.Rate ~ 1 + (1|ParticipantNo),
                  iter = 10000,
                  save_all_pars = TRUE,
                  control = list(adapt_delta = 0.99),
-                 cores = 4)
+                 cores = 4,
+                 sample_prior = TRUE)
 saveRDS(model.null.Acc,file="nullmodel.Acc.rds")
 
 # ExpPhase model
@@ -362,30 +345,9 @@ model.expphase.Acc = brm(Hit.Rate ~ ExpPhase + (ExpPhase|ParticipantNo),
                      iter = 10000,
                      save_all_pars = TRUE,
                      control = list(adapt_delta = 0.99),
-                     cores = 4)
+                     cores = 4,
+                     sample_prior = TRUE)
 saveRDS(model.expphase.Acc,file="expphasemodel.Acc.rds")
-
-# Condition model
-model.condition.Acc = brm(Hit.Rate ~ Condition + (Condition|ParticipantNo),
-                      data=data.final,
-                      family=gaussian(),
-                      warmup = 2000,
-                      iter = 10000,
-                      save_all_pars = TRUE,
-                      control = list(adapt_delta = 0.99),
-                      cores = 4)
-saveRDS(model.expphase.Acc,file="model.condition.Acc.rds")
-
-# # Two main effects model
-model.twomaineffects.Acc = brm(Hit.Rate ~ ExpPhase + Condition + (ExpPhase + Condition|ParticipantNo),
-                           data=data.final,
-                           family=gaussian(),
-                           warmup = 2000,
-                           iter = 10000,
-                           save_all_pars = TRUE,
-                           control = list(adapt_delta = 0.99),
-                           cores = 4)
-saveRDS(model.twomaineffects.Acc,file="model.twomaineffects.Acc.rds")
 
 #Interaction model
 model.full.Acc = brm(Hit.Rate ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
@@ -395,26 +357,24 @@ model.full.Acc = brm(Hit.Rate ~ ExpPhase * Condition + (ExpPhase * Condition|Par
                  iter = 10000,
                  save_all_pars = TRUE,
                  control = list(adapt_delta = 0.99),
-                 cores = 4)
+                 cores = 4,
+                 sample_prior = TRUE)
 saveRDS(model.full.Acc,file="model.full.Acc.rds")
 
 #read in the models and comparisons
-model.null.Acc = readRDS("nullmodel.Acc.rds")
-model.condition.Acc = readRDS("model.condition.Acc.rds")
-model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
-model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
-model.full.Acc = readRDS("model.full.Acc.rds")
+# model.null.Acc = readRDS("nullmodel.Acc.rds")
+# model.condition.Acc = readRDS("model.condition.Acc.rds")
+# model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
+# model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
+# model.full.Acc = readRDS("model.full.Acc.rds")
 #compare.loo.Acc = readRDS("compare.Acc.loo")
 # compare.waic.Acc = readRDS("compare.Acc.waic")
 
 #WAIC
-compare.Acc.waic = WAIC(model.null.Acc,model.condition.Acc,model.expphase.Acc,model.twomaineffects.Acc,model.full.Acc)
+compare.Acc.waic = WAIC(model.null.Acc,model.expphase.Acc,model.full.Acc, compare = TRUE)
 saveRDS(compare.Acc.waic,file="compare.Acc.waic")
 
 # Weighted waic
-model_weights(model.null.Acc,model.condition.Acc,model.expphase.Acc,model.twomaineffects.Acc,model.full.Acc, weights = "waic")
+compare.Acc.waic.weights = model_weights(model.null.Acc,model.expphase.Acc,model.full.Acc, weights = "waic")
+saveRDS(compare.Acc.waic.weights,file="compare.Acc.waic.weights")
 
-
-# #LOO crossvalidation
-# compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
-# saveRDS(compare.RT.loo,file="compare.Acc.loo")

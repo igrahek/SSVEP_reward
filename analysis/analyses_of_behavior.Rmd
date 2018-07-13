@@ -276,20 +276,6 @@ Summary of the best model
 print(tidy(model.full.Acc, par_type = "non-varying"), digits = 1)
 ```
 
-Plotting fixed effects
-
-```{r, warning=FALSE, message=FALSE}
-coefplot(model.full.Acc, type = "b")
-#stanplot(model.full.Acc, pars = "^b_")
-```
-
-Plotting random effects
-
-```{r, warning=FALSE, message=FALSE}
-coefplot(model.full.Acc, type = "r")
-#stanplot(model.full.Acc, pars = "^b_")
-```
-
 ### Plotting the best model
 
 ```{r, warning=FALSE, message=FALSE}
@@ -312,7 +298,6 @@ Check the difference between high and low reward in baseline
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept < b_Intercept + b_ConditionLow_Rew ")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between high and low reward in acquisition 
@@ -321,7 +306,6 @@ Check the difference between high and low reward in acquisition
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept + b_ExpPhaseAcq < b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseAcq:ConditionLow_Rew")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between high and low reward in extinction 
@@ -330,7 +314,6 @@ Check the difference between high and low reward in extinction
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept + b_ExpPhaseExt < b_Intercept + b_ExpPhaseExt + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between high reward in baseline vs. acquisition 
@@ -339,7 +322,6 @@ Check the difference between high reward in baseline vs. acquisition
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ExpPhaseAcq")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
@@ -348,7 +330,6 @@ Check the difference between low reward in baseline vs. acquisition
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept + b_ConditionLow_Rew > b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
 print(h1)
-plot(h1)
 ```
 
 ## Reaction times
@@ -506,19 +487,6 @@ Summary of the best model
 print(tidy(model.full.RT, par_type = "non-varying"), digits = 1)
 ```
 
-Plotting fixed effects
-
-```{r, warning=FALSE, message=FALSE}
-coefplot(model.full.RT, type = "b")
-#stanplot(model.full.Acc, pars = "^b_")
-```
-
-Plotting random effects
-
-```{r, warning=FALSE, message=FALSE}
-coefplot(model.full.RT, type = "r")
-```
-
 
 ### Plotting the best model
 
@@ -542,7 +510,6 @@ Check the difference between high and low reward in baseline
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept < b_Intercept + b_ConditionLow_Rew ")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between high and low reward in acquisition 
@@ -551,7 +518,6 @@ Check the difference between high and low reward in acquisition
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept + b_ExpPhaseAcq < b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseAcq:ConditionLow_Rew")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between high and low reward in extinction 
@@ -560,7 +526,6 @@ Check the difference between high and low reward in extinction
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept + b_ExpPhaseExt < b_Intercept + b_ExpPhaseExt + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between high reward in baseline vs. acquisition 
@@ -569,7 +534,6 @@ Check the difference between high reward in baseline vs. acquisition
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ExpPhaseAcq")
 print(h1)
-plot(h1)
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
@@ -578,5 +542,4 @@ Check the difference between low reward in baseline vs. acquisition
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "b_Intercept + b_ConditionLow_Rew > b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
 print(h1)
-plot(h1)
 ```

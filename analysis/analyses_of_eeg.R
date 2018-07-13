@@ -330,6 +330,10 @@ data$ExpPhase=relevel(data$ExpPhase,ref="Bsln")
 data$Condition=relevel(data$Condition,ref="High_Rew")
 data$Attention=relevel(data$Attention,ref="Att")
 
+# Contrast coding
+# data$Condition = ifelse(data$Condition == "High_Rew", 0.5, -0.5)
+# data$Attention = ifelse(data$Attention == "Att", 0.5, -0.5)
+
 # Null model
 null = brm(Amplitude ~ 1 + (1|Subject),
                               data=data,
@@ -338,7 +342,8 @@ null = brm(Amplitude ~ 1 + (1|Subject),
                               iter = 10000,
                               save_all_pars = TRUE,
                               control = list(adapt_delta = 0.99),
-                              cores = 4)
+                              cores = 4,
+                              sample_prior = TRUE)
 saveRDS(null,file="null.EEG.allsub.rds")
 
 # Exp phase model
@@ -349,19 +354,9 @@ expphase = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
                                   iter = 10000,
                                   save_all_pars = TRUE,
                                   control = list(adapt_delta = 0.99),
-                                  cores = 4)
+                                  cores = 4,
+                                  sample_prior = TRUE)
 saveRDS(expphase,file="expphase.EEG.allsubs.rds")
-
-# Condition model
-condition = brm(Amplitude ~ Condition + (Condition|Subject),
-                                   data=data,
-                                   family=gaussian(),
-                                   warmup = 2000,
-                                   iter = 10000,
-                                   save_all_pars = TRUE,
-                                   control = list(adapt_delta = 0.99),
-                                   cores = 4)
-saveRDS(condition,file="condition.EEG.allsubs.rds")
 
 # Attention model
 attention = brm(Amplitude ~ Attention + (Attention|Subject),
@@ -371,7 +366,8 @@ attention = brm(Amplitude ~ Attention + (Attention|Subject),
                                    iter = 10000,
                                    save_all_pars = TRUE,
                                    control = list(adapt_delta = 0.99),
-                                   cores = 4)
+                                   cores = 4,
+                                   sample_prior = TRUE)
 saveRDS(attention,file="attention.EEG.allsubs.rds")
 
 # Two main effects - phase and attention
@@ -382,19 +378,9 @@ phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention
                                         iter = 10000,
                                         save_all_pars = TRUE,
                                         control = list(adapt_delta = 0.99),
-                                        cores = 4)
+                                        cores = 4,
+                                        sample_prior = TRUE)
 saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.rds")
-
-# Two main effects - reward magnitude and attention
-rewardANDattention = brm(Amplitude ~ Condition + Attention + (Condition + Attention|Subject),
-                                           data=data,
-                                           family=gaussian(),
-                                           warmup = 2000,
-                                           iter = 10000,
-                                           save_all_pars = TRUE,
-                                           control = list(adapt_delta = 0.99),
-                                           cores = 4)
-saveRDS(rewardANDattention,file="rewardANDattention.EEG.allsubs.rds")
 
 # Interaction between expphase and reward magnitude plus attention
 rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
@@ -404,19 +390,9 @@ rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Co
                          iter = 10000,
                          save_all_pars = TRUE,
                          control = list(adapt_delta = 0.99),
-                         cores = 4)
+                         cores = 4,
+                         sample_prior = TRUE)
 saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.rds")
-
-# Three main effects
-threemain = brm(Amplitude ~ Condition + ExpPhase + Attention + (Condition + ExpPhase + Attention|Subject),
-                                          data=data,
-                                          family=gaussian(),
-                                          warmup = 2000,
-                                          iter = 10000,
-                                          save_all_pars = TRUE,
-                                          control = list(adapt_delta = 0.99),
-                                          cores = 4)
-saveRDS(threemain,file="threemain.EEG.allsubs.rds")
 
 # Full model
 full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),
@@ -426,82 +402,35 @@ full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase 
                               iter = 10000,
                               save_all_pars = TRUE,
                               control = list(adapt_delta = 0.99),
-                              cores = 4)
+                              cores = 4,
+                              sample_prior = TRUE)
 saveRDS(full,file="full.EEG.allsubs.rds")
+
+#Trial
+#full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject/Trial),
 
 # read in the models and comparisons
 null = readRDS("null.EEG.allsub.rds")
-condition = readRDS("condition.EEG.allsubs.rds")
 attention = readRDS("attention.EEG.allsubs.rds")
 expphase = readRDS("expphase.EEG.allsubs.rds")
-rewardANDattention = readRDS("rewardANDattention.EEG.allsubs.rds")
 phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
 rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
-threemain = readRDS("threemain.EEG.allsubs.rds")
 full = readRDS("full.EEG.allsubs.rds")
-waic = readRDS("compare.EEG.waic.allsubs.rds")
+# waic = readRDS("compare.EEG.waic.allsubs.rds")
+
+# color_scheme_set("viridis")
+# pp_check(full, type = "stat_grouped", nsamples = 100, group = "ExpPhase")
 
 # WAIC
-# Weighted waic
-WAIC(attention, rewardTimesPhasePlusAtt, full)
-
-# Weighted waic
-model_weights(attention, rewardTimesPhasePlusAtt, full, weights = "waic")
-
-# Weighted loo
-model_weights(attention, rewardTimesPhasePlusAtt, full, weights = "loo")
-
-# Loo
-loo(attention, rewardTimesPhasePlusAtt)
-
-library(loo)
-
-# Compute waics
-waic_attention = waic(attention)
-waic_condition = waic(condition)
-waic_expphase = waic(expphase)
-waic_int_plus_att = waic(rewardTimesPhasePlusAtt)
-waic_full = waic(full)
-
-# Put them all in one object
-waics <- c(
-  waic_attention$estimates["elpd_waic", 1],
-  waic_condition$estimates["elpd_waic", 1],
-  waic_expphase$estimates["elpd_waic", 1],
-  waic_int_plus_att$estimates["elpd_waic", 1],
-  waic_full$estimates["elpd_waic", 1]
-)
-
-# Calculate weighted waics
-waic_wts <- exp(waics) / sum(exp(waics))
-waic_wts = round(waic_wts)
-
-loo_attention = loo(attention)
-loo_condition = loo(condition)
-loo_expphase = loo(expphase)
-loo_int_plus_att = loo(rewardTimesPhasePlusAtt)
-loo_full = loo(full)
-
-compare(loo_attention, loo_condition, loo_expphase, loo_int_plus_att, loo_full)
-
-loo.5.factors = readRDS("compare.EEG.loo.allsubs.rds")
-loo.full.model = readRDS("compare.EEG.fullmodel.loo.allsubs.rds")
-
-#WAIC
-compare.EEG.waic = WAIC(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, compare = FALSE)
+compare.EEG.waic = WAIC(null, expphase, attention, phaseANDattention, rewardTimesPhasePlusAtt, full, compare = TRUE)
 saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.rds")
-#LOO crossvalidation first five models
-compare.EEG.loo = LOO(null, condition, expphase, attention, threemain, reloo = TRUE, compare = FALSE)
-saveRDS(compare.EEG.loo,file="compare.EEG.loo.allsubs.rds")
 
-#LOO crossvalidation full model
-compare.EEG.loo = LOO(full, reloo = TRUE, compare = FALSE)
-saveRDS(compare.EEG.loo,file="compare.EEG.fullmodel.loo.allsubs.rds")
+# Weighted waic
+compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, rewardTimesPhasePlusAtt, full, weights = "waic")
+saveRDS(compare.EEG.waic.weights,file="compare.EEG.waic.weights")
 
-# Sample from the posterior
 post = posterior_samples(full, "^b")
 
-pp_check(full)
 
 ################################################ Baseline ####
 
@@ -580,17 +509,252 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
   post[["b_ConditionLow_Rew:ExpPhaseExt"]] + 
   post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
 
+BESTmcmc(Acquisition_High_Attended, Acquisition_Low_Attended)
 
 #Check the difference between high and low reward in acquisition attended
 
 # Difference between high and low reward in acquisition attended
 Diff_Rew_Acq_Att = Acquisition_High_Attended - Acquisition_Low_Attended
-plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = TRUE, ROPE = c(0,1))
+plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+
+mean(Acquisition_High_Attended>Acquisition_Low_Attended)
 
 # Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
 h1 = hypothesis(post, "0 > b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
 print(h1)
+colMeans(h1$samples > 0)
 plot(h1)
+
+
+#Check the difference between high and low reward in baseline attended
+
+# Difference between high and low reward in acquisition attended
+Diff_Rew_Bsln_Att = Baseline_High_Attended - Baseline_Low_Attended
+plotPost(Diff_Rew_Bsln_Att, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+
+mean(Baseline_High_Attended < Baseline_Low_Attended)
+
+
+
+########### Blue high rewarded group #####################
+
+# Set the working directory where to save the models
+setwd("./brms_models")
+
+data.blue = subset(data, data$RewardedColor == "Blue")
+
+#help stan run faster
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+# Modelling the effects of phase, attention, and reward magnitude - All subjects
+
+# Set the intercept model
+data.blue$ExpPhase=relevel(data.blue$ExpPhase,ref="Bsln")
+data.blue$Condition=relevel(data.blue$Condition,ref="High_Rew")
+data.blue$Attention=relevel(data.blue$Attention,ref="Att")
+
+# Contrast coding
+# data$Condition = ifelse(data$Condition == "High_Rew", 0.5, -0.5)
+# data$Attention = ifelse(data$Attention == "Att", 0.5, -0.5)
+
+# Null model
+null.blue = brm(Amplitude ~ 1 + (1|Subject),
+           data=data.blue,
+           family=gaussian(),
+           warmup = 2000,
+           iter = 10000,
+           save_all_pars = TRUE,
+           control = list(adapt_delta = 0.99),
+           cores = 4)
+saveRDS(null.blue,file="null.EEG.allsub.blue.rds")
+
+# Exp phase model
+expphase.blue = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
+               data=data.blue,
+               family=gaussian(),
+               warmup = 2000,
+               iter = 10000,
+               save_all_pars = TRUE,
+               control = list(adapt_delta = 0.99),
+               cores = 4)
+saveRDS(expphase.blue,file="expphase.EEG.allsubs.blue.rds")
+
+
+# Attention model
+attention.blue = brm(Amplitude ~ Attention + (Attention|Subject),
+                data=data.blue,
+                family=gaussian(),
+                warmup = 2000,
+                iter = 10000,
+                save_all_pars = TRUE,
+                control = list(adapt_delta = 0.99),
+                cores = 4)
+saveRDS(attention.blue,file="attention.EEG.allsubs.blue.rds")
+
+# Two main effects - phase and attention
+phaseANDattention.blue = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention|Subject),
+                        data=data.blue,
+                        family=gaussian(),
+                        warmup = 2000,
+                        iter = 10000,
+                        save_all_pars = TRUE,
+                        control = list(adapt_delta = 0.99),
+                        cores = 4)
+saveRDS(phaseANDattention.blue,file="phaseANDattention.EEG.allsubs.blue.rds")
+
+
+# Interaction between expphase and reward magnitude plus attention
+rewardTimesPhasePlusAtt.blue = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
+                              data=data.blue,
+                              family=gaussian(),
+                              warmup = 2000,
+                              iter = 10000,
+                              save_all_pars = TRUE,
+                              control = list(adapt_delta = 0.99),
+                              cores = 4)
+saveRDS(rewardTimesPhasePlusAtt.blue,file="rewardTimesPhasePlusAtt.EEG.allsubs.blue.rds")
+
+
+# Full model
+full.blue = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),
+           data=data.blue,
+           family=gaussian(),
+           warmup = 2000,
+           iter = 10000,
+           save_all_pars = TRUE,
+           control = list(adapt_delta = 0.99),
+           cores = 4)
+saveRDS(full.blue,file="full.EEG.allsubs.blue.rds")
+
+# read in the models and comparisons
+# null = readRDS("null.EEG.allsub.contrast.rds")
+# condition = readRDS("condition.EEG.allsubs.rds")
+# attention = readRDS("attention.EEG.allsubs.contrast.rds")
+# expphase = readRDS("expphase.EEG.allsubs.contrast.rds")
+# rewardANDattention = readRDS("rewardANDattention.EEG.allsubs.rds")
+# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.contrast.rds")
+# rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.contrast.rds")
+# threemain = readRDS("threemain.EEG.allsubs.rds")
+# full = readRDS("full.EEG.allsubs.contrast.rds")
+# waic = readRDS("compare.EEG.waic.allsubs.rds")
+
+# WAIC
+compare.EEG.waic.blue = WAIC(null.blue, expphase.blue, attention.blue, phaseANDattention.blue, rewardTimesPhasePlusAtt.blue, full.blue, compare = TRUE)
+saveRDS(compare.EEG.waic.blue,file="compare.EEG.waic.allsubs.blue.rds")
+
+
+
+
+
+########### Red high rewarded group #####################
+
+# Set the working directory where to save the models
+setwd("./brms_models")
+
+data.red = subset(data, data$RewardedColor == "Red")
+
+#help stan run faster
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+# Modelling the effects of phase, attention, and reward magnitude - All subjects
+
+# Set the intercept model
+data.red$ExpPhase=relevel(data.red$ExpPhase,ref="Bsln")
+data.red$Condition=relevel(data.red$Condition,ref="High_Rew")
+data.red$Attention=relevel(data.red$Attention,ref="Att")
+
+# Contrast coding
+# data$Condition = ifelse(data$Condition == "High_Rew", 0.5, -0.5)
+# data$Attention = ifelse(data$Attention == "Att", 0.5, -0.5)
+
+# Null model
+null.red = brm(Amplitude ~ 1 + (1|Subject),
+                data=data.red,
+                family=gaussian(),
+                warmup = 2000,
+                iter = 10000,
+                save_all_pars = TRUE,
+                control = list(adapt_delta = 0.99),
+                cores = 4)
+saveRDS(null.red,file="null.EEG.allsub.red.rds")
+
+# Exp phase model
+expphase.red = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
+                    data=data.red,
+                    family=gaussian(),
+                    warmup = 2000,
+                    iter = 10000,
+                    save_all_pars = TRUE,
+                    control = list(adapt_delta = 0.99),
+                    cores = 4)
+saveRDS(expphase.red,file="expphase.EEG.allsubs.red.rds")
+
+
+# Attention model
+attention.red = brm(Amplitude ~ Attention + (Attention|Subject),
+                     data=data.red,
+                     family=gaussian(),
+                     warmup = 2000,
+                     iter = 10000,
+                     save_all_pars = TRUE,
+                     control = list(adapt_delta = 0.99),
+                     cores = 4)
+saveRDS(attention.red,file="attention.EEG.allsubs.red.rds")
+
+# Two main effects - phase and attention
+phaseANDattention.red = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention|Subject),
+                             data=data.red,
+                             family=gaussian(),
+                             warmup = 2000,
+                             iter = 10000,
+                             save_all_pars = TRUE,
+                             control = list(adapt_delta = 0.99),
+                             cores = 4)
+saveRDS(phaseANDattention.red,file="phaseANDattention.EEG.allsubs.red.rds")
+
+
+# Interaction between expphase and reward magnitude plus attention
+rewardTimesPhasePlusAtt.red = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
+                                   data=data.red,
+                                   family=gaussian(),
+                                   warmup = 2000,
+                                   iter = 10000,
+                                   save_all_pars = TRUE,
+                                   control = list(adapt_delta = 0.99),
+                                   cores = 4)
+saveRDS(rewardTimesPhasePlusAtt.red,file="rewardTimesPhasePlusAtt.EEG.allsubs.red.rds")
+
+
+# Full model
+full.red = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),
+                data=data.red,
+                family=gaussian(),
+                warmup = 2000,
+                iter = 10000,
+                save_all_pars = TRUE,
+                control = list(adapt_delta = 0.99),
+                cores = 4)
+saveRDS(full.red,file="full.EEG.allsubs.red.rds")
+
+# read in the models and comparisons
+# null = readRDS("null.EEG.allsub.contrast.rds")
+# condition = readRDS("condition.EEG.allsubs.rds")
+# attention = readRDS("attention.EEG.allsubs.contrast.rds")
+# expphase = readRDS("expphase.EEG.allsubs.contrast.rds")
+# rewardANDattention = readRDS("rewardANDattention.EEG.allsubs.rds")
+# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.contrast.rds")
+# rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.contrast.rds")
+# threemain = readRDS("threemain.EEG.allsubs.rds")
+# full = readRDS("full.EEG.allsubs.contrast.rds")
+# waic = readRDS("compare.EEG.waic.allsubs.rds")
+
+# WAIC
+compare.EEG.waic.red = WAIC(null.red, expphase.red, attention.red, phaseANDattention.red, rewardTimesPhasePlusAtt.red, full.red, compare = TRUE)
+saveRDS(compare.EEG.waic.red,file="compare.EEG.waic.allsubs.red.rds")
+
+
 
 
 

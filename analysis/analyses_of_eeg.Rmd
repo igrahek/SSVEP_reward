@@ -318,13 +318,13 @@ model.full.threefactors = readRDS("full.EEG.allsubs.rds")
 compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.rds")
 ```
 
-## Model comparison with WAIC
+### Model comparison with WAIC
 
 ```{r, warning=FALSE, message=FALSE}
 print(compare.threefactors.EEG.waic)
 ```
 
-## Checking the best model
+### Checking the best model
 
 Plotting the chains
 ```{r, warning=FALSE, message=FALSE}
@@ -339,7 +339,7 @@ Summary of the best model
 print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
 ```
 
-## Plotting the best model
+### Plotting the best model
 
 Attended color (plot 1) and Not attended color (plot 2)
 
@@ -349,12 +349,12 @@ conditions = data.frame(Attention = c("Att", "NotAtt"))
 plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
 ```
 
-## Inference about the best model
-
+### Inference about the best model
 
 ```{r, warning=FALSE, message=FALSE}
-# Sample from the posterior
 post = posterior_samples(model.full.threefactors, "^b")
+
+# Calculate posteriors for each condition
 
 ################################################ Baseline ####
 
@@ -364,18 +364,18 @@ post = posterior_samples(model.full.threefactors, "^b")
 Baseline_High_Attended = post[["b_Intercept"]]
 ######### Low reward
 Baseline_Low_Attended = post[["b_Intercept"]] + 
-                        post[["b_ConditionLow_Rew"]] 
+  post[["b_ConditionLow_Rew"]] 
 
 ##################### Not Attended
 
 ######### High reward
 Baseline_High_NotAttended = post[["b_Intercept"]] + 
-                            post[["b_AttentionNotAtt"]]
+  post[["b_AttentionNotAtt"]]
 ######### Low reward
 Baseline_Low_NotAttended = post[["b_Intercept"]] + 
-                           post[["b_AttentionNotAtt"]] + 
-                           post[["b_ConditionLow_Rew"]] + 
-                           post[["b_ConditionLow_Rew:AttentionNotAtt"]]
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ConditionLow_Rew:AttentionNotAtt"]]
 
 ################################################ Acquistion
 
@@ -383,55 +383,279 @@ Baseline_Low_NotAttended = post[["b_Intercept"]] +
 
 ######### High reward
 Acquisition_High_Attended = post[["b_Intercept"]] + 
-                            post[["b_ExpPhaseAcq"]] 
+  post[["b_ExpPhaseAcq"]] 
 ######### Low reward
 Acquisition_Low_Attended = post[["b_Intercept"]] + 
-                           post[["b_ExpPhaseAcq"]] + 
-                           post[["b_ConditionLow_Rew"]] + 
-                           post[["b_ConditionLow_Rew:ExpPhaseAcq"]]
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseAcq"]]
 
 ##################### Not Attended
 
 ######### High reward
 Acquisition_High_NotAttended = post[["b_Intercept"]] + 
-                               post[["b_ExpPhaseAcq"]] + 
-                               post[["b_AttentionNotAtt"]]
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_AttentionNotAtt"]]
 ######### Low reward
 Acquisition_Low_NotAttended = post[["b_Intercept"]] + 
-                              post[["b_ExpPhaseAcq"]] + 
-                              post[["b_AttentionNotAtt"]] + 
-                              post[["b_ConditionLow_Rew"]] + 
-                              post[["b_ExpPhaseAcq:AttentionNotAtt"]] +
-                              post[["b_ConditionLow_Rew:ExpPhaseAcq"]] + 
-                              post[["b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt"]]
-                              
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:AttentionNotAtt"]] +
+  post[["b_ConditionLow_Rew:ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt"]]
+
 ################################################ Extinction
-                              
+
 ##################### Attended
-                              
+
 ######### High reward
 Extinction_High_Attended = post[["b_Intercept"]] + 
-                           post[["b_ExpPhaseExt"]] 
+  post[["b_ExpPhaseExt"]] 
 ######### Low reward
 Extinction_Low_Attended = post[["b_Intercept"]] + 
-                          post[["b_ExpPhaseExt"]] + 
-                          post[["b_ConditionLow_Rew"]] + 
-                          post[["b_ConditionLow_Rew:ExpPhaseExt"]]
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseExt"]]
 
 ##################### Not Attended
 
 ######### High reward
 Extinction_High_NotAttended = post[["b_Intercept"]] + 
-                              post[["b_ExpPhaseExt"]] + 
-                              post[["b_AttentionNotAtt"]]
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_AttentionNotAtt"]]
 ######### Low reward
 Extinction_Low_NotAttended = post[["b_Intercept"]] + 
-                             post[["b_ExpPhaseExt"]] + 
-                             post[["b_AttentionNotAtt"]] + 
-                             post[["b_ConditionLow_Rew"]] + 
-                             post[["b_ExpPhaseExt:AttentionNotAtt"]] +
-                             post[["b_ConditionLow_Rew:ExpPhaseExt"]] + 
-                             post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:AttentionNotAtt"]] +
+  post[["b_ConditionLow_Rew:ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
+```
+
+Check the difference between high and low reward in basline attended
+
+```{r, warning=FALSE, message=FALSE}
+# Difference between high and low reward in acquisition attended
+Diff_Rew_Bsln_Att = Baseline_High_Attended - Baseline_Low_Attended
+plotPost(Diff_Rew_Bsln_Att, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ConditionLow_Rew")
+print(h1)
+```
+
+Check the difference between high and low reward in acquisition attended
+
+```{r, warning=FALSE, message=FALSE}
+# Difference between high and low reward in acquisition attended
+Diff_Rew_Acq_Att = Acquisition_High_Attended - Acquisition_Low_Attended
+plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq > b_Intercept +  b_ExpPhaseAcq + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
+print(h1)
+```
+
+Check the difference between high and low reward in extinction attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt > b_Intercept +  b_ExpPhaseExt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt")
+print(h1)
+```
+
+Check the difference between high and low reward in baseline not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept + b_AttentionNotAtt > b_Intercept + b_AttentionNotAtt + b_ConditionLow_Rew")
+print(h2)
+```
+
+Check the difference between high and low reward in acquisition not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ExpPhaseAcq:AttentionNotAtt > b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq + b_ExpPhaseAcq:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt")
+print(h2)
+```
+
+Check the difference between high and low reward in extinction not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ExpPhaseExt:AttentionNotAtt > b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt + b_ExpPhaseExt:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt")
+print(h2)
+```
+
+
+
+## Statistics - Blue - high reward
+
+```{r, warning=FALSE, message=FALSE}
+# Set the working directory in order to load the models
+# Set working directory
+setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
+
+
+# read in the models and comparisons
+#model.null.threefactors = readRDS("null.EEG.allsub.rds")
+# model.condition.threefactors = readRDS("model.condition.threefactors.EEG.allsubs.rds")
+#model.attention.threefactors = readRDS("attention.EEG.allsubs.rds")
+# model.expphase.threefactors = readRDS("model.expphase.threefactors.EEG.allsubs.rds")
+# model.rewardmagnitudeANDattention.threefactors = readRDS("model.rewardmagnitudeANDattention.threefactors.EEG.allsubs.rds")
+# model.phaseANDattention.threefactors = readRDS("model.phaseANDattention.threefactors.EEG.allsubs.rds")
+#model.threemaineffects.threefactors = readRDS("threemain.EEG.allsubs.rds")
+model.full.threefactors = readRDS("full.EEG.allsubs.blue.rds")
+#compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
+compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.blue.rds")
+```
+
+### Model comparison with WAIC
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.threefactors.EEG.waic)
+```
+
+### Checking the best model
+
+Plotting the chains
+```{r, warning=FALSE, message=FALSE}
+# Plot chains
+plot(model.full.threefactors, pars = "^b_", ask = FALSE, N=6)
+```
+
+Summary of the best model 
+
+```{r, warning=FALSE, message=FALSE}
+# Summary of the best model
+print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
+```
+
+### Plotting the best model
+
+Attended color (plot 1) and Not attended color (plot 2)
+
+```{r, warning=FALSE, message=FALSE}
+# Plot the interaction between Phase and Attention in two conditions of reward probability
+conditions = data.frame(Attention = c("Att", "NotAtt"))
+plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
+```
+
+### Inference about the best model
+
+```{r, warning=FALSE, message=FALSE}
+post = posterior_samples(model.full.threefactors, "^b")
+```
+
+Check the difference between high and low reward in basline attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ConditionLow_Rew")
+print(h1)
+```
+
+Check the difference between high and low reward in acquisition attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq > b_Intercept +  b_ExpPhaseAcq + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
+print(h1)
+```
+
+Check the difference between high and low reward in extinction attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
+h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt > b_Intercept +  b_ExpPhaseExt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt")
+print(h1)
+```
+
+Check the difference between high and low reward in baseline not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept + b_AttentionNotAtt > b_Intercept + b_AttentionNotAtt + b_ConditionLow_Rew")
+print(h2)
+```
+
+Check the difference between high and low reward in acquisition not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ExpPhaseAcq:AttentionNotAtt > b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq + b_ExpPhaseAcq:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt")
+print(h2)
+```
+
+Check the difference between high and low reward in extinction not attended
+
+```{r, warning=FALSE, message=FALSE}
+# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
+h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ExpPhaseExt:AttentionNotAtt > b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt + b_ExpPhaseExt:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt")
+print(h2)
+```
+
+
+
+## Statistics - Red - high reward
+
+```{r, warning=FALSE, message=FALSE}
+# Set the working directory in order to load the models
+# Set working directory
+setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
+
+
+# read in the models and comparisons
+#model.null.threefactors = readRDS("null.EEG.allsub.rds")
+# model.condition.threefactors = readRDS("model.condition.threefactors.EEG.allsubs.rds")
+#model.attention.threefactors = readRDS("attention.EEG.allsubs.rds")
+# model.expphase.threefactors = readRDS("model.expphase.threefactors.EEG.allsubs.rds")
+# model.rewardmagnitudeANDattention.threefactors = readRDS("model.rewardmagnitudeANDattention.threefactors.EEG.allsubs.rds")
+# model.phaseANDattention.threefactors = readRDS("model.phaseANDattention.threefactors.EEG.allsubs.rds")
+#model.threemaineffects.threefactors = readRDS("threemain.EEG.allsubs.rds")
+model.full.threefactors = readRDS("full.EEG.allsubs.red.rds")
+#compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
+compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.red.rds")
+```
+
+### Model comparison with WAIC
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.threefactors.EEG.waic)
+```
+
+### Checking the best model
+
+Plotting the chains
+```{r, warning=FALSE, message=FALSE}
+# Plot chains
+plot(model.full.threefactors, pars = "^b_", ask = FALSE, N=6)
+```
+
+Summary of the best model 
+
+```{r, warning=FALSE, message=FALSE}
+# Summary of the best model
+print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
+```
+
+### Plotting the best model
+
+Attended color (plot 1) and Not attended color (plot 2)
+
+```{r, warning=FALSE, message=FALSE}
+# Plot the interaction between Phase and Attention in two conditions of reward probability
+conditions = data.frame(Attention = c("Att", "NotAtt"))
+plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
+```
+
+### Inference about the best model
+
+```{r, warning=FALSE, message=FALSE}
+post = posterior_samples(model.full.threefactors, "^b")
 ```
 
 Check the difference between high and low reward in basline attended
