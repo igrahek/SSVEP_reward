@@ -203,12 +203,11 @@ for (i in 1:length(plottingConditions)){
 # Set working directory
 setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
 
-# Modelling the effects of phase, attention, and reward magnitude - All subjects
-# 
 # # Set the intercept model
 # data$ExpPhase=relevel(data$ExpPhase,ref="Bsln")
 # data$Condition=relevel(data$Condition,ref="High_Rew")
 # data$Attention=relevel(data$Attention,ref="Att")
+# 
 # 
 # # Null model
 # null = brm(Amplitude ~ 1 + (1|Subject),
@@ -218,7 +217,8 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                               iter = 10000,
 #                               save_all_pars = TRUE,
 #                               control = list(adapt_delta = 0.99),
-#                               cores = 4)
+#                               cores = 4,
+#                               sample_prior = TRUE)
 # saveRDS(null,file="null.EEG.allsub.rds")
 # 
 # # Exp phase model
@@ -229,19 +229,9 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                                   iter = 10000,
 #                                   save_all_pars = TRUE,
 #                                   control = list(adapt_delta = 0.99),
-#                                   cores = 4)
+#                                   cores = 4,
+#                                   sample_prior = TRUE)
 # saveRDS(expphase,file="expphase.EEG.allsubs.rds")
-# 
-# # Condition model
-# condition = brm(Amplitude ~ Condition + (Condition|Subject),
-#                                    data=data,
-#                                    family=gaussian(),
-#                                    warmup = 2000,
-#                                    iter = 10000,
-#                                    save_all_pars = TRUE,
-#                                    control = list(adapt_delta = 0.99),
-#                                    cores = 4)
-# saveRDS(condition,file="condition.EEG.allsubs.rds")
 # 
 # # Attention model
 # attention = brm(Amplitude ~ Attention + (Attention|Subject),
@@ -251,7 +241,8 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                                    iter = 10000,
 #                                    save_all_pars = TRUE,
 #                                    control = list(adapt_delta = 0.99),
-#                                    cores = 4)
+#                                    cores = 4,
+#                                    sample_prior = TRUE)
 # saveRDS(attention,file="attention.EEG.allsubs.rds")
 # 
 # # Two main effects - phase and attention
@@ -262,30 +253,21 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                                         iter = 10000,
 #                                         save_all_pars = TRUE,
 #                                         control = list(adapt_delta = 0.99),
-#                                         cores = 4)
+#                                         cores = 4,
+#                                         sample_prior = TRUE)
 # saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.rds")
 # 
-# # Two main effects - reward magnitude and attention
-# rewardANDattention = brm(Amplitude ~ Condition + Attention + (Condition + Attention|Subject),
-#                                            data=data,
-#                                            family=gaussian(),
-#                                            warmup = 2000,
-#                                            iter = 10000,
-#                                            save_all_pars = TRUE,
-#                                            control = list(adapt_delta = 0.99),
-#                                            cores = 4)
-# saveRDS(rewardANDattention,file="rewardANDattention.EEG.allsubs.rds")
-# 
-# # Three main effects
-# threemain = brm(Amplitude ~ Condition + ExpPhase + Attention + (Condition + ExpPhase + Attention|Subject),
-#                                           data=data,
-#                                           family=gaussian(),
-#                                           warmup = 2000,
-#                                           iter = 10000,
-#                                           save_all_pars = TRUE,
-#                                           control = list(adapt_delta = 0.99),
-#                                           cores = 4)
-# saveRDS(threemain,file="threemain.EEG.allsubs.rds")
+# # Interaction between expphase and reward magnitude plus attention
+# rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
+#                          data=data,
+#                          family=gaussian(),
+#                          warmup = 2000,
+#                          iter = 10000,
+#                          save_all_pars = TRUE,
+#                          control = list(adapt_delta = 0.99),
+#                          cores = 4,
+#                          sample_prior = TRUE)
+# saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.rds")
 # 
 # # Full model
 # full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),
@@ -295,33 +277,110 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                               iter = 10000,
 #                               save_all_pars = TRUE,
 #                               control = list(adapt_delta = 0.99),
-#                               cores = 4)
+#                               cores = 4,
+#                               sample_prior = TRUE)
 # saveRDS(full,file="full.EEG.allsubs.rds")
 # 
+# #Trial
+# #full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject/Trial),
 # 
+# # read in the models and comparisons
+# null = readRDS("null.EEG.allsub.rds")
+# attention = readRDS("attention.EEG.allsubs.rds")
+# expphase = readRDS("expphase.EEG.allsubs.rds")
+# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
+# rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
+# full = readRDS("full.EEG.allsubs.rds")
+# # waic = readRDS("compare.EEG.waic.allsubs.rds")
 # 
-# #WAIC
-# compare.EEG.waic = WAIC(null, condition, expphase, attention, phaseANDattention, rewardANDattention, threemain, full, compare = FALSE)
+# # color_scheme_set("viridis")
+# # pp_check(full, type = "stat_grouped", nsamples = 100, group = "ExpPhase")
+# 
+# # WAIC
+# compare.EEG.waic = WAIC(null, expphase, attention, phaseANDattention, rewardTimesPhasePlusAtt, full, compare = TRUE)
 # saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.rds")
+# 
+# # Weighted waic
+# compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, rewardTimesPhasePlusAtt, full, weights = "waic")
+# saveRDS(compare.EEG.waic.weights,file="compare.EEG.waic.weights")
+# 
+# # Bayesian R2
+# #Null
+# bR2.null.EEG = bayes_R2(null)
+# saveRDS(bR2.null.EEG,file="bR2.null.EEG")
+# #ExpPhase
+# bR2.expphase.EEG = bayes_R2(expphase)
+# saveRDS(bR2.expphase.EEG,file="bR2.expphase.EEG")
+# #Phase and attention
+# bR2.phaseANDattention.EEG = bayes_R2(phaseANDattention)
+# saveRDS(bR2.phaseANDattention.EEG,file="bR2.phaseANDattention.EEG")
+# #Reward times phase plus attention
+# bR2.rewardTimesPhasePlusAtt.EEG = bayes_R2(rewardTimesPhasePlusAtt)
+# saveRDS(bR2.rewardTimesPhasePlusAtt.EEG,file="bR2.rewardTimesPhasePlusAtt.EEG")
+# #Full
+# bR2.full.EEG = bayes_R2(model.full.EEG)
+# saveRDS(bR2.full.EEG,file="bR2.full.EEG")
 
 
 # read in the models and comparisons
-#model.null.threefactors = readRDS("null.EEG.allsub.rds")
-# model.condition.threefactors = readRDS("model.condition.threefactors.EEG.allsubs.rds")
-#model.attention.threefactors = readRDS("attention.EEG.allsubs.rds")
-# model.expphase.threefactors = readRDS("model.expphase.threefactors.EEG.allsubs.rds")
-# model.rewardmagnitudeANDattention.threefactors = readRDS("model.rewardmagnitudeANDattention.threefactors.EEG.allsubs.rds")
-# model.phaseANDattention.threefactors = readRDS("model.phaseANDattention.threefactors.EEG.allsubs.rds")
-#model.threemaineffects.threefactors = readRDS("threemain.EEG.allsubs.rds")
+# null = readRDS("null.EEG.allsub.rds")
+# attention = readRDS("attention.EEG.allsubs.rds")
+# expphase = readRDS("expphase.EEG.allsubs.rds")
+# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
+# rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
 model.full.threefactors = readRDS("full.EEG.allsubs.rds")
-#compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
 compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.rds")
+compare.EEG.waic.weights = readRDS("compare.EEG.waic.weights")
+bR2.null.EEG = readRDS("bR2.null.EEG")
+bR2.expphase.EEG = readRDS("bR2.expphase.EEG")
+bR2.attention.EEG = readRDS("bR2.attention.EEG")
+bR2.phaseANDattention.EEG = readRDS("bR2.phaseANDattention.EEG")
+bR2.rewardTimesPhasePlusAtt.EEG = readRDS("bR2.rewardTimesPhasePlusAtt.EEG")
+bR2.full.EEG = readRDS("bR2.full.EEG")
 ```
 
 ### Model comparison with WAIC
 
 ```{r, warning=FALSE, message=FALSE}
 print(compare.threefactors.EEG.waic)
+```
+
+### Model comparison with WAIC weights
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.EEG.waic.weights)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.EEG)
+```
+
+Experiment phase
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.EEG)
+```
+
+Attention model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.attention.EEG)
+```
+
+Phase and attention model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.phaseANDattention.EEG)
+```
+
+Reward times phase plus attention model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.rewardTimesPhasePlusAtt.EEG)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.full.EEG)
 ```
 
 ### Checking the best model
@@ -437,272 +496,69 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
 Check the difference between high and low reward in basline attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Difference between high and low reward in acquisition attended
 Diff_Rew_Bsln_Att = Baseline_High_Attended - Baseline_Low_Attended
 plotPost(Diff_Rew_Bsln_Att, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ConditionLow_Rew")
-print(h1)
 ```
 
 Check the difference between high and low reward in acquisition attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Difference between high and low reward in acquisition attended
 Diff_Rew_Acq_Att = Acquisition_High_Attended - Acquisition_Low_Attended
 plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq > b_Intercept +  b_ExpPhaseAcq + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
-print(h1)
 ```
 
 Check the difference between high and low reward in extinction attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt > b_Intercept +  b_ExpPhaseExt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt")
-print(h1)
+Diff_Rew_Ext_Att = Extinction_High_Attended - Extinction_Low_Attended
+plotPost(Diff_Rew_Ext_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
-Check the difference between high and low reward in baseline not attended
+Check the difference between high and low reward in basline not attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept + b_AttentionNotAtt > b_Intercept + b_AttentionNotAtt + b_ConditionLow_Rew")
-print(h2)
+Diff_Rew_Bsln_NotAtt = Baseline_High_NotAttended - Baseline_Low_NotAttended
+plotPost(Diff_Rew_Bsln_NotAtt, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high and low reward in acquisition not attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ExpPhaseAcq:AttentionNotAtt > b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq + b_ExpPhaseAcq:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt")
-print(h2)
+Diff_Rew_Acq_NotAtt = Acquisition_High_NotAttended - Acquisition_Low_NotAttended
+plotPost(Diff_Rew_Acq_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
 Check the difference between high and low reward in extinction not attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ExpPhaseExt:AttentionNotAtt > b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt + b_ExpPhaseExt:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt")
-print(h2)
+Diff_Rew_Ext_NotAtt = Extinction_High_NotAttended - Extinction_Low_NotAttended
+plotPost(Diff_Rew_Ext_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
-
-
-## Statistics - Blue - high reward
+Check the difference between baseline and acquisition in high reward attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Set the working directory in order to load the models
-# Set working directory
-setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
-
-
-# read in the models and comparisons
-#model.null.threefactors = readRDS("null.EEG.allsub.rds")
-# model.condition.threefactors = readRDS("model.condition.threefactors.EEG.allsubs.rds")
-#model.attention.threefactors = readRDS("attention.EEG.allsubs.rds")
-# model.expphase.threefactors = readRDS("model.expphase.threefactors.EEG.allsubs.rds")
-# model.rewardmagnitudeANDattention.threefactors = readRDS("model.rewardmagnitudeANDattention.threefactors.EEG.allsubs.rds")
-# model.phaseANDattention.threefactors = readRDS("model.phaseANDattention.threefactors.EEG.allsubs.rds")
-#model.threemaineffects.threefactors = readRDS("threemain.EEG.allsubs.rds")
-model.full.threefactors = readRDS("full.EEG.allsubs.blue.rds")
-#compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
-compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.blue.rds")
+Diff_Bsln_Acq_High_Att = Baseline_High_Attended - Acquisition_High_Attended
+plotPost(Diff_Bsln_Acq_High_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
-### Model comparison with WAIC
+Check the difference between baseline and acquisition in low reward attended
 
 ```{r, warning=FALSE, message=FALSE}
-print(compare.threefactors.EEG.waic)
+Diff_Bsln_Acq_Low_Att = Baseline_Low_Attended - Acquisition_Low_Attended
+plotPost(Diff_Bsln_Acq_Low_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
-### Checking the best model
-
-Plotting the chains
-```{r, warning=FALSE, message=FALSE}
-# Plot chains
-plot(model.full.threefactors, pars = "^b_", ask = FALSE, N=6)
-```
-
-Summary of the best model 
+Check the difference between baseline and acquisition in high reward not attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Summary of the best model
-print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
+Diff_Bsln_Acq_High_NotAtt = Baseline_High_NotAttended - Acquisition_High_NotAttended
+plotPost(Diff_Bsln_Acq_High_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
-### Plotting the best model
-
-Attended color (plot 1) and Not attended color (plot 2)
+Check the difference between baseline and acquisition in low reward not attended
 
 ```{r, warning=FALSE, message=FALSE}
-# Plot the interaction between Phase and Attention in two conditions of reward probability
-conditions = data.frame(Attention = c("Att", "NotAtt"))
-plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
+Diff_Bsln_Acq_Low_NotAtt = Baseline_Low_NotAttended - Acquisition_Low_NotAttended
+plotPost(Diff_Bsln_Acq_Low_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
-
-### Inference about the best model
-
-```{r, warning=FALSE, message=FALSE}
-post = posterior_samples(model.full.threefactors, "^b")
-```
-
-Check the difference between high and low reward in basline attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ConditionLow_Rew")
-print(h1)
-```
-
-Check the difference between high and low reward in acquisition attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq > b_Intercept +  b_ExpPhaseAcq + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
-print(h1)
-```
-
-Check the difference between high and low reward in extinction attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt > b_Intercept +  b_ExpPhaseExt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt")
-print(h1)
-```
-
-Check the difference between high and low reward in baseline not attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept + b_AttentionNotAtt > b_Intercept + b_AttentionNotAtt + b_ConditionLow_Rew")
-print(h2)
-```
-
-Check the difference between high and low reward in acquisition not attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ExpPhaseAcq:AttentionNotAtt > b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq + b_ExpPhaseAcq:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt")
-print(h2)
-```
-
-Check the difference between high and low reward in extinction not attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ExpPhaseExt:AttentionNotAtt > b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt + b_ExpPhaseExt:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt")
-print(h2)
-```
-
-
-
-## Statistics - Red - high reward
-
-```{r, warning=FALSE, message=FALSE}
-# Set the working directory in order to load the models
-# Set working directory
-setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
-
-
-# read in the models and comparisons
-#model.null.threefactors = readRDS("null.EEG.allsub.rds")
-# model.condition.threefactors = readRDS("model.condition.threefactors.EEG.allsubs.rds")
-#model.attention.threefactors = readRDS("attention.EEG.allsubs.rds")
-# model.expphase.threefactors = readRDS("model.expphase.threefactors.EEG.allsubs.rds")
-# model.rewardmagnitudeANDattention.threefactors = readRDS("model.rewardmagnitudeANDattention.threefactors.EEG.allsubs.rds")
-# model.phaseANDattention.threefactors = readRDS("model.phaseANDattention.threefactors.EEG.allsubs.rds")
-#model.threemaineffects.threefactors = readRDS("threemain.EEG.allsubs.rds")
-model.full.threefactors = readRDS("full.EEG.allsubs.red.rds")
-#compare.threefactors.EEG.loo = readRDS("compare.threefactors.EEG.loo.allsubs.rds")
-compare.threefactors.EEG.waic = readRDS("compare.EEG.waic.allsubs.red.rds")
-```
-
-### Model comparison with WAIC
-
-```{r, warning=FALSE, message=FALSE}
-print(compare.threefactors.EEG.waic)
-```
-
-### Checking the best model
-
-Plotting the chains
-```{r, warning=FALSE, message=FALSE}
-# Plot chains
-plot(model.full.threefactors, pars = "^b_", ask = FALSE, N=6)
-```
-
-Summary of the best model 
-
-```{r, warning=FALSE, message=FALSE}
-# Summary of the best model
-print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
-```
-
-### Plotting the best model
-
-Attended color (plot 1) and Not attended color (plot 2)
-
-```{r, warning=FALSE, message=FALSE}
-# Plot the interaction between Phase and Attention in two conditions of reward probability
-conditions = data.frame(Attention = c("Att", "NotAtt"))
-plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
-```
-
-### Inference about the best model
-
-```{r, warning=FALSE, message=FALSE}
-post = posterior_samples(model.full.threefactors, "^b")
-```
-
-Check the difference between high and low reward in basline attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ConditionLow_Rew")
-print(h1)
-```
-
-Check the difference between high and low reward in acquisition attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq > b_Intercept +  b_ExpPhaseAcq + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq")
-print(h1)
-```
-
-Check the difference between high and low reward in extinction attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt > b_Intercept +  b_ExpPhaseExt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt")
-print(h1)
-```
-
-Check the difference between high and low reward in baseline not attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept + b_AttentionNotAtt > b_Intercept + b_AttentionNotAtt + b_ConditionLow_Rew")
-print(h2)
-```
-
-Check the difference between high and low reward in acquisition not attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ExpPhaseAcq:AttentionNotAtt > b_Intercept +  b_ExpPhaseAcq + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseAcq + b_ExpPhaseAcq:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt")
-print(h2)
-```
-
-Check the difference between high and low reward in extinction not attended
-
-```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for not attended
-h2 = hypothesis(post, "b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ExpPhaseExt:AttentionNotAtt > b_Intercept +  b_ExpPhaseExt + b_AttentionNotAtt + b_ConditionLow_Rew  + b_ConditionLow_Rew:ExpPhaseExt + b_ExpPhaseExt:AttentionNotAtt + b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt")
-print(h2)
-```
-

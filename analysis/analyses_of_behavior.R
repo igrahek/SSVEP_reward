@@ -253,13 +253,6 @@ options(mc.cores = parallel::detectCores())
 data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
 data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
 
-# Contrast coding
-# subset(data.final$ExpPhase, data.final$ExpPhase=="Bsln") = -0.5
-# data.final$ExpPhase["Bsln"] = -0.5
-# 
-# data.final$ExpPhase[data.final$ExpPhase == "Acq"] <- 5
-
-
 # Null model
 model.null.RT = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
                  data=data.final,
@@ -297,12 +290,9 @@ model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase * Condition|Part
 saveRDS(model.full.RT,file="model.full.RT.rds")
 
 # # read in the models and comparisons
-# model.null.RT = readRDS("nullmodel.RT.rds")
-# model.condition.RT = readRDS("model.condition.RT.rds")
-# model.expphase.RT = readRDS("expphasemodel.RT.rds")
-# model.twomaineffects.RT = readRDS("model.twomaineffects.RT.rds")
-# model.full.RT = readRDS("model.full.RT.rds")
-# #compare.loo = readRDS("compare.RT.loo")
+ # model.null.RT = readRDS("nullmodel.RT.rds")
+ # model.expphase.RT = readRDS("expphasemodel.RT.rds")
+ # model.full.RT = readRDS("model.full.RT.rds")
 # compare.waic = readRDS("compare.RT.waic")
 
 #WAIC
@@ -313,10 +303,64 @@ saveRDS(compare.RT.waic,file="compare.RT.waic")
 compare.RT.waic.weights = model_weights(model.null.RT,model.expphase.RT,model.full.RT, weights = "waic")
 saveRDS(compare.RT.waic.weights,file="compare.RT.waic.weights")
 
-# #LOO crossvalidation
-# compare.RT.loo = LOO(model.null,model.condition,model.expphase,model.twomaineffects,model.full,reloo=TRUE) #,reloo=TRUE
-# saveRDS(compare.RT.loo,file="compare.RT.loo")
+# Bayesian R2
+#Null
+bR2.null.RT = bayes_R2(model.null.RT)
+saveRDS(bR2.null.RT,file="bR2.null.RT")
+#ExpPhase
+bR2.expphase.RT = bayes_R2(model.expphase.RT)
+saveRDS(bR2.expphase.RT,file="bR2.expphase.RT")
+#Full
+bR2.full.RT = bayes_R2(model.full.RT)
+saveRDS(bR2.full.RT,file="bR2.full.RT")
 
+# Analyzing the posterior and differences between conditions
+
+post = posterior_samples(model.full.RT, "^b")
+
+
+################################################ Baseline ####
+
+######### High reward
+Baseline_High = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Acquistion
+
+######### High reward
+Acquisition_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:ConditionLow_Rew"]]
+
+################################################ Extinction
+
+######### High reward
+Extinction_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:ConditionLow_Rew"]]
+
+
+# Difference between high and low reward in baseline
+Diff_Rew_Bsln = Baseline_High - Baseline_Low
+plotPost(Diff_Rew_Bsln, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+
+# Difference between high and low reward in acquisition 
+Diff_Rew_Acq = Acquisition_High - Acquisition_Low
+plotPost(Diff_Rew_Acq, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+
+# Difference between high and low reward in extinction
+Diff_Rew_Ext = Extinction_High - Extinction_Low
+plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 
 # brms accuracy------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -362,12 +406,9 @@ model.full.Acc = brm(Hit.Rate ~ ExpPhase * Condition + (ExpPhase * Condition|Par
 saveRDS(model.full.Acc,file="model.full.Acc.rds")
 
 #read in the models and comparisons
-# model.null.Acc = readRDS("nullmodel.Acc.rds")
-# model.condition.Acc = readRDS("model.condition.Acc.rds")
-# model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
-# model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
-# model.full.Acc = readRDS("model.full.Acc.rds")
-#compare.loo.Acc = readRDS("compare.Acc.loo")
+ model.null.Acc = readRDS("nullmodel.Acc.rds")
+ model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
+ model.full.Acc = readRDS("model.full.Acc.rds")
 # compare.waic.Acc = readRDS("compare.Acc.waic")
 
 #WAIC
@@ -377,4 +418,63 @@ saveRDS(compare.Acc.waic,file="compare.Acc.waic")
 # Weighted waic
 compare.Acc.waic.weights = model_weights(model.null.Acc,model.expphase.Acc,model.full.Acc, weights = "waic")
 saveRDS(compare.Acc.waic.weights,file="compare.Acc.waic.weights")
+
+# Bayesian R2
+#Null
+bR2.null.Acc = bayes_R2(model.null.Acc)
+saveRDS(bR2.null.Acc,file="bR2.null.Acc")
+#ExpPhase
+bR2.expphase.Acc = bayes_R2(model.expphase.Acc)
+saveRDS(bR2.expphase.Acc,file="bR2.expphase.Acc")
+#Full
+bR2.full.Acc = bayes_R2(model.full.Acc)
+saveRDS(bR2.full.Acc,file="bR2.full.Acc")
+
+# Analyzing the posterior and differences between conditions
+
+post = posterior_samples(model.full.Acc, "^b")
+
+
+################################################ Baseline ####
+
+######### High reward
+Baseline_High = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Acquistion
+
+######### High reward
+Acquisition_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:ConditionLow_Rew"]]
+
+################################################ Extinction
+
+######### High reward
+Extinction_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:ConditionLow_Rew"]]
+
+
+# Difference between high and low reward in baseline
+Diff_Rew_Bsln = Baseline_High - Baseline_Low
+plotPost(Diff_Rew_Bsln, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+
+# Difference between high and low reward in acquisition 
+Diff_Rew_Acq = Acquisition_High - Acquisition_Low
+plotPost(Diff_Rew_Acq, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+
+# Difference between high and low reward in extinction
+Diff_Rew_Ext = Extinction_High - Extinction_Low
+plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 

@@ -32,7 +32,7 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools)
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST)
 # set seed
 set.seed(42) 
 # set directory
@@ -185,6 +185,11 @@ data.final$Condition = factor(data.final$Condition)
 # Set working directory
 setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
 
+# # referencing for easier interpretation
+# data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+# data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+# 
+# 
 # # Null model
 # model.null.Acc = brm(Hit.Rate ~ 1 + (1|ParticipantNo),
 #                  data=data.final,
@@ -193,7 +198,8 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                  iter = 10000,
 #                  save_all_pars = TRUE,
 #                  control = list(adapt_delta = 0.99),
-#                  cores = 4)
+#                  cores = 4,
+#                  sample_prior = TRUE)
 # saveRDS(model.null.Acc,file="nullmodel.Acc.rds")
 # 
 # # ExpPhase model
@@ -204,30 +210,9 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                      iter = 10000,
 #                      save_all_pars = TRUE,
 #                      control = list(adapt_delta = 0.99),
-#                      cores = 4)
+#                      cores = 4,
+#                      sample_prior = TRUE)
 # saveRDS(model.expphase.Acc,file="expphasemodel.Acc.rds")
-# 
-# # Condition model
-# model.condition.Acc = brm(Hit.Rate ~ Condition + (Condition|ParticipantNo),
-#                       data=data.final,
-#                       family=gaussian(),
-#                       warmup = 2000,
-#                       iter = 10000,
-#                       save_all_pars = TRUE,
-#                       control = list(adapt_delta = 0.99),
-#                       cores = 4)
-# saveRDS(model.expphase.Acc,file="model.condition.Acc.rds")
-# 
-# # # Two main effects model
-# model.twomaineffects.Acc = brm(Hit.Rate ~ ExpPhase + Condition + (ExpPhase + Condition|ParticipantNo),
-#                            data=data.final,
-#                            family=gaussian(),
-#                            warmup = 2000,
-#                            iter = 10000,
-#                            save_all_pars = TRUE,
-#                            control = list(adapt_delta = 0.99),
-#                            cores = 4)
-# saveRDS(model.twomaineffects.Acc,file="model.twomaineffects.Acc.rds")
 # 
 # #Interaction model
 # model.full.Acc = brm(Hit.Rate ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
@@ -237,13 +222,17 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                  iter = 10000,
 #                  save_all_pars = TRUE,
 #                  control = list(adapt_delta = 0.99),
-#                  cores = 4)
+#                  cores = 4,
+#                  sample_prior = TRUE)
 # saveRDS(model.full.Acc,file="model.full.Acc.rds")
-# 
-# #WAIC
-# compare.Acc.waic = WAIC(model.null.Acc,model.condition.Acc,model.expphase.Acc,model.twomaineffects.Acc,model.full.Acc, compare = FALSE)
+
+#WAIC
+# compare.Acc.waic = WAIC(model.null.Acc,model.expphase.Acc,model.full.Acc, compare = TRUE)
 # saveRDS(compare.Acc.waic,file="compare.Acc.waic")
 
+# Weighted waic
+# compare.Acc.waic.weights = model_weights(model.null.Acc,model.expphase.Acc,model.full.Acc, weights = "waic")
+# saveRDS(compare.Acc.waic.weights,file="compare.Acc.waic.weights")
 
 #read in the models and comparisons
 # model.null.Acc = readRDS("nullmodel.Acc.rds")
@@ -251,14 +240,40 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 # model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
 # model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
 model.full.Acc = readRDS("model.full.Acc.rds")
-#compare.loo.Acc = readRDS("compare.Acc.loo")
 compare.waic.Acc = readRDS("compare.Acc.waic")
+compare.Acc.waic.weights = readRDS("compare.Acc.waic.weights")
+bR2.null.Acc = readRDS("bR2.null.Acc")
+bR2.expphase.Acc = readRDS("bR2.expphase.Acc")
+bR2.full.Acc = readRDS("bR2.full.Acc")
 ```
 
 ### Model comparison with WAIC
 
 ```{r, warning=FALSE, message=FALSE}
 print(compare.waic.Acc)
+```
+
+### Model comparison with WAIC weights
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.Acc.waic.weights)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.Acc)
+```
+
+Experiment phase model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.Acc)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.full.Acc)
 ```
 
 ### Checking the best model
@@ -289,47 +304,75 @@ plot(marginal_effects(model.full.Acc, effects = "ExpPhase:Condition"),ask=FALSE)
 
 #### Sample from the posterior
 ```{r, warning=FALSE, message=FALSE}
+# Analyzing the posterior and differences between conditions
+
 post = posterior_samples(model.full.Acc, "^b")
+
+
+################################################ Baseline ####
+
+######### High reward
+Baseline_High = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Acquistion
+
+######### High reward
+Acquisition_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:ConditionLow_Rew"]]
+
+################################################ Extinction
+
+######### High reward
+Extinction_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:ConditionLow_Rew"]]
 ```
 
 Check the difference between high and low reward in baseline 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept < b_Intercept + b_ConditionLow_Rew ")
-print(h1)
+Diff_Rew_Bsln = Baseline_High - Baseline_Low
+plotPost(Diff_Rew_Bsln, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high and low reward in acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept + b_ExpPhaseAcq < b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseAcq:ConditionLow_Rew")
-print(h1)
+Diff_Rew_Acq = Acquisition_High - Acquisition_Low
+plotPost(Diff_Rew_Acq, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
 Check the difference between high and low reward in extinction 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept + b_ExpPhaseExt < b_Intercept + b_ExpPhaseExt + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
-print(h1)
+Diff_Rew_Ext = Extinction_High - Extinction_Low
+plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ExpPhaseAcq")
-print(h1)
+Diff_Bsln_Acq_High = Baseline_High - Acquisition_High
+plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept + b_ConditionLow_Rew > b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
-print(h1)
+Diff_Bsln_Acq_Low = Baseline_Low - Acquisition_Low
+plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 ## Reaction times
@@ -392,10 +435,9 @@ print(h1)
 # Set working directory
 setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
 # 
-# # referencing for easier interpretation
+# referencing for easier interpretation
 # data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
 # data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
-# 
 # 
 # # Null model
 # model.null.RT = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
@@ -405,7 +447,8 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                  iter = 10000,
 #                  save_all_pars = TRUE,
 #                  control = list(adapt_delta = 0.99),
-#                  cores = 4)
+#                  cores = 4,
+#                  sample_prior = TRUE)
 # saveRDS(model.null.RT,file="nullmodel.RT.rds")
 # 
 # # ExpPhase model
@@ -416,30 +459,9 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                  iter = 10000,
 #                  save_all_pars = TRUE,
 #                  control = list(adapt_delta = 0.99),
-#                  cores = 4)
+#                  cores = 4,
+#                  sample_prior = TRUE)
 # saveRDS(model.expphase.RT,file="expphasemodel.RT.rds")
-# 
-# # Condition model
-# model.condition.RT = brm(Hits.RTs ~ Condition + (Condition|ParticipantNo),
-#                      data=data.final,
-#                      family=gaussian(),
-#                      warmup = 2000,
-#                      iter = 10000,
-#                      save_all_pars = TRUE,
-#                      control = list(adapt_delta = 0.99),
-#                      cores = 4)
-# saveRDS(model.condition.RT,file="model.condition.RT.rds")
-# 
-# # # Two main effects model
-# model.twomaineffects.RT = brm(Hits.RTs ~ ExpPhase + Condition + (ExpPhase + Condition|ParticipantNo),
-#                  data=data.final,
-#                  family=gaussian(),
-#                  warmup = 2000,
-#                  iter = 10000,
-#                  save_all_pars = TRUE,
-#                  control = list(adapt_delta = 0.99),
-#                  cores = 4)
-# saveRDS(model.twomaineffects.RT,file="model.twomaineffects.RT.rds")
 # 
 # #Interaction model
 # model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
@@ -449,27 +471,68 @@ setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experim
 #                  iter = 10000,
 #                  save_all_pars = TRUE,
 #                  control = list(adapt_delta = 0.99),
-#                  cores = 4)
+#                  cores = 4,
+#                  sample_prior = TRUE)
 # saveRDS(model.full.RT,file="model.full.RT.rds")
 # 
 # #WAIC
-# compare.RT.waic = WAIC(model.null.RT,model.condition.RT,model.expphase.RT,model.twomaineffects.RT,model.full.RT, compare = FALSE)
+# compare.RT.waic = WAIC(model.null.RT,model.expphase.RT,model.full.RT, comapre = TRUE)
 # saveRDS(compare.RT.waic,file="compare.RT.waic")
+# 
+# # Weighted waic
+# compare.RT.waic.weights = model_weights(model.null.RT,model.expphase.RT,model.full.RT, weights = "waic")
+# saveRDS(compare.RT.waic.weights,file="compare.RT.waic.weights")
+# 
+# # Bayesian R2
+# #Null
+# bR2.null.RT = bayes_R2(model.null.RT)
+# saveRDS(bR2.null.RT,file="bR2.null.RT")
+# #ExpPhase
+# bR2.expphase.RT = bayes_R2(model.expphase.RT)
+# saveRDS(bR2.expphase.RT,file="bR2.expphase.RT")
+# #Full
+# bR2.full.RT = bayes_R2(model.full.RT)
+# saveRDS(bR2.full.RT,file="bR2.full.RT")
 
 # # read in the models and comparisons
+
 # model.null.RT = readRDS("nullmodel.RT.rds")
-# model.condition.RT = readRDS("model.condition.RT.rds")
 # model.expphase.RT = readRDS("expphasemodel.RT.rds")
-# model.twomaineffects.RT = readRDS("model.twomaineffects.RT.rds")
 model.full.RT = readRDS("model.full.RT.rds")
-#compare.loo = readRDS("compare.RT.loo")
 compare.waic.RT = readRDS("compare.RT.waic")
+compare.RT.waic.weights = readRDS("compare.RT.waic.weights")
+bR2.null.RT = readRDS("bR2.null.RT")
+bR2.expphase.RT = readRDS("bR2.expphase.RT")
+bR2.full.RT = readRDS("bR2.full.RT")
 ```
 
 ### Model comparison with WAIC
 
 ```{r, warning=FALSE, message=FALSE}
 print(compare.waic.RT)
+```
+
+### Model comparison with WAIC weights
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.RT.waic.weights)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.RT)
+```
+
+Experiment phase model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.RT)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.full.RT)
 ```
 
 ### Checking the best model
@@ -501,45 +564,74 @@ plot(marginal_effects(model.full.RT, effects = "ExpPhase:Condition"),ask=FALSE)
 
 #### Sample from the posterior
 ```{r, warning=FALSE, message=FALSE}
+
+# Analyzing the posterior and differences between conditions
+
 post = posterior_samples(model.full.RT, "^b")
+
+
+################################################ Baseline ####
+
+######### High reward
+Baseline_High = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Acquistion
+
+######### High reward
+Acquisition_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:ConditionLow_Rew"]]
+
+################################################ Extinction
+
+######### High reward
+Extinction_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:ConditionLow_Rew"]]
 ```
 
 Check the difference between high and low reward in baseline 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept < b_Intercept + b_ConditionLow_Rew ")
-print(h1)
+Diff_Rew_Bsln = Baseline_High - Baseline_Low
+plotPost(Diff_Rew_Bsln, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high and low reward in acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept + b_ExpPhaseAcq < b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseAcq:ConditionLow_Rew")
-print(h1)
+Diff_Rew_Acq = Acquisition_High - Acquisition_Low
+plotPost(Diff_Rew_Acq, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
 Check the difference between high and low reward in extinction 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept + b_ExpPhaseExt < b_Intercept + b_ExpPhaseExt + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
-print(h1)
+Diff_Rew_Ext = Extinction_High - Extinction_Low
+plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept > b_Intercept + b_ExpPhaseAcq")
-print(h1)
+Diff_Bsln_Acq_High = Baseline_High - Acquisition_High
+plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-# Evidence ratio for the hypothesis that the high rewarded condition is higher than the low rewarded condition for attended
-h1 = hypothesis(post, "b_Intercept + b_ConditionLow_Rew > b_Intercept + b_ExpPhaseAcq + b_ConditionLow_Rew + b_ExpPhaseExt:ConditionLow_Rew")
-print(h1)
+Diff_Bsln_Acq_Low = Baseline_Low - Acquisition_Low
+plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
