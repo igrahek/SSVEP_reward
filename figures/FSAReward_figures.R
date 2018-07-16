@@ -1,6 +1,5 @@
 
-pkgdir <- paste0(getwd(), "/packages") # set package directory
-.libPaths(c(pkgdir, .libPaths())) # add package directory
+.libPaths("E:/R_workspace/packages") # add package directory
 
 library(Rmisc) # must be loaded before 'tidyverse' or it will cause compatibility issues
 library(tidyverse)
@@ -42,7 +41,8 @@ topo_10Hz <- topos %>%
     interp_limit = "skirt",
     contour = TRUE,
     chan_marker = "point",
-    quantity = "amplitude"
+    quantity = "amplitude",
+    highlights = c("Oz", "POz", "O2", "PO3")
   ) +
   ggtitle("10 Hz") +
   theme(
@@ -62,7 +62,8 @@ topo_12Hz <- topos %>%
     interp_limit = "skirt",
     contour = TRUE,
     chan_marker = "point",
-    quantity = "amplitude"
+    quantity = "amplitude",
+    highlights = c("Oz", "POz", "O2", "PO3")
   ) +
   ggtitle("12 Hz") +
   theme(
