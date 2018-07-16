@@ -1,4 +1,0 @@
-edfReader               edfReader: A package for reading EDF(+) and
-                        BDF(+) files
-readEdfHeader           Read EDF(+) or BDF(+) file header
-readEdfSignals          Reads signals from an EDF(+)/BDF(+) file

@@ -1,7 +1,0 @@
-edfReader-package	edfReader
-bdfReader	edfReader
-edfReader	edfReader
-readBdfHeader	readEdfHeader
-readBdfSignals	readEdfSignals
-readEdfHeader	readEdfHeader
-readEdfSignals	readEdfSignals
