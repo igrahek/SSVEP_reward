@@ -565,3 +565,31 @@ Check the difference between baseline and acquisition in low reward not attended
 Diff_Bsln_Acq_Low_NotAtt = Baseline_Low_NotAttended - Acquisition_Low_NotAttended
 plotPost(Diff_Bsln_Acq_Low_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
+
+Check the difference between acquisition and extinction in high reward attended
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_High_Att = Acquisition_High_Attended - Extinction_High_Attended
+plotPost(Diff_Acq_Ext_High_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+```
+
+Check the difference between acquisition and extinction in low reward attended
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_Low_Att = Acquisition_Low_Attended - Extinction_Low_Attended
+plotPost(Diff_Acq_Ext_Low_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+```
+
+Check the difference between acquisition and extinction in high reward not attended
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_High_NotAtt = Acquisition_High_NotAttended - Extinction_High_NotAttended
+plotPost(Diff_Acq_Ext_High_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+```
+
+Check the difference between acquisition and extinction in low reward not attended
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_Low_NotAtt = Acquisition_Low_NotAttended - Extinction_Low_NotAttended
+plotPost(Diff_Acq_Ext_Low_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
+```
