@@ -375,6 +375,20 @@ Diff_Bsln_Acq_Low = Baseline_Low - Acquisition_Low
 plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
+Check the difference between high reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_High = Acquisition_High - Extinction_High
+plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between low reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_Low = Acquisition_Low - Extinction_Low
+plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
 ## Reaction times
 
 ### Plot
@@ -635,7 +649,6 @@ Check the difference between low reward in baseline vs. acquisition
 Diff_Bsln_Acq_Low = Baseline_Low - Acquisition_Low
 plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
-
 
 Check the difference between high reward in acquisition vs. extinction 
 
