@@ -501,7 +501,8 @@ Acquisition_Low_Attended = post[["b_Intercept"]] +
 ######### High reward
 Acquisition_High_NotAttended = post[["b_Intercept"]] + 
   post[["b_ExpPhaseAcq"]] + 
-  post[["b_AttentionNotAtt"]]
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ExpPhaseAcq:AttentionNotAtt"]]
 ######### Low reward
 Acquisition_Low_NotAttended = post[["b_Intercept"]] + 
   post[["b_ExpPhaseAcq"]] + 
@@ -529,7 +530,8 @@ Extinction_Low_Attended = post[["b_Intercept"]] +
 ######### High reward
 Extinction_High_NotAttended = post[["b_Intercept"]] + 
   post[["b_ExpPhaseExt"]] + 
-  post[["b_AttentionNotAtt"]]
+  post[["b_AttentionNotAtt"]] + 
+  post[["b_ExpPhaseExt:AttentionNotAtt"]]
 ######### Low reward
 Extinction_Low_NotAttended = post[["b_Intercept"]] + 
   post[["b_ExpPhaseExt"]] + 
