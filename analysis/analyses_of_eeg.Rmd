@@ -496,48 +496,6 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
   post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
 ```
 
-Check the difference between high and low reward in basline attended
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Bsln_Att = Baseline_High_Attended - Baseline_Low_Attended
-plotPost(Diff_Rew_Bsln_Att, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-```
-
-Check the difference between high and low reward in acquisition attended
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Acq_Att = Acquisition_High_Attended - Acquisition_Low_Attended
-plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-```
-
-Check the difference between high and low reward in extinction attended
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Ext_Att = Extinction_High_Attended - Extinction_Low_Attended
-plotPost(Diff_Rew_Ext_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-```
-
-Check the difference between high and low reward in basline not attended
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Bsln_NotAtt = Baseline_High_NotAttended - Baseline_Low_NotAttended
-plotPost(Diff_Rew_Bsln_NotAtt, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-```
-
-Check the difference between high and low reward in acquisition not attended
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Acq_NotAtt = Acquisition_High_NotAttended - Acquisition_Low_NotAttended
-plotPost(Diff_Rew_Acq_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-```
-
-Check the difference between high and low reward in extinction not attended
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Ext_NotAtt = Extinction_High_NotAttended - Extinction_Low_NotAttended
-plotPost(Diff_Rew_Ext_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-```
-
 Check the difference between baseline and acquisition in high reward attended
 
 ```{r, warning=FALSE, message=FALSE}
