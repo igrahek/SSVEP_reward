@@ -340,52 +340,31 @@ Extinction_Low = post[["b_Intercept"]] +
   post[["b_ExpPhaseExt:ConditionLow_Rew"]]
 ```
 
-Check the difference between high and low reward in baseline 
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Bsln = Baseline_High - Baseline_Low
-plotPost(Diff_Rew_Bsln, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-```
-
-Check the difference between high and low reward in acquisition 
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Acq = Acquisition_High - Acquisition_Low
-plotPost(Diff_Rew_Acq, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-```
-
-Check the difference between high and low reward in extinction 
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Ext = Extinction_High - Extinction_Low
-plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-```
-
 Check the difference between high reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Bsln_Acq_High = Baseline_High - Acquisition_High
+Diff_Bsln_Acq_High = Acquisition_High - Baseline_High
 plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Bsln_Acq_Low = Baseline_Low - Acquisition_Low
+Diff_Bsln_Acq_Low = Acquisition_High - Baseline_High
 plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high reward in acquisition vs. extinction 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Acq_Ext_High = Acquisition_High - Extinction_High
+Diff_Acq_Ext_High = Extinction_High - Acquisition_High
 plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between low reward in acquisition vs. extinction 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Acq_Ext_Low = Acquisition_Low - Extinction_Low
+Diff_Acq_Ext_Low = Extinction_High - Acquisition_High
 plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
@@ -615,51 +594,30 @@ Extinction_Low = post[["b_Intercept"]] +
   post[["b_ExpPhaseExt:ConditionLow_Rew"]]
 ```
 
-Check the difference between high and low reward in baseline 
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Bsln = Baseline_High - Baseline_Low
-plotPost(Diff_Rew_Bsln, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-```
-
-Check the difference between high and low reward in acquisition 
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Acq = Acquisition_High - Acquisition_Low
-plotPost(Diff_Rew_Acq, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-```
-
-Check the difference between high and low reward in extinction 
-
-```{r, warning=FALSE, message=FALSE}
-Diff_Rew_Ext = Extinction_High - Extinction_Low
-plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-```
-
 Check the difference between high reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Bsln_Acq_High = Baseline_High - Acquisition_High
+Diff_Bsln_Acq_High = Acquisition_Low - Baseline_Low
 plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Bsln_Acq_Low = Baseline_Low - Acquisition_Low
+Diff_Bsln_Acq_Low = Acquisition_Low - Baseline_Low 
 plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high reward in acquisition vs. extinction 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Acq_Ext_High = Acquisition_High - Extinction_High
+Diff_Acq_Ext_High = Extinction_High - Acquisition_High
 plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between low reward in acquisition vs. extinction 
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Acq_Ext_Low = Acquisition_Low - Extinction_Low
+Diff_Acq_Ext_Low = Extinction_High - Acquisition_High
 plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
