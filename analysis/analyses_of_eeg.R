@@ -382,6 +382,18 @@ phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention
                                         sample_prior = TRUE)
 saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.rds")
 
+# Interaction between phase and attention
+phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + (ExpPhase * Attention|Subject),
+                        data=data,
+                        family=gaussian(),
+                        warmup = 2000,
+                        iter = 10000,
+                        save_all_pars = TRUE,
+                        control = list(adapt_delta = 0.99),
+                        cores = 4,
+                        sample_prior = TRUE)
+saveRDS(phaseANDattention_interaction,file="phaseANDattention_interaction.EEG.allsubs.rds")
+
 # Interaction between expphase and reward magnitude plus attention
 rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
                          data=data,
@@ -414,6 +426,7 @@ null = readRDS("null.EEG.allsub.rds")
 attention = readRDS("attention.EEG.allsubs.rds")
 expphase = readRDS("expphase.EEG.allsubs.rds")
 phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
+phaseANDattention_interaction = readRDS("phaseANDattention_interaction.EEG.allsubs.rds")
 rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
 full = readRDS("full.EEG.allsubs.rds")
 # waic = readRDS("compare.EEG.waic.allsubs.rds")
@@ -422,11 +435,11 @@ full = readRDS("full.EEG.allsubs.rds")
 # pp_check(full, type = "stat_grouped", nsamples = 100, group = "ExpPhase")
 
 # WAIC
-compare.EEG.waic = WAIC(null, expphase, attention, phaseANDattention, rewardTimesPhasePlusAtt, full, compare = TRUE)
+compare.EEG.waic = WAIC(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, compare = TRUE)
 saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.rds")
 
 # Weighted waic
-compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, rewardTimesPhasePlusAtt, full, weights = "waic")
+compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, weights = "waic")
 saveRDS(compare.EEG.waic.weights,file="compare.EEG.waic.weights")
 
 # Bayesian R2
@@ -442,6 +455,9 @@ saveRDS(bR2.attention.EEG,file="bR2.attention.EEG")
 #Phase and attention
 bR2.phaseANDattention.EEG = bayes_R2(phaseANDattention)
 saveRDS(bR2.phaseANDattention.EEG,file="bR2.phaseANDattention.EEG")
+#Phase and attention interaction
+bR2.phaseANDattention_interaction.EEG = bayes_R2(phaseANDattention_interaction)
+saveRDS(bR2.phaseANDattention_interaction.EEG,file="bR2.phaseANDattention_interaction.EEG")
 #Reward times phase plus attention
 bR2.rewardTimesPhasePlusAtt.EEG = bayes_R2(rewardTimesPhasePlusAtt)
 saveRDS(bR2.rewardTimesPhasePlusAtt.EEG,file="bR2.rewardTimesPhasePlusAtt.EEG")
