@@ -504,6 +504,106 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
   post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
 ```
 
+```{r, warning=FALSE, message=FALSE}
+# make a data frame
+library(tidyverse)
+
+posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Magnitude", "Attention"), "_", extra = "merge")
+
+names(posterior_conditions)[4] = "Amplitude"
+
+
+
+# Pirate plot
+pirateplot(formula=Amplitude ~ Reward_Phase + Reward_Magnitude + Attention, # dependent~independent variables
+           data=posterior_conditions, # data frame
+           main="ssVEPs", # main title
+           xlim=NULL, # x-axis: limits
+           xlab="", # x-axis: label
+           ylim=c(0.7,1.2), # y-axis: limits
+           ylab="Amplitude", # y-axis: label
+           inf.method="sd", # type of inference: 95% Bayesian Highest Density Intervals
+           #hdi.iter=5000, # number of iterations for estimation of HDI
+           #inf.within=ParticipantNo, # ID variable
+           theme=0, # preset theme (0: use your own)
+           # theme settings
+           # pal="xman", # color palette [see piratepal(palette="all")]
+           #point.col="black", # points: color
+           #point.o=.3, # points: opacity (0-1)
+           avg.line.col="black", # average line: color
+           avg.line.lwd=2, # average line: line width
+           avg.line.o=1, # average line: opacity (0-1)
+           bar.b.col=NULL, # bars, border: color
+           bar.lwd=0, # bars, border: line width
+           bar.b.o=0, # bars, border: opacity (0-1)
+           bar.f.col=NULL, # bars, filling: color
+           bar.f.o=0, # bars, filling: opacity (0-1)
+           inf.b.col="black", # inference band, border: color
+           inf.lwd=0.1, # inference band, border: line width
+           inf.b.o=1, # inference band, border: opacity (0-1)
+           inf.f.col="black", # inference band, filling: color
+           inf.f.o=0, # inference band, filling: opacity (0-1)
+           bean.b.col="black", # bean border, color
+           bean.lwd=0.6, # bean border, line width
+           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+           bean.b.o=0.3, # bean border, opacity (0-1)
+           bean.f.col="gray", # bean filling, color
+           bean.f.o=.1, # bean filling, opacity (0-1)
+           cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
+           sortx = "sequential", # how to sort the x axis
+           # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
+           # quant.col="black", # quantiles, line: color
+           # quant.length=.7, # quantiles, horizontal line length
+           # quant.lwd=2, # quantiles, line width
+           gl.col="gray", # gridlines: color
+           gl.lwd=c(.75,0), # gridlines: line width
+           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+           cex.lab=1, # axis labels: size
+           cex.axis=1, # axis numbers: size
+           bty="l", # plot box type
+           back.col="white") # background, color
+```
+
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+library(HDInterval)
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Attended Baseline High Reward", 
+                                  "Attended Baseline Low Reward", 
+                                  "Attended Acquisition High Reward", 
+                                  "Attended Acquisition Low Reward", 
+                                  "Attended Extinction High Reward", 
+                                  "Attended Extinction Low Reward",
+                                  "Unattended Baseline High Reward", 
+                                  "Unattended Baseline Low Reward", 
+                                  "Unattended Acquisition High Reward", 
+                                  "Unattended Acquisition Low Reward", 
+                                  "Unattended Extinction High Reward", 
+                                  "Unattended Extinction Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline_High_Attended), digits = 2), " [", round(hdi(Baseline_High_Attended)[[1]], digits = 2), " ", round(hdi(Baseline_High_Attended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_Low_Attended), digits = 2), " [", round(hdi(Baseline_Low_Attended)[[1]], digits = 2), " ", round(hdi(Baseline_Low_Attended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_High_Attended), digits = 2), " [", round(hdi(Acquisition_High_Attended)[[1]], digits = 2), " ", round(hdi(Acquisition_High_Attended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_Low_Attended), digits = 2), " [", round(hdi(Acquisition_Low_Attended)[[1]], digits = 2), " ", round(hdi(Acquisition_Low_Attended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_High_Attended), digits = 2), " [", round(hdi(Extinction_High_Attended)[[1]], digits = 2), " ", round(hdi(Extinction_High_Attended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_Low_NotAttended), digits = 2), " [", round(hdi(Extinction_Low_NotAttended)[[1]], digits = 2), " ", round(hdi(Extinction_Low_NotAttended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_High_NotAttended), digits = 2), " [", round(hdi(Baseline_High_NotAttended)[[1]], digits = 2), " ", round(hdi(Baseline_High_NotAttended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_Low_NotAttended), digits = 2), " [", round(hdi(Baseline_Low_NotAttended)[[1]], digits = 2), " ", round(hdi(Baseline_Low_NotAttended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_High_NotAttended), digits = 2), " [", round(hdi(Acquisition_High_NotAttended)[[1]], digits = 2), " ", round(hdi(Acquisition_High_NotAttended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_Low_NotAttended), digits = 2), " [", round(hdi(Acquisition_Low_NotAttended)[[1]], digits = 2), " ", round(hdi(Acquisition_Low_NotAttended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_High_NotAttended), digits = 2), " [", round(hdi(Extinction_High_NotAttended)[[1]], digits = 2), " ", round(hdi(Extinction_High_NotAttended)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_Low_NotAttended), digits = 2), " [", round(hdi(Extinction_Low_NotAttended)[[1]], digits = 2), " ", round(hdi(Extinction_Low_NotAttended)[[2]], digits = 2), "]")))
+
+names(posterior_means)[2] = "Mean [HDI]"
+                        
+print(posterior_means)
+```
+
 #### Attended vs. unattended
 
 Check the difference between attended and not attended in baseline high rewarded

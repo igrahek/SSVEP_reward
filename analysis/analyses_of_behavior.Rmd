@@ -400,6 +400,33 @@ pirateplot(formula=Hit_rate ~ Reward_Phase + Reward_Magnitude, # dependent~indep
            back.col="white") # background, color
 ```
 
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+library(HDInterval)
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline High Reward", 
+                                  "Baseline Low Reward", 
+                                  "Acquisition High Reward", 
+                                  "Acquisition Low Reward", 
+                                  "Extinction High Reward", 
+                                  "Extinction Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline_High), digits = 2), " [", round(hdi(Baseline_High)[[1]], digits = 2), " ", round(hdi(Baseline_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_Low), digits = 2), " [", round(hdi(Baseline_Low)[[1]], digits = 2), " ", round(hdi(Baseline_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_High), digits = 2), " [", round(hdi(Acquisition_High)[[1]], digits = 2), " ", round(hdi(Acquisition_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_Low), digits = 2), " [", round(hdi(Acquisition_Low)[[1]], digits = 2), " ", round(hdi(Acquisition_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_High), digits = 2), " [", round(hdi(Extinction_High)[[1]], digits = 2), " ", round(hdi(Extinction_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_Low), digits = 2), " [", round(hdi(Extinction_Low)[[1]], digits = 2), " ", round(hdi(Extinction_Low)[[2]], digits = 2), "]"))
+
+names(posterior_means)[2] = "Mean [HDI]"
+                        
+print(posterior_means)
+```
+
+
 Check the difference between high reward in baseline vs. acquisition 
 
 ```{r, warning=FALSE, message=FALSE}
@@ -418,6 +445,12 @@ plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex =
 cat('Mean = ', round(mean(Diff_Bsln_Acq_Low), digits = 2))
 cat('SD = ', round(sd(Diff_Bsln_Acq_Low), digits = 2))
 cat('SE = ', round(sd(Diff_Bsln_Acq_Low/sqrt(length(Diff_Bsln_Acq_Low))), digits = 2))
+```
+
+Difference between the upper two
+```{r, warning=FALSE, message=FALSE}
+Diff_Diff = Diff_Bsln_Acq_Low - Diff_Bsln_Acq_High
+plotPost(Diff_Diff, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
 
 Check the difference between high reward in acquisition vs. extinction 
@@ -446,7 +479,10 @@ cat('SE = ', round(sd(Diff_Acq_Ext_Low/sqrt(length(Diff_Acq_Ext_Low))), digits =
 
 ```{r, warning=FALSE, message=FALSE}
 # Pirate plot
-  pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
+
+recode  
+
+pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
              data=data.final, # data frame
              main="Reaction times", # main title
              xlim=NULL, # x-axis: limits
@@ -723,6 +759,33 @@ pirateplot(formula=Reaction_time ~ Reward_Phase + Reward_Magnitude, # dependent~
            cex.axis=1, # axis numbers: size
            bty="l", # plot box type
            back.col="white") # background, color
+```
+
+
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+library(HDInterval)
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline High Reward", 
+                                  "Baseline Low Reward", 
+                                  "Acquisition High Reward", 
+                                  "Acquisition Low Reward", 
+                                  "Extinction High Reward", 
+                                  "Extinction Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline_High), digits = 2), " [", round(hdi(Baseline_High)[[1]], digits = 2), " ", round(hdi(Baseline_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_Low), digits = 2), " [", round(hdi(Baseline_Low)[[1]], digits = 2), " ", round(hdi(Baseline_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_High), digits = 2), " [", round(hdi(Acquisition_High)[[1]], digits = 2), " ", round(hdi(Acquisition_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_Low), digits = 2), " [", round(hdi(Acquisition_Low)[[1]], digits = 2), " ", round(hdi(Acquisition_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_High), digits = 2), " [", round(hdi(Extinction_High)[[1]], digits = 2), " ", round(hdi(Extinction_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_Low), digits = 2), " [", round(hdi(Extinction_Low)[[1]], digits = 2), " ", round(hdi(Extinction_Low)[[2]], digits = 2), "]"))
+
+names(posterior_means)[2] = "Mean [HDI]"
+                        
+print(posterior_means)
 ```
 
 Check the difference between high reward in baseline vs. acquisition 
