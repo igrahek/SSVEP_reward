@@ -32,7 +32,7 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST)
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr)
 # set seed
 set.seed(42) 
 # set directory
@@ -122,6 +122,27 @@ data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor
 data.final$Condition = factor(data.final$Condition)
 
 ```
+### Means - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hit.Rate, na.rm = TRUE), digits = 10), " [", round(hdi(Hit.Rate)[[1]], digits = 10), " ", round(hdi(Hit.Rate)[[2]], digits = 10), "]")))
+
+names(summary) = c("Reward phase", "Reward probability", "Hit Rate")
+
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                           "Acq" = "Acquisition",
+                           "Bsln" = "Baseline",
+                           "Ext" = "Extinction")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+kable(summary, caption = "Hit rates per condition")
+```
+
 ### Plot
 
 ```{r, warning=FALSE, message=FALSE}
@@ -344,14 +365,14 @@ Extinction_Low = post[["b_Intercept"]] +
 # make a data frame
 posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
 
-posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Magnitude"), "_", extra = "merge")
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Probability"), "_", extra = "merge")
 
 names(posterior_conditions)[3] = "Hit_rate"
 
 
 
 # Pirate plot
-pirateplot(formula=Hit_rate ~ Reward_Phase + Reward_Magnitude, # dependent~independent variables
+pirateplot(formula=Hit_rate ~ Reward_Phase + Reward_Probability, # dependent~independent variables
            data=posterior_conditions, # data frame
            main="Hit rates", # main title
            xlim=NULL, # x-axis: limits
@@ -422,8 +443,11 @@ posterior_means$Mean = c(paste(round(mean(Baseline_High), digits = 2), " [", rou
                         paste(round(mean(Extinction_Low), digits = 2), " [", round(hdi(Extinction_Low)[[1]], digits = 2), " ", round(hdi(Extinction_Low)[[2]], digits = 2), "]"))
 
 names(posterior_means)[2] = "Mean [HDI]"
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
                         
-print(posterior_means)
+kable(posterior_means, caption = "Means per condition")
+
 ```
 
 
@@ -432,9 +456,6 @@ Check the difference between high reward in baseline vs. acquisition
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_High = Acquisition_High - Baseline_High
 plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_Acq_High), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_High), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_High/sqrt(length(Diff_Bsln_Acq_High))), digits = 2))
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
@@ -442,25 +463,22 @@ Check the difference between low reward in baseline vs. acquisition
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_Low = Acquisition_Low - Baseline_Low
 plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_Acq_Low), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_Low), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_Low/sqrt(length(Diff_Bsln_Acq_Low))), digits = 2))
 ```
 
-Difference between the upper two
+Check the difference between high and low reward in baseline vs. acquisition 
+
 ```{r, warning=FALSE, message=FALSE}
-Diff_Diff = Diff_Bsln_Acq_Low - Diff_Bsln_Acq_High
-plotPost(Diff_Diff, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+Diff_Bsln_Acq_High_vs_Low = Diff_Bsln_Acq_Low - Diff_Bsln_Acq_High 
+plotPost(Diff_Bsln_Acq_High_vs_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+paste("Mean = ",round(mean(Diff_Bsln_Acq_High_vs_Low), digits = 2), " [", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[1]], digits = 2), " ", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[2]], digits = 2), "]")
 ```
+
 
 Check the difference between high reward in acquisition vs. extinction 
 
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_High = Extinction_High - Acquisition_High
 plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('Mean = ', round(mean(Diff_Acq_Ext_High), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_High), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_High/sqrt(length(Diff_Acq_Ext_High))), digits = 2))
 ```
 
 Check the difference between low reward in acquisition vs. extinction 
@@ -468,19 +486,37 @@ Check the difference between low reward in acquisition vs. extinction
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_Low = Extinction_Low - Acquisition_Low
 plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('Mean = ', round(mean(Diff_Acq_Ext_Low), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_Low), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_Low/sqrt(length(Diff_Acq_Ext_Low))), digits = 2))
 ```
 
 ## Reaction times
+
+### Means - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hits.RTs, na.rm = TRUE), digits = 2), " [", round(hdi(Hits.RTs)[[1]], digits = 2), " ", round(hdi(Hits.RTs)[[2]], digits = 2), "]")))
+
+names(summary) = c("Reward phase", "Reward probability", "Reaction times")
+
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                           "Acq" = "Acquisition",
+                           "Bsln" = "Baseline",
+                           "Ext" = "Extinction")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+kable(summary, caption = "Reaction times per condition")
+```
 
 ### Plot
 
 ```{r, warning=FALSE, message=FALSE}
 # Pirate plot
 
-recode  
+  
 
 pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
              data=data.final, # data frame
@@ -613,12 +649,6 @@ bR2.full.RT = readRDS("bR2.full.RT")
 print(compare.waic.RT)
 ```
 
-### Model comparison with WAIC weights
-
-```{r, warning=FALSE, message=FALSE}
-print(compare.RT.waic.weights)
-```
-
 ### Bayesian R squared 
 
 Null model
@@ -705,14 +735,14 @@ Extinction_Low = post[["b_Intercept"]] +
 # make a data frame
 posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
 
-posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Magnitude"), "_", extra = "merge")
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Probability"), "_", extra = "merge")
 
 names(posterior_conditions)[3] = "Reaction_time"
 
 
 
 # Pirate plot
-pirateplot(formula=Reaction_time ~ Reward_Phase + Reward_Magnitude, # dependent~independent variables
+pirateplot(formula=Reaction_time ~ Reward_Phase + Reward_Probability, # dependent~independent variables
            data=posterior_conditions, # data frame
            main="Reaction times", # main title
            xlim=NULL, # x-axis: limits
@@ -784,8 +814,10 @@ posterior_means$Mean = c(paste(round(mean(Baseline_High), digits = 2), " [", rou
                         paste(round(mean(Extinction_Low), digits = 2), " [", round(hdi(Extinction_Low)[[1]], digits = 2), " ", round(hdi(Extinction_Low)[[2]], digits = 2), "]"))
 
 names(posterior_means)[2] = "Mean [HDI]"
-                        
-print(posterior_means)
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+kable(posterior_means, caption = "Means per condition")
 ```
 
 Check the difference between high reward in baseline vs. acquisition 
@@ -793,10 +825,6 @@ Check the difference between high reward in baseline vs. acquisition
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_High = Acquisition_High - Baseline_High
 plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('HDI = ', round(hdi(Diff_Bsln_Acq_High),digits = 2))
-cat('Mean = ', round(mean(Diff_Bsln_Acq_High), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_High), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_High/sqrt(length(Diff_Bsln_Acq_High))), digits = 2))
 ```
 
 Check the difference between low reward in baseline vs. acquisition 
@@ -804,10 +832,14 @@ Check the difference between low reward in baseline vs. acquisition
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_Low = Acquisition_Low - Baseline_Low 
 plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('HDI = ', round(hdi(Diff_Bsln_Acq_Low),digits = 2))
-cat('Mean = ', round(mean(Diff_Bsln_Acq_Low), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_Low), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_Low/sqrt(length(Diff_Bsln_Acq_Low))), digits = 2))
+```
+
+Check the difference between high and low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High_vs_Low = Diff_Bsln_Acq_High - Diff_Bsln_Acq_Low 
+plotPost(Diff_Bsln_Acq_High_vs_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+paste("Mean = ",round(mean(Diff_Bsln_Acq_High_vs_Low), digits = 2), " [", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[1]], digits = 2), " ", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[2]], digits = 2), "]")
 ```
 
 Check the difference between high reward in acquisition vs. extinction 
@@ -815,10 +847,6 @@ Check the difference between high reward in acquisition vs. extinction
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_High = Extinction_High - Acquisition_High
 plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('HDI = ', round(hdi(Diff_Acq_Ext_High),digits = 2))
-cat('Mean = ', round(mean(Diff_Acq_Ext_High), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_High), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_High/sqrt(length(Diff_Acq_Ext_High))), digits = 2))
 ```
 
 Check the difference between low reward in acquisition vs. extinction 
@@ -826,8 +854,4 @@ Check the difference between low reward in acquisition vs. extinction
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_Low = Extinction_Low - Acquisition_Low
 plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
-cat('HDI = ', round(hdi(Diff_Acq_Ext_Low),digits = 2))
-cat('Mean = ', round(mean(Diff_Acq_Ext_Low), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_Low), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_Low/sqrt(length(Diff_Acq_Ext_Low))), digits = 2))
 ```

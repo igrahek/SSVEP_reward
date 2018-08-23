@@ -36,7 +36,7 @@ rm(list=ls())
 cat("\014")
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,knitr,broom, brmstools, BEST)
+pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,knitr,broom, brmstools, BEST, tidyverse)
 # set seed
 set.seed(42)
 # Set working directory
@@ -112,6 +112,34 @@ data.diff[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] =
   lapply(data.diff[c("Subject", "Condition","ExpPhase",  "RecordingAndCondition")], factor)
 
 ```
+## Means - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data,.(Attention,ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Amplitude, na.rm = TRUE), digits = 2), " [", round(hdi(Amplitude)[[1]], digits = 2), " ", round(hdi(Amplitude)[[2]], digits = 2), "]")))
+
+names(summary) = c("Attention", "Reward phase", "Reward probability", "Amplitude")
+
+summary$Attention = recode(summary$Attention,
+                           "Att" = "Attended",
+                           "NotAtt" = "Unattended")
+
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                           "Acq" = "Acquisition",
+                           "Bsln" = "Baseline",
+                           "Ext" = "Extinction")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+summary$`Reward phase` = factor(summary$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
+summary = summary[order(summary$Attention,summary$`Reward phase`,summary$`Reward probability`),]
+
+kable(summary, caption = "Amplitudes per condition")
+```
+
 ## Plots - raw data
 
 ```{r, warning=FALSE, message=FALSE}
@@ -417,8 +445,6 @@ plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", c
 ### Inference about the best model
 
 ```{r, warning=FALSE, message=FALSE}
-library(brms)
-library(BEST)
 post = posterior_samples(model.full.threefactors, "^b")
 
 # Calculate posteriors for each condition
@@ -506,7 +532,6 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
 
 ```{r, warning=FALSE, message=FALSE}
 # make a data frame
-library(tidyverse)
 
 posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
 
@@ -569,8 +594,6 @@ pirateplot(formula=Amplitude ~ Reward_Phase + Reward_Magnitude + Attention, # de
 Table of means across conditions
 
 ```{r, warning=FALSE, message=FALSE}
-library(HDInterval)
-
 # Make a table with conditions
 posterior_means = as.data.frame(c("Attended Baseline High Reward", 
                                   "Attended Baseline Low Reward", 
@@ -588,6 +611,7 @@ names(posterior_means)[1] = "Condition"
 
 posterior_means$Mean = c(paste(round(mean(Baseline_High_Attended), digits = 2), " [", round(hdi(Baseline_High_Attended)[[1]], digits = 2), " ", round(hdi(Baseline_High_Attended)[[2]], digits = 2), "]"),
                         paste(round(mean(Baseline_Low_Attended), digits = 2), " [", round(hdi(Baseline_Low_Attended)[[1]], digits = 2), " ", round(hdi(Baseline_Low_Attended)[[2]], digits = 2), "]"),
+                        
                         paste(round(mean(Acquisition_High_Attended), digits = 2), " [", round(hdi(Acquisition_High_Attended)[[1]], digits = 2), " ", round(hdi(Acquisition_High_Attended)[[2]], digits = 2), "]"),
                         paste(round(mean(Acquisition_Low_Attended), digits = 2), " [", round(hdi(Acquisition_Low_Attended)[[1]], digits = 2), " ", round(hdi(Acquisition_Low_Attended)[[2]], digits = 2), "]"),
                         paste(round(mean(Extinction_High_Attended), digits = 2), " [", round(hdi(Extinction_High_Attended)[[1]], digits = 2), " ", round(hdi(Extinction_High_Attended)[[2]], digits = 2), "]"),
@@ -597,11 +621,14 @@ posterior_means$Mean = c(paste(round(mean(Baseline_High_Attended), digits = 2), 
                         paste(round(mean(Acquisition_High_NotAttended), digits = 2), " [", round(hdi(Acquisition_High_NotAttended)[[1]], digits = 2), " ", round(hdi(Acquisition_High_NotAttended)[[2]], digits = 2), "]"),
                         paste(round(mean(Acquisition_Low_NotAttended), digits = 2), " [", round(hdi(Acquisition_Low_NotAttended)[[1]], digits = 2), " ", round(hdi(Acquisition_Low_NotAttended)[[2]], digits = 2), "]"),
                         paste(round(mean(Extinction_High_NotAttended), digits = 2), " [", round(hdi(Extinction_High_NotAttended)[[1]], digits = 2), " ", round(hdi(Extinction_High_NotAttended)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction_Low_NotAttended), digits = 2), " [", round(hdi(Extinction_Low_NotAttended)[[1]], digits = 2), " ", round(hdi(Extinction_Low_NotAttended)[[2]], digits = 2), "]")))
+                        paste(round(mean(Extinction_Low_NotAttended), digits = 2), " [", round(hdi(Extinction_Low_NotAttended)[[1]], digits = 2), " ", round(hdi(Extinction_Low_NotAttended)[[2]], digits = 2), "]"))
 
 names(posterior_means)[2] = "Mean [HDI]"
-                        
-print(posterior_means)
+
+posterior_means =  posterior_means %>% separate(Condition, c("Attention", "Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+kable(posterior_means, caption = "Means per condition")
+
 ```
 
 #### Attended vs. unattended
@@ -611,9 +638,6 @@ Check the difference between attended and not attended in baseline high rewarded
 ```{r, warning=FALSE, message=FALSE}
 Diff_Att_NotAtt_Bsln_High = Baseline_High_Attended - Baseline_High_NotAttended
 plotPost(Diff_Att_NotAtt_Bsln_High, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Att_NotAtt_Bsln_High), digits = 2))
-cat('SD = ', round(sd(Diff_Att_NotAtt_Bsln_High), digits = 2))
-cat('SE = ', round(sd(Diff_Att_NotAtt_Bsln_High/sqrt(length(Diff_Att_NotAtt_Bsln_High))), digits = 2))
 ```
 
 Check the difference between attended and not attended in baseline low rewarded
@@ -621,9 +645,6 @@ Check the difference between attended and not attended in baseline low rewarded
 ```{r, warning=FALSE, message=FALSE}
 Diff_Att_NotAtt_Bsln_Low = Baseline_Low_Attended - Baseline_Low_NotAttended
 plotPost(Diff_Att_NotAtt_Bsln_Low, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Att_NotAtt_Bsln_Low), digits = 2))
-cat('SD = ', round(sd(Diff_Att_NotAtt_Bsln_Low), digits = 2))
-cat('SE = ', round(sd(Diff_Att_NotAtt_Bsln_Low/sqrt(length(Diff_Att_NotAtt_Bsln_Low))), digits = 2))
 ```
 
 Check the difference between attended and not attended in acquisition high rewarded
@@ -631,9 +652,6 @@ Check the difference between attended and not attended in acquisition high rewar
 ```{r, warning=FALSE, message=FALSE}
 Diff_Att_NotAtt_Acq_High = Acquisition_High_Attended - Acquisition_High_NotAttended
 plotPost(Diff_Att_NotAtt_Acq_High, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Att_NotAtt_Acq_High), digits = 2))
-cat('SD = ', round(sd(Diff_Att_NotAtt_Acq_High), digits = 2))
-cat('SE = ', round(sd(Diff_Att_NotAtt_Acq_High/sqrt(length(Diff_Att_NotAtt_Acq_High))), digits = 2))
 ```
 
 Check the difference between attended and not attended in acquisition low rewarded
@@ -641,9 +659,6 @@ Check the difference between attended and not attended in acquisition low reward
 ```{r, warning=FALSE, message=FALSE}
 Diff_Att_NotAtt_Acq_Low = Acquisition_Low_Attended - Acquisition_Low_NotAttended
 plotPost(Diff_Att_NotAtt_Acq_Low, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Att_NotAtt_Acq_Low), digits = 2))
-cat('SD = ', round(sd(Diff_Att_NotAtt_Acq_Low), digits = 2))
-cat('SE = ', round(sd(Diff_Att_NotAtt_Acq_Low/sqrt(length(Diff_Att_NotAtt_Acq_Low))), digits = 2))
 ```
 
 Check the difference between attended and not attended in extinction high rewarded
@@ -651,9 +666,6 @@ Check the difference between attended and not attended in extinction high reward
 ```{r, warning=FALSE, message=FALSE}
 Diff_Att_NotAtt_Ext_High = Extinction_High_Attended - Extinction_High_NotAttended
 plotPost(Diff_Att_NotAtt_Ext_High, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Att_NotAtt_Ext_High), digits = 2))
-cat('SD = ', round(sd(Diff_Att_NotAtt_Ext_High), digits = 2))
-cat('SE = ', round(sd(Diff_Att_NotAtt_Ext_High/sqrt(length(Diff_Att_NotAtt_Ext_High))), digits = 2))
 ```
 
 Check the difference between attended and not attended in extinction low rewarded
@@ -661,9 +673,6 @@ Check the difference between attended and not attended in extinction low rewarde
 ```{r, warning=FALSE, message=FALSE}
 Diff_Att_NotAtt_Ext_Low = Extinction_Low_Attended - Extinction_Low_NotAttended
 plotPost(Diff_Att_NotAtt_Ext_Low, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Att_NotAtt_Ext_Low), digits = 2))
-cat('SD = ', round(sd(Diff_Att_NotAtt_Ext_Low), digits = 2))
-cat('SE = ', round(sd(Diff_Att_NotAtt_Ext_Low/sqrt(length(Diff_Att_NotAtt_Ext_Low))), digits = 2))
 ```
 
 #### Comparison between phases
@@ -673,9 +682,6 @@ Check the difference between baseline and acquisition in high reward attended
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_High_Att = Baseline_High_Attended - Acquisition_High_Attended
 plotPost(Diff_Bsln_Acq_High_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_Acq_High_Att), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_High_Att), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_High_Att/sqrt(length(Diff_Bsln_Acq_High_Att))), digits = 2))
 ```
 
 Check the difference between baseline and acquisition in low reward attended
@@ -683,9 +689,6 @@ Check the difference between baseline and acquisition in low reward attended
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_Low_Att = Baseline_Low_Attended - Acquisition_Low_Attended
 plotPost(Diff_Bsln_Acq_Low_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_Acq_Low_Att), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_Low_Att), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_Low_Att/sqrt(length(Diff_Bsln_Acq_Low_Att))), digits = 2))
 ```
 
 Check the difference between baseline and acquisition in high reward not attended
@@ -693,9 +696,6 @@ Check the difference between baseline and acquisition in high reward not attende
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_High_NotAtt = Baseline_High_NotAttended - Acquisition_High_NotAttended
 plotPost(Diff_Bsln_Acq_High_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_Acq_High_NotAtt), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_High_NotAtt), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_High_NotAtt/sqrt(length(Diff_Bsln_Acq_High_NotAtt))), digits = 2))
 ```
 
 Check the difference between baseline and acquisition in low reward not attended
@@ -703,9 +703,6 @@ Check the difference between baseline and acquisition in low reward not attended
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_Acq_Low_NotAtt = Acquisition_Low_NotAttended - Baseline_Low_NotAttended  
 plotPost(Diff_Bsln_Acq_Low_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_Acq_Low_NotAtt), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_Acq_Low_NotAtt), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_Acq_Low_NotAtt/sqrt(length(Diff_Bsln_Acq_Low_NotAtt))), digits = 2))
 ```
 
 Check the difference between acquisition and extinction in high reward attended
@@ -713,9 +710,6 @@ Check the difference between acquisition and extinction in high reward attended
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_High_Att = Acquisition_High_Attended - Extinction_High_Attended
 plotPost(Diff_Acq_Ext_High_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Acq_Ext_High_Att), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_High_Att), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_High_Att/sqrt(length(Diff_Acq_Ext_High_Att))), digits = 2))
 ```
 
 Check the difference between acquisition and extinction in low reward attended
@@ -723,9 +717,6 @@ Check the difference between acquisition and extinction in low reward attended
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_Low_Att = Extinction_Low_Attended - Acquisition_Low_Attended 
 plotPost(Diff_Acq_Ext_Low_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Acq_Ext_Low_Att), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_Low_Att), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_Low_Att/sqrt(length(Diff_Acq_Ext_Low_Att))), digits = 2))
 ```
 
 Check the difference between acquisition and extinction in high reward not attended
@@ -733,9 +724,6 @@ Check the difference between acquisition and extinction in high reward not atten
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_High_NotAtt = Extinction_High_NotAttended - Acquisition_High_NotAttended 
 plotPost(Diff_Acq_Ext_High_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Acq_Ext_High_NotAtt), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_High_NotAtt), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_High_NotAtt/sqrt(length(Diff_Acq_Ext_High_NotAtt))), digits = 2))
 ```
 
 Check the difference between acquisition and extinction in low reward not attended
@@ -743,9 +731,6 @@ Check the difference between acquisition and extinction in low reward not attend
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_Low_NotAtt = Extinction_Low_NotAttended - Acquisition_Low_NotAttended 
 plotPost(Diff_Acq_Ext_Low_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Acq_Ext_Low_NotAtt), digits = 2))
-cat('SD = ', round(sd(Diff_Acq_Ext_Low_NotAtt), digits = 2))
-cat('SE = ', round(sd(Diff_Acq_Ext_Low_NotAtt/sqrt(length(Diff_Acq_Ext_Low_NotAtt))), digits = 2))
 ```
 
 #### Baseline difference
@@ -755,9 +740,6 @@ Check the difference between baseline and acquisition in high reward attended
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_High_Low_Att = Baseline_High_Attended - Baseline_Low_Attended
 plotPost(Diff_Bsln_High_Low_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_High_Low_Att), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_High_Low_Att), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_High_Low_Att/sqrt(length(Diff_Bsln_High_Low_Att))), digits = 2))
 ```
 
 Check the difference between baseline and acquisition in high reward unattended
@@ -765,7 +747,12 @@ Check the difference between baseline and acquisition in high reward unattended
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_High_Low_NotAtt = Baseline_High_NotAttended - Baseline_Low_NotAttended
 plotPost(Diff_Bsln_High_Low_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-cat('Mean = ', round(mean(Diff_Bsln_High_Low_NotAtt), digits = 2))
-cat('SD = ', round(sd(Diff_Bsln_High_Low_NotAtt), digits = 2))
-cat('SE = ', round(sd(Diff_Bsln_High_Low_NotAtt/sqrt(length(Diff_Bsln_High_Low_NotAtt))), digits = 2))
+```
+
+Check the difference between baseline and acquisition in high reward unattended vs. attended
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High_vs_Low_in_attended_vs_unattended = Diff_Bsln_High_Low_NotAtt - Diff_Bsln_High_Low_Att 
+plotPost(Diff_Bsln_Acq_High_vs_Low_in_attended_vs_unattended, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+paste("Mean = ",round(mean(Diff_Bsln_Acq_High_vs_Low_in_attended_vs_unattended), digits = 2), " [", round(hdi(Diff_Bsln_Acq_High_vs_Low_in_attended_vs_unattended)[[1]], digits = 2), " ", round(hdi(Diff_Bsln_Acq_High_vs_Low_in_attended_vs_unattended)[[2]], digits = 2), "]")
 ```
