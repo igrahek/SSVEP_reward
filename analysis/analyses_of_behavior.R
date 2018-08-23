@@ -16,7 +16,7 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms,rstan)
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms,rstan, tidyverse)
 # set seed
 set.seed(42) 
 # set directory
@@ -108,142 +108,85 @@ data.final$Condition = factor(data.final$Condition)
 ################################################################## Plotting ###############################################################################################################################################################################################################
 
 # # Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Prepare the dataset
 data.plot = data.final
 
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+
 
 
 
   # Pirate plot
-  pirateplot(formula=Hit.Rate ~ Condition + ExpPhase, # dependent~independent variables
-             data=data.final, # data frame
-             main="Hit rates", # main title
-             xlim=NULL, # x-axis: limits
-             xlab="", # x-axis: label
-             ylim=c(0.1,0.85), # y-axis: limits
+  pirateplot(formula=Hit.Rate ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
+             ylim=c(0.1,0.9), # y-axis: limits
              ylab="Hit Rate", # y-axis: label
-             #inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-             #hdi.iter=5000, # number of iterations for estimation of HDI
-             #inf.within=ParticipantNo, # ID variable
              theme=0, # preset theme (0: use your own)
-             # theme settings
-             # pal="xman", # color palette [see piratepal(palette="all")]
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
-             bar.b.col=NULL, # bars, border: color
-             bar.lwd=0, # bars, border: line width
-             bar.b.o=0, # bars, border: opacity (0-1)
-             bar.f.col=NULL, # bars, filling: color
-             bar.f.o=0, # bars, filling: opacity (0-1)
-             #inf.b.col="black", # inference band, border: color
-             #inf.lwd=0.1, # inference band, border: line width
-             #inf.b.o=1, # inference band, border: opacity (0-1)
-             #inf.f.col="black", # inference band, filling: color
-             #inf.f.o=0, # inference band, filling: opacity (0-1)
              bean.b.col="black", # bean border, color
              bean.lwd=0.6, # bean border, line width
              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
              bean.b.o=0.3, # bean border, opacity (0-1)
              bean.f.col="gray", # bean filling, color
              bean.f.o=.1, # bean filling, opacity (0-1)
-             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-             # quant.col="black", # quantiles, line: color
-             # quant.length=.7, # quantiles, horizontal line length
-             # quant.lwd=2, # quantiles, line width
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
              gl.col="gray", # gridlines: color
-             gl.lwd=c(.75,0), # gridlines: line width
              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-             cex.lab=0.8, # axis labels: size
+             cex.lab=1, # axis labels: size
              cex.axis=1, # axis numbers: size
+             cex.names = 1,
              bty="l", # plot box type
              back.col="white") # background, color
-          
+             
+  
+  
 #  Plot Reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# 
+
   # Pirate plot
-  pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
-             data=data.final, # data frame
-             main="Reaction times", # main title
-             xlim=NULL, # x-axis: limits
-             xlab="", # x-axis: label
+  pirateplot(formula = Hits.RTs ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
              ylim=c(400,700), # y-axis: limits
              ylab="Reaction time", # y-axis: label
-             inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-             hdi.iter=5000, # number of iterations for estimation of HDI
-             inf.within=ParticipantNo, # ID variable
              theme=0, # preset theme (0: use your own)
-             # theme settings
-             # pal="xman", # color palette [see piratepal(palette="all")]
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
-             bar.b.col=NULL, # bars, border: color
-             bar.lwd=0, # bars, border: line width
-             bar.b.o=0, # bars, border: opacity (0-1)
-             bar.f.col=NULL, # bars, filling: color
-             bar.f.o=0, # bars, filling: opacity (0-1)
-             inf.b.col="black", # inference band, border: color
-             inf.lwd=0.1, # inference band, border: line width
-             inf.b.o=1, # inference band, border: opacity (0-1)
-             inf.f.col="black", # inference band, filling: color
-             inf.f.o=0, # inference band, filling: opacity (0-1)
              bean.b.col="black", # bean border, color
              bean.lwd=0.6, # bean border, line width
              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
              bean.b.o=0.3, # bean border, opacity (0-1)
              bean.f.col="gray", # bean filling, color
              bean.f.o=.1, # bean filling, opacity (0-1)
-             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-             # quant.col="black", # quantiles, line: color
-             # quant.length=.7, # quantiles, horizontal line length
-             # quant.lwd=2, # quantiles, line width
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
              gl.col="gray", # gridlines: color
-             gl.lwd=c(.75,0), # gridlines: line width
              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-             cex.lab=0.8, # axis labels: size
+             cex.lab=1, # axis labels: size
              cex.axis=1, # axis numbers: size
+             cex.names = 1,
              bty="l", # plot box type
              back.col="white") # background, color
-#   
+  
+  
 ################################################################## Stats ###############################################################################################################################################################################################################
-
-# BF ANOVA------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-# number of MonteCarlo iterations (default: 10000)
-# num.iter=10000 
-# 
-# # DV: dprime
-# # 3 x 2 rANOVA
-# # Assuming a medium prior d~Cauchy(0,.707):
-# rANOVA_dPrime.bf.med <- anovaBF(dprime~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-# rANOVA_dPrime.bf.med
-# 
-# # DV: Hit.Rate
-# # 3 x 2 rANOVA
-# # Assuming a medium prior d~Cauchy(0,.707):
-# rANOVA_HitRate.bf.med <- anovaBF(Hit.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-# rANOVA_HitRate.bf.med
-# 
-# # DV: FA rate
-# # 3 x 2 rANOVA
-# # Assuming a medium prior d~Cauchy(0,.707):
-# rANOVA_FArate.bf.med <- anovaBF(FA.Rate~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-# rANOVA_FArate.bf.med
-# 
-# # DV: RTs for Hits 
-# # 3 x 2 rANOVA
-# 
-# # Assuming a medium prior d~Cauchy(0,.707):
-# rANOVA_RT.bf.med <- anovaBF(Hits.RTs~ExpPhase*Condition+ParticipantNo,data=data.final,iterations=num.iter,whichRandom="ParticipantNo",rscaleRandom="nuisance",rscaleFixed=sqrt(2)/2)
-# rANOVA_RT.bf.med
-# 
 
 # brms reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -373,58 +316,33 @@ plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, c
 # make a data frame
 posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
 
-posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Magnitude"), "_", extra = "merge")
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
 
-names(posterior_conditions)[3] = "Reaction_time"
-
-
+names(posterior_conditions)[3] = "Reaction time"
 
 # Pirate plot
-pirateplot(formula=Reaction_time ~ Reward_Phase + Reward_Magnitude, # dependent~independent variables
+pirateplot(formula = `Reaction time` ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
            data=posterior_conditions, # data frame
            main="Reaction times", # main title
-           xlim=NULL, # x-axis: limits
-           xlab="", # x-axis: label
            ylim=c(485,600), # y-axis: limits
            ylab="Reaction time", # y-axis: label
-           inf.method="sd", # type of inference: 95% Bayesian Highest Density Intervals
-           #hdi.iter=5000, # number of iterations for estimation of HDI
-           #inf.within=ParticipantNo, # ID variable
            theme=0, # preset theme (0: use your own)
-           # theme settings
-           # pal="xman", # color palette [see piratepal(palette="all")]
-           #point.col="black", # points: color
-           #point.o=.3, # points: opacity (0-1)
            avg.line.col="black", # average line: color
            avg.line.lwd=2, # average line: line width
            avg.line.o=1, # average line: opacity (0-1)
-           bar.b.col=NULL, # bars, border: color
-           bar.lwd=0, # bars, border: line width
-           bar.b.o=0, # bars, border: opacity (0-1)
-           bar.f.col=NULL, # bars, filling: color
-           bar.f.o=0, # bars, filling: opacity (0-1)
-           inf.b.col="black", # inference band, border: color
-           inf.lwd=0.1, # inference band, border: line width
-           inf.b.o=1, # inference band, border: opacity (0-1)
-           inf.f.col="black", # inference band, filling: color
-           inf.f.o=0, # inference band, filling: opacity (0-1)
            bean.b.col="black", # bean border, color
            bean.lwd=0.6, # bean border, line width
            bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
            bean.b.o=0.3, # bean border, opacity (0-1)
            bean.f.col="gray", # bean filling, color
            bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-           sortx = "sequential", # how to sort the x axis
-           # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-           # quant.col="black", # quantiles, line: color
-           # quant.length=.7, # quantiles, horizontal line length
-           # quant.lwd=2, # quantiles, line width
+           cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
            gl.col="gray", # gridlines: color
-           gl.lwd=c(.75,0), # gridlines: line width
            gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
            cex.lab=1, # axis labels: size
            cex.axis=1, # axis numbers: size
+           cex.names = 1,
+           sortx = "sequential",
            bty="l", # plot box type
            back.col="white") # background, color
            
@@ -551,58 +469,34 @@ plotPost(Diff_Rew_Ext, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, c
 # make a data frame
 posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
 
-posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Magnitude"), "_", extra = "merge")
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
 
-names(posterior_conditions)[3] = "Hit_rate"
-
-
+names(posterior_conditions)[3] = "Hit rate"
 
 # Pirate plot
-pirateplot(formula=Hit_rate ~ Reward_Phase + Reward_Magnitude, # dependent~independent variables
+pirateplot(formula = `Hit rate` ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
            data=posterior_conditions, # data frame
            main="Hit rates", # main title
-           xlim=NULL, # x-axis: limits
-           xlab="", # x-axis: label
            ylim=c(0.5, 0.7), # y-axis: limits
            ylab="Hit rate", # y-axis: label
-           inf.method="sd", # type of inference: 95% Bayesian Highest Density Intervals
-           #hdi.iter=5000, # number of iterations for estimation of HDI
-           #inf.within=ParticipantNo, # ID variable
            theme=0, # preset theme (0: use your own)
-           # theme settings
-           # pal="xman", # color palette [see piratepal(palette="all")]
-           #point.col="black", # points: color
-           #point.o=.3, # points: opacity (0-1)
            avg.line.col="black", # average line: color
            avg.line.lwd=2, # average line: line width
            avg.line.o=1, # average line: opacity (0-1)
-           bar.b.col=NULL, # bars, border: color
-           bar.lwd=0, # bars, border: line width
-           bar.b.o=0, # bars, border: opacity (0-1)
-           bar.f.col=NULL, # bars, filling: color
-           bar.f.o=0, # bars, filling: opacity (0-1)
-           inf.b.col="black", # inference band, border: color
-           inf.lwd=0.1, # inference band, border: line width
-           inf.b.o=1, # inference band, border: opacity (0-1)
-           inf.f.col="black", # inference band, filling: color
-           inf.f.o=0, # inference band, filling: opacity (0-1)
            bean.b.col="black", # bean border, color
            bean.lwd=0.6, # bean border, line width
            bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
            bean.b.o=0.3, # bean border, opacity (0-1)
            bean.f.col="gray", # bean filling, color
            bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-           sortx = "sequential", # how to sort the x axis
-           # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-           # quant.col="black", # quantiles, line: color
-           # quant.length=.7, # quantiles, horizontal line length
-           # quant.lwd=2, # quantiles, line width
+           cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
            gl.col="gray", # gridlines: color
-           gl.lwd=c(.75,0), # gridlines: line width
            gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
            cex.lab=1, # axis labels: size
            cex.axis=1, # axis numbers: size
+           cex.names = 1,
+           sortx = "sequential",
            bty="l", # plot box type
            back.col="white") # background, color
+
 

@@ -105,214 +105,65 @@ data.diff[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] =
 
 ################################################################## Plotting ###############################################################################################################################################################################################################
 
-# Plot amplitude across experiment phases------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# prepare data for plotting
+dataPlot = data
 
-plottingConditions = c("Amplitude both reward conditions","Amplitude High_Rew","Amplitude Low_Rew" )
+# rename variables
+colnames(dataPlot)[colnames(dataPlot)=="ExpPhase"] <- "Reward phase"
+colnames(dataPlot)[colnames(dataPlot)=="Condition"] <- "Reward probability"
+
+# rename conditions
+dataPlot$`Reward phase` = recode(dataPlot$`Reward phase`,
+                                  "Acq" = "Acquisition",
+                                  "Bsln" = "Baseline",
+                                  "Ext" = "Extinction")
+
+dataPlot$`Reward probability` = recode(dataPlot$`Reward probability`,
+                                        "High_Rew" = "High",
+                                        "Low_Rew" = "Low")
+
+#order
+dataPlot$`Reward phase` = factor(dataPlot$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
+dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward phase`,dataPlot$`Reward probability`),]
+
+plottingConditions = c("Attended","Unattended" )
 for (i in 1:length(plottingConditions)){
   
-  if(plottingConditions[i]=="Amplitude both reward conditions"){
-    
-    #Average over the reward condition and order data for plotting
-    dataAmplitudePlot=ddply(data,.(Subject,Attention,ExpPhase),plyr::summarize,Amplitude=mean(Amplitude,na.rm=TRUE)) 
-    
-    #Order the data again in order to be able to plot Condition in the same order as in the other plots
-    dataAmplitudePlot$Attention = factor(dataAmplitudePlot$Attention, levels = c("NotAtt","Att"))
-    dataAmplitudePlot$ExpPhase = factor(dataAmplitudePlot$ExpPhase, levels = c("Bsln","Acq","Ext"))
-    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$Attention),]}
+  if(plottingConditions[i]=="Attended"){dataAmplitudePlot=subset(dataPlot,Attention=="Att")}
   
-  if(plottingConditions[i]=="Amplitude High_Rew"){dataAmplitudePlot=subset(data,Condition=="High_Rew")}
-  
-  if(plottingConditions[i]=="Amplitude Low_Rew"){
-    
-    #Order the data again in order to be able to plot Condition in the same order as in the other plots
-    dataAmplitudePlot=subset(data,Condition=="Low_Rew")
-    dataAmplitudePlot$Attention = factor(dataAmplitudePlot$Attention, levels = c("NotAtt","Att"))
-    dataAmplitudePlot$ExpPhase = factor(dataAmplitudePlot$ExpPhase, levels = c("Bsln","Acq","Ext"))
-    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$Attention),] #order the data again in order to be able to plot Condition in the same order as in the other plots
-    }  
+  if(plottingConditions[i]=="Unattended"){dataAmplitudePlot=subset(dataPlot,Attention=="NotAtt")}  
 
 # Pirate plot
 
-  pirateplot(formula=Amplitude~Attention+ExpPhase, # dependent~independent variables
+    pirateplot(formula = Amplitude ~ `Reward phase` + `Reward probability`, # dependent~independent variables
              data=dataAmplitudePlot, # data frame
              main=plottingConditions[i], # main title
-             xlim=NULL, # x-axis: limits
-             xlab="", # x-axis: label
              ylim=c(0.2,2.2), # y-axis: limits
              ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
-             inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-             hdi.iter=5000, # number of iterations for estimation of HDI
-             inf.within=Subject, # ID variable
              theme=0, # preset theme (0: use your own)
-             # theme settings
-             # pal="xman", # color palette [see piratepal(palette="all")]
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
-             bar.b.col=NULL, # bars, border: color
-             bar.lwd=0, # bars, border: line width
-             bar.b.o=0, # bars, border: opacity (0-1)
-             bar.f.col=NULL, # bars, filling: color
-             bar.f.o=0, # bars, filling: opacity (0-1)
-             inf.b.col="black", # inference band, border: color
-             inf.lwd=0.1, # inference band, border: line width
-             inf.b.o=1, # inference band, border: opacity (0-1)
-             inf.f.col="black", # inference band, filling: color
-             inf.f.o=0, # inference band, filling: opacity (0-1)
              bean.b.col="black", # bean border, color
              bean.lwd=0.6, # bean border, line width
              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
              bean.b.o=0.3, # bean border, opacity (0-1)
              bean.f.col="gray", # bean filling, color
              bean.f.o=.1, # bean filling, opacity (0-1)
-             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-             # quant.col="black", # quantiles, line: color
-             # quant.length=.7, # quantiles, horizontal line length
-             # quant.lwd=2, # quantiles, line width
-             sortx="sequential",
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
              gl.col="gray", # gridlines: color
-             gl.lwd=c(.75,0), # gridlines: line width
              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-             cex.lab=0.8, # axis labels: size
+             cex.lab=1, # axis labels: size
              cex.axis=1, # axis numbers: size
+             cex.names = 1,
              bty="l", # plot box type
              back.col="white") # background, color
 }
   
 
-# Plot the selectivity index across experiment phases and reward magnitude------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Pirate plot
-
-pirateplot(formula=Selectivity ~ Condition + ExpPhase, # dependent~independent variables
-           data=data.diff, # data frame
-           main="Selectivity index", # main title
-           xlim=NULL, # x-axis: limits
-           xlab="", # x-axis: label
-           ylim=c(-1,1.5), # y-axis: limits
-           ylab=expression(paste("Amplitude diff (",mu,"V)")), # y-axis: label
-           inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-           hdi.iter=5000, # number of iterations for estimation of HDI
-           inf.within=Subject, # ID variable
-           theme=0, # preset theme (0: use your own)
-           # theme settings
-           # pal="xman", # color palette [see piratepal(palette="all")]
-           point.col="black", # points: color
-           point.o=.3, # points: opacity (0-1)
-           avg.line.col="black", # average line: color
-           avg.line.lwd=2, # average line: line width
-           avg.line.o=1, # average line: opacity (0-1)
-           bar.b.col=NULL, # bars, border: color
-           bar.lwd=0, # bars, border: line width
-           bar.b.o=0, # bars, border: opacity (0-1)
-           bar.f.col=NULL, # bars, filling: color
-           bar.f.o=0, # bars, filling: opacity (0-1)
-           inf.b.col="black", # inference band, border: color
-           inf.lwd=0.1, # inference band, border: line width
-           inf.b.o=1, # inference band, border: opacity (0-1)
-           inf.f.col="black", # inference band, filling: color
-           inf.f.o=0, # inference band, filling: opacity (0-1)
-           bean.b.col="black", # bean border, color
-           bean.lwd=0.6, # bean border, line width
-           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-           bean.b.o=0.3, # bean border, opacity (0-1)
-           bean.f.col="gray", # bean filling, color
-           bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-           # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-           # quant.col="black", # quantiles, line: color
-           # quant.length=.7, # quantiles, horizontal line length
-           # quant.lwd=2, # quantiles, line width
-           sortx="sequential",
-           gl.col="gray", # gridlines: color
-           gl.lwd=c(.75,0), # gridlines: line width
-           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-           cex.lab=0.8, # axis labels: size
-           cex.axis=1, # axis numbers: size
-           bty="l", # plot box type
-           back.col="white") # background, color
-
-# Plot the total enhancement index across experiment phases and reward magnitude------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    # Pirate plot
-    
-    pirateplot(formula=TotalEnhancement ~ ExpPhase + Condition, # dependent~independent variables
-               data=data.diff, # data frame
-               main="Total enhancement index", # main title
-               xlim=NULL, # x-axis: limits
-               xlab="", # x-axis: label
-               ylim=c(1,3.5), # y-axis: limits
-               ylab=expression(paste("Amplitude sum (",mu,"V)")), # y-axis: label
-               inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-               hdi.iter=5000, # number of iterations for estimation of HDI
-               inf.within=Subject, # ID variable
-               theme=0, # preset theme (0: use your own)
-               # theme settings
-               # pal="xman", # color palette [see piratepal(palette="all")]
-               point.col="black", # points: color
-               point.o=.3, # points: opacity (0-1)
-               avg.line.col="black", # average line: color
-               avg.line.lwd=2, # average line: line width
-               avg.line.o=1, # average line: opacity (0-1)
-               bar.b.col=NULL, # bars, border: color
-               bar.lwd=0, # bars, border: line width
-               bar.b.o=0, # bars, border: opacity (0-1)
-               bar.f.col=NULL, # bars, filling: color
-               bar.f.o=0, # bars, filling: opacity (0-1)
-               inf.b.col="black", # inference band, border: color
-               inf.lwd=0.1, # inference band, border: line width
-               inf.b.o=1, # inference band, border: opacity (0-1)
-               inf.f.col="black", # inference band, filling: color
-               inf.f.o=0, # inference band, filling: opacity (0-1)
-               bean.b.col="black", # bean border, color
-               bean.lwd=0.6, # bean border, line width
-               bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-               bean.b.o=0.3, # bean border, opacity (0-1)
-               bean.f.col="gray", # bean filling, color
-               bean.f.o=.1, # bean filling, opacity (0-1)
-               cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-               # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-               # quant.col="black", # quantiles, line: color
-               # quant.length=.7, # quantiles, horizontal line length
-               # quant.lwd=2, # quantiles, line width
-               sortx="sequential",
-               gl.col="gray", # gridlines: color
-               gl.lwd=c(.75,0), # gridlines: line width
-               gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-               cex.lab=0.8, # axis labels: size
-               cex.axis=1, # axis numbers: size
-               bty="l", # plot box type
-               back.col="white") # background, color
-    
-##### STATS ####
-
-# # Set the parameters 
-# num.iter=10000 # number of MonteCarlo iterations (default: 10000)
-# # select scaling factor r of Cauchy(0,r) prior on standardized effect sizes
-# medprior=sqrt(2)/2 # medium prior
-# 
-# 
-# 
-# # Amplitude - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
-# ssVEPamp.bf.amplitude <- anovaBF(Amplitude ~ ExpPhase * Condition  * Attention + Subject,data=data,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
-# sort(ssVEPamp.bf.amplitude)
-# 
-# # Amplitude - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) 
-# ssVEPamp.bf.amplitude <- anovaBF(Amplitude ~ ExpPhase * Attention + Subject,data=data,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
-# sort(ssVEPamp.bf.amplitude)
-# 
-# 
-# # Selectivity index - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
-# ssVEPamp.bf.selectivity <- anovaBF(Selectivity ~ ExpPhase * Condition + Subject,data=data.diff,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
-# sort(ssVEPamp.bf.selectivity)
-# 
-# # Total enhancement index - Bayesian ANOVA 3(Exp Phase) X 2(Attended recorded vs. NotAttended recorded) X 2(high vs. low reward) 
-# ssVEPamp.bf.totalenhancement <- anovaBF(TotalEnhancement ~ ExpPhase * Condition + Subject,data=data.diff,iterations=num.iter,whichRandom="Subject",rscaleRandom="nuisance",rscaleFixed=medprior)
-# sort(ssVEPamp.bf.totalenhancement)
-# 
 
 # brms three factors------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -558,6 +409,61 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
   post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
 
 
+
+### Plotting the posterior ###
+
+# make a data frame
+
+posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability", "Attention"), "_", extra = "merge")
+
+posterior_conditions$Attention = recode(posterior_conditions$Attention,
+                                        "Attended" = "Attended",
+                                        "NotAttended" = "Unattended")
+
+names(posterior_conditions)[4] = "Amplitude"
+
+
+#order
+#dataPlot$`Reward phase` = factor(dataPlot$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
+#dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward phase`,dataPlot$`Reward probability`),]
+
+
+plottingConditions = c("Attended","Unattended" )
+for (i in 1:length(plottingConditions)){
+  
+  if(plottingConditions[i]=="Attended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Attended")}
+  
+  if(plottingConditions[i]=="Unattended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Unattended")}  
+  
+  # Pirate plot
+  
+  pirateplot(formula = Amplitude ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
+             data=dataAmplitudePlot, # data frame
+             main=plottingConditions[i], # main title
+             ylim=c(0.7,1.2), # y-axis: limits
+             ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             sortx = "sequential",
+             bty="l", # plot box type
+             back.col="white") # background, color
+}
 
 #Check the difference between high and low reward in acquisition attended
 

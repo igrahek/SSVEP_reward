@@ -23,9 +23,7 @@ _This is an R Markdown document. Markdown is a simple formatting syntax for auth
 
 ## Topography & spectra
 
-![Topography](topos.jpg)
-![Spectra](spectra.jpg)
-
+![Topography and spectra](topos_spectra.png)
 \newpage
 ```{r, warning=FALSE, message=FALSE}
 # # Clear environemnt and import data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -136,6 +134,7 @@ summary = as.data.frame(summary)
 
 summary$`Reward phase` = factor(summary$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
 summary = summary[order(summary$Attention,summary$`Reward phase`,summary$`Reward probability`),]
+row.names(summary) = NULL
 
 kable(summary, caption = "Amplitudes per condition")
 ```
@@ -144,78 +143,60 @@ kable(summary, caption = "Amplitudes per condition")
 
 ```{r, warning=FALSE, message=FALSE}
 # Plot amplitude across experiment phases------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# prepare data for plotting
+dataPlot = data
 
-plottingConditions = c("Amplitude both reward conditions","Amplitude High_Rew","Amplitude Low_Rew" )
+# rename variables
+colnames(dataPlot)[colnames(dataPlot)=="ExpPhase"] <- "Reward phase"
+colnames(dataPlot)[colnames(dataPlot)=="Condition"] <- "Reward probability"
+
+# rename conditions
+dataPlot$`Reward phase` = recode(dataPlot$`Reward phase`,
+                                  "Acq" = "Acquisition",
+                                  "Bsln" = "Baseline",
+                                  "Ext" = "Extinction")
+
+dataPlot$`Reward probability` = recode(dataPlot$`Reward probability`,
+                                        "High_Rew" = "High",
+                                        "Low_Rew" = "Low")
+
+#order
+dataPlot$`Reward phase` = factor(dataPlot$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
+dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward phase`,dataPlot$`Reward probability`),]
+
+
+plottingConditions = c("Attended","Unattended" )
 for (i in 1:length(plottingConditions)){
-
-  if(plottingConditions[i]=="Amplitude both reward conditions"){
-
-    #Average over the reward condition and order data for plotting
-    dataAmplitudePlot=ddply(data,.(Subject,Attention,ExpPhase),plyr::summarize,Amplitude=mean(Amplitude,na.rm=TRUE))
-
-    #Order the data again in order to be able to plot Condition in the same order as in the other plots
-    dataAmplitudePlot$Attention = factor(dataAmplitudePlot$Attention, levels = c("NotAtt","Att"))
-    dataAmplitudePlot$ExpPhase = factor(dataAmplitudePlot$ExpPhase, levels = c("Bsln","Acq","Ext"))
-    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$Attention),]}
-
-  if(plottingConditions[i]=="Amplitude High_Rew"){dataAmplitudePlot=subset(data,Condition=="High_Rew")}
-
-  if(plottingConditions[i]=="Amplitude Low_Rew"){
-
-    #Order the data again in order to be able to plot Condition in the same order as in the other plots
-    dataAmplitudePlot=subset(data,Condition=="Low_Rew")
-    dataAmplitudePlot$Attention = factor(dataAmplitudePlot$Attention, levels = c("NotAtt","Att"))
-    dataAmplitudePlot$ExpPhase = factor(dataAmplitudePlot$ExpPhase, levels = c("Bsln","Acq","Ext"))
-    dataAmplitudePlot = dataAmplitudePlot[order(dataAmplitudePlot$Subject,dataAmplitudePlot$ExpPhase,dataAmplitudePlot$Attention),] #order the data again in order to be able to plot Condition in the same order as in the other plots
-    }
+  
+  if(plottingConditions[i]=="Attended"){dataAmplitudePlot=subset(dataPlot,Attention=="Att")}
+  
+  if(plottingConditions[i]=="Unattended"){dataAmplitudePlot=subset(dataPlot,Attention=="NotAtt")}  
 
 # Pirate plot
 
-  pirateplot(formula=Amplitude~Attention+ExpPhase, # dependent~independent variables
+    pirateplot(formula = Amplitude ~ `Reward phase` + `Reward probability`, # dependent~independent variables
              data=dataAmplitudePlot, # data frame
              main=plottingConditions[i], # main title
-             xlim=NULL, # x-axis: limits
-             xlab="", # x-axis: label
              ylim=c(0.2,2.2), # y-axis: limits
              ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
-             inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-             hdi.iter=5000, # number of iterations for estimation of HDI
-             inf.within=Subject, # ID variable
              theme=0, # preset theme (0: use your own)
-             # theme settings
-             # pal="xman", # color palette [see piratepal(palette="all")]
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
-             bar.b.col=NULL, # bars, border: color
-             bar.lwd=0, # bars, border: line width
-             bar.b.o=0, # bars, border: opacity (0-1)
-             bar.f.col=NULL, # bars, filling: color
-             bar.f.o=0, # bars, filling: opacity (0-1)
-             inf.b.col="black", # inference band, border: color
-             inf.lwd=0.1, # inference band, border: line width
-             inf.b.o=1, # inference band, border: opacity (0-1)
-             inf.f.col="black", # inference band, filling: color
-             inf.f.o=0, # inference band, filling: opacity (0-1)
              bean.b.col="black", # bean border, color
              bean.lwd=0.6, # bean border, line width
              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
              bean.b.o=0.3, # bean border, opacity (0-1)
              bean.f.col="gray", # bean filling, color
              bean.f.o=.1, # bean filling, opacity (0-1)
-             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-             # quant.col="black", # quantiles, line: color
-             # quant.length=.7, # quantiles, horizontal line length
-             # quant.lwd=2, # quantiles, line width
-             sortx="sequential",
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
              gl.col="gray", # gridlines: color
-             gl.lwd=c(.75,0), # gridlines: line width
              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-             cex.lab=0.8, # axis labels: size
+             cex.lab=1, # axis labels: size
              cex.axis=1, # axis numbers: size
+             cex.names = 1,
              bty="l", # plot box type
              back.col="white") # background, color
 }
@@ -434,16 +415,6 @@ print(tidy(model.full.threefactors, par_type = "non-varying"), digits = 1)
 
 ### Plotting the best model
 
-Attended color (plot 1) and Not attended color (plot 2)
-
-```{r, warning=FALSE, message=FALSE}
-# Plot the interaction between Phase and Attention in two conditions of reward probability
-conditions = data.frame(Attention = c("Att", "NotAtt"))
-plot(marginal_effects(model.full.threefactors, effects = "ExpPhase:Condition", conditions = conditions),ask=FALSE)
-```
-
-### Inference about the best model
-
 ```{r, warning=FALSE, message=FALSE}
 post = posterior_samples(model.full.threefactors, "^b")
 
@@ -535,60 +506,55 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
 
 posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
 
-posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Magnitude", "Attention"), "_", extra = "merge")
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability", "Attention"), "_", extra = "merge")
+
+posterior_conditions$Attention = recode(posterior_conditions$Attention,
+                           "Attended" = "Attended",
+                           "NotAttended" = "Unattended")
 
 names(posterior_conditions)[4] = "Amplitude"
 
 
+#order
+#dataPlot$`Reward phase` = factor(dataPlot$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
+#dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward phase`,dataPlot$`Reward probability`),]
+
+
+plottingConditions = c("Attended","Unattended" )
+for (i in 1:length(plottingConditions)){
+  
+  if(plottingConditions[i]=="Attended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Attended")}
+  
+  if(plottingConditions[i]=="Unattended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Unattended")}  
 
 # Pirate plot
-pirateplot(formula=Amplitude ~ Reward_Phase + Reward_Magnitude + Attention, # dependent~independent variables
-           data=posterior_conditions, # data frame
-           main="ssVEPs", # main title
-           xlim=NULL, # x-axis: limits
-           xlab="", # x-axis: label
-           ylim=c(0.7,1.2), # y-axis: limits
-           ylab="Amplitude", # y-axis: label
-           inf.method="sd", # type of inference: 95% Bayesian Highest Density Intervals
-           #hdi.iter=5000, # number of iterations for estimation of HDI
-           #inf.within=ParticipantNo, # ID variable
-           theme=0, # preset theme (0: use your own)
-           # theme settings
-           # pal="xman", # color palette [see piratepal(palette="all")]
-           #point.col="black", # points: color
-           #point.o=.3, # points: opacity (0-1)
-           avg.line.col="black", # average line: color
-           avg.line.lwd=2, # average line: line width
-           avg.line.o=1, # average line: opacity (0-1)
-           bar.b.col=NULL, # bars, border: color
-           bar.lwd=0, # bars, border: line width
-           bar.b.o=0, # bars, border: opacity (0-1)
-           bar.f.col=NULL, # bars, filling: color
-           bar.f.o=0, # bars, filling: opacity (0-1)
-           inf.b.col="black", # inference band, border: color
-           inf.lwd=0.1, # inference band, border: line width
-           inf.b.o=1, # inference band, border: opacity (0-1)
-           inf.f.col="black", # inference band, filling: color
-           inf.f.o=0, # inference band, filling: opacity (0-1)
-           bean.b.col="black", # bean border, color
-           bean.lwd=0.6, # bean border, line width
-           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-           bean.b.o=0.3, # bean border, opacity (0-1)
-           bean.f.col="gray", # bean filling, color
-           bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-           sortx = "sequential", # how to sort the x axis
-           # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-           # quant.col="black", # quantiles, line: color
-           # quant.length=.7, # quantiles, horizontal line length
-           # quant.lwd=2, # quantiles, line width
-           gl.col="gray", # gridlines: color
-           gl.lwd=c(.75,0), # gridlines: line width
-           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-           cex.lab=1, # axis labels: size
-           cex.axis=1, # axis numbers: size
-           bty="l", # plot box type
-           back.col="white") # background, color
+
+    pirateplot(formula = Amplitude ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
+             data=dataAmplitudePlot, # data frame
+             main=plottingConditions[i], # main title
+             ylim=c(0.7,1.2), # y-axis: limits
+             ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             sortx = "sequential",
+             bty="l", # plot box type
+             back.col="white") # background, color
+}
+
 ```
 
 Table of means across conditions
@@ -630,6 +596,7 @@ posterior_means =  posterior_means %>% separate(Condition, c("Attention", "Rewar
 kable(posterior_means, caption = "Means per condition")
 
 ```
+### Inference about the best model
 
 #### Attended vs. unattended
 

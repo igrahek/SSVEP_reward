@@ -100,21 +100,6 @@ data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedCo
                       Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
                       
 
-# Handle outliers------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-### Determine outliers and cut them
-# outliers based on hit rate at any condition
-#crit = .6 # minimum 60% hit rate in any condition .6
-# select participants below the criterion
-#criterion = subset(ddply(data.final,.(ParticipantNo),summarize,mean.Hit.Rate=mean(Hit.Rate)),mean.Hit.Rate<crit)$Participant # minimum 60% hit rate across all conditions
-
-#criterion = subset(data.final,data.final$Hit.Rate<.3)$Participant # minimum 60% hit rate across all conditions
-
-# eliminate ouotliers from data frame
-#data.final = data.final[!data.final$ParticipantNo %in% unique(criterion),] 
-
-# Create the final dataframe for accuracy and RTs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 ### Create a final dataframe for accuracy and RTs analyses
 # add a new variable specifying whether the participant is attending the high or Low_Rewed color
 data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High_Rew","Low_Rew")
@@ -147,52 +132,46 @@ kable(summary, caption = "Hit rates per condition")
 
 ```{r, warning=FALSE, message=FALSE}
 # # Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# 
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
   # Pirate plot
-  pirateplot(formula=Hit.Rate~ExpPhase+Condition, # dependent~independent variables
-             data=data.final, # data frame
+  pirateplot(formula=Hit.Rate ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
              main="Hit rates", # main title
-             xlim=NULL, # x-axis: limits
-             xlab="", # x-axis: label
-             ylim=c(0,1), # y-axis: limits
+             ylim=c(0.1,0.9), # y-axis: limits
              ylab="Hit Rate", # y-axis: label
-             inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-             hdi.iter=5000, # number of iterations for estimation of HDI
-             inf.within=ParticipantNo, # ID variable
              theme=0, # preset theme (0: use your own)
-             # theme settings
-             # pal="xman", # color palette [see piratepal(palette="all")]
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
-             bar.b.col=NULL, # bars, border: color
-             bar.lwd=0, # bars, border: line width
-             bar.b.o=0, # bars, border: opacity (0-1)
-             bar.f.col=NULL, # bars, filling: color
-             bar.f.o=0, # bars, filling: opacity (0-1)
-             inf.b.col="black", # inference band, border: color
-             inf.lwd=0.1, # inference band, border: line width
-             inf.b.o=1, # inference band, border: opacity (0-1)
-             inf.f.col="black", # inference band, filling: color
-             inf.f.o=0, # inference band, filling: opacity (0-1)
              bean.b.col="black", # bean border, color
              bean.lwd=0.6, # bean border, line width
              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
              bean.b.o=0.3, # bean border, opacity (0-1)
              bean.f.col="gray", # bean filling, color
              bean.f.o=.1, # bean filling, opacity (0-1)
-             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-             # quant.col="black", # quantiles, line: color
-             # quant.length=.7, # quantiles, horizontal line length
-             # quant.lwd=2, # quantiles, line width
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
              gl.col="gray", # gridlines: color
-             gl.lwd=c(.75,0), # gridlines: line width
              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-             cex.lab=0.8, # axis labels: size
+             cex.lab=1, # axis labels: size
              cex.axis=1, # axis numbers: size
+             cex.names = 1,
              bty="l", # plot box type
              back.col="white") # background, color
 ```
@@ -313,15 +292,6 @@ print(tidy(model.full.Acc, par_type = "non-varying"), digits = 1)
 ```
 
 ### Plotting the best model
-
-```{r, warning=FALSE, message=FALSE}
-# Plot the interaction between Phase and Attention in two conditions of reward probability
-# conditions = data.frame(Condition = c("High_Rew", "Low_Rew"))
-plot(marginal_effects(model.full.Acc, effects = "ExpPhase:Condition"),ask=FALSE)
-```
-
-### Inference about the best model
-
 #### Sample from the posterior
 ```{r, warning=FALSE, message=FALSE}
 # Analyzing the posterior and differences between conditions
@@ -365,60 +335,39 @@ Extinction_Low = post[["b_Intercept"]] +
 # make a data frame
 posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
 
-posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Probability"), "_", extra = "merge")
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
 
-names(posterior_conditions)[3] = "Hit_rate"
+names(posterior_conditions)[3] = "Hit rate"
+
+
 
 
 
 # Pirate plot
-pirateplot(formula=Hit_rate ~ Reward_Phase + Reward_Probability, # dependent~independent variables
-           data=posterior_conditions, # data frame
-           main="Hit rates", # main title
-           xlim=NULL, # x-axis: limits
-           xlab="", # x-axis: label
-           ylim=c(0.5, 0.7), # y-axis: limits
-           ylab="Hit rate", # y-axis: label
-           inf.method="sd", # type of inference: 95% Bayesian Highest Density Intervals
-           #hdi.iter=5000, # number of iterations for estimation of HDI
-           #inf.within=ParticipantNo, # ID variable
-           theme=0, # preset theme (0: use your own)
-           # theme settings
-           # pal="xman", # color palette [see piratepal(palette="all")]
-           #point.col="black", # points: color
-           #point.o=.3, # points: opacity (0-1)
-           avg.line.col="black", # average line: color
-           avg.line.lwd=2, # average line: line width
-           avg.line.o=1, # average line: opacity (0-1)
-           bar.b.col=NULL, # bars, border: color
-           bar.lwd=0, # bars, border: line width
-           bar.b.o=0, # bars, border: opacity (0-1)
-           bar.f.col=NULL, # bars, filling: color
-           bar.f.o=0, # bars, filling: opacity (0-1)
-           inf.b.col="black", # inference band, border: color
-           inf.lwd=0.1, # inference band, border: line width
-           inf.b.o=1, # inference band, border: opacity (0-1)
-           inf.f.col="black", # inference band, filling: color
-           inf.f.o=0, # inference band, filling: opacity (0-1)
-           bean.b.col="black", # bean border, color
-           bean.lwd=0.6, # bean border, line width
-           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-           bean.b.o=0.3, # bean border, opacity (0-1)
-           bean.f.col="gray", # bean filling, color
-           bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-           sortx = "sequential", # how to sort the x axis
-           # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-           # quant.col="black", # quantiles, line: color
-           # quant.length=.7, # quantiles, horizontal line length
-           # quant.lwd=2, # quantiles, line width
-           gl.col="gray", # gridlines: color
-           gl.lwd=c(.75,0), # gridlines: line width
-           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-           cex.lab=1, # axis labels: size
-           cex.axis=1, # axis numbers: size
-           bty="l", # plot box type
-           back.col="white") # background, color
+pirateplot(formula = `Hit rate` ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
+             data=posterior_conditions, # data frame
+             main="Hit rates", # main title
+             ylim=c(0.5, 0.7), # y-axis: limits
+             ylab="Hit rate", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             sortx = "sequential",
+             bty="l", # plot box type
+             back.col="white") # background, color
 ```
 
 Table of means across conditions
@@ -450,6 +399,7 @@ kable(posterior_means, caption = "Means per condition")
 
 ```
 
+### Inference about the best model
 
 Check the difference between high reward in baseline vs. acquisition 
 
@@ -514,54 +464,47 @@ kable(summary, caption = "Reaction times per condition")
 ### Plot
 
 ```{r, warning=FALSE, message=FALSE}
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] = "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] = "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+
 # Pirate plot
-
-  
-
-pirateplot(formula=Hits.RTs~ExpPhase+Condition, # dependent~independent variables
-             data=data.final, # data frame
+  pirateplot(formula = Hits.RTs ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
              main="Reaction times", # main title
-             xlim=NULL, # x-axis: limits
-             xlab="", # x-axis: label
              ylim=c(400,700), # y-axis: limits
              ylab="Reaction time", # y-axis: label
-             inf.method="hdi", # type of inference: 95% Bayesian Highest Density Intervals
-             hdi.iter=5000, # number of iterations for estimation of HDI
-             inf.within=ParticipantNo, # ID variable
              theme=0, # preset theme (0: use your own)
-             # theme settings
-             # pal="xman", # color palette [see piratepal(palette="all")]
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
-             bar.b.col=NULL, # bars, border: color
-             bar.lwd=0, # bars, border: line width
-             bar.b.o=0, # bars, border: opacity (0-1)
-             bar.f.col=NULL, # bars, filling: color
-             bar.f.o=0, # bars, filling: opacity (0-1)
-             inf.b.col="black", # inference band, border: color
-             inf.lwd=0.1, # inference band, border: line width
-             inf.b.o=1, # inference band, border: opacity (0-1)
-             inf.f.col="black", # inference band, filling: color
-             inf.f.o=0, # inference band, filling: opacity (0-1)
              bean.b.col="black", # bean border, color
              bean.lwd=0.6, # bean border, line width
              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
              bean.b.o=0.3, # bean border, opacity (0-1)
              bean.f.col="gray", # bean filling, color
              bean.f.o=.1, # bean filling, opacity (0-1)
-             cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-             # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-             # quant.col="black", # quantiles, line: color
-             # quant.length=.7, # quantiles, horizontal line length
-             # quant.lwd=2, # quantiles, line width
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
              gl.col="gray", # gridlines: color
-             gl.lwd=c(.75,0), # gridlines: line width
              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-             cex.lab=0.8, # axis labels: size
+             cex.lab=1, # axis labels: size
              cex.axis=1, # axis numbers: size
+             cex.names = 1,
              bty="l", # plot box type
              back.col="white") # background, color
 ```
@@ -683,15 +626,6 @@ print(tidy(model.full.RT, par_type = "non-varying"), digits = 1)
 
 
 ### Plotting the best model
-
-```{r, warning=FALSE, message=FALSE}
-# Plot the interaction between Phase and Attention in two conditions of reward probability
-# conditions = data.frame(Condition = c("High_Rew", "Low_Rew"))
-plot(marginal_effects(model.full.RT, effects = "ExpPhase:Condition"),ask=FALSE)
-```
-
-### Inference about the best model
-
 #### Sample from the posterior
 ```{r, warning=FALSE, message=FALSE}
 
@@ -735,60 +669,37 @@ Extinction_Low = post[["b_Intercept"]] +
 # make a data frame
 posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
 
-posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward_Phase", "Reward_Probability"), "_", extra = "merge")
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
 
-names(posterior_conditions)[3] = "Reaction_time"
+names(posterior_conditions)[3] = "Reaction time"
 
 
 
 # Pirate plot
-pirateplot(formula=Reaction_time ~ Reward_Phase + Reward_Probability, # dependent~independent variables
-           data=posterior_conditions, # data frame
-           main="Reaction times", # main title
-           xlim=NULL, # x-axis: limits
-           xlab="", # x-axis: label
-           ylim=c(485,600), # y-axis: limits
-           ylab="Reaction time", # y-axis: label
-           inf.method="sd", # type of inference: 95% Bayesian Highest Density Intervals
-           #hdi.iter=5000, # number of iterations for estimation of HDI
-           #inf.within=ParticipantNo, # ID variable
-           theme=0, # preset theme (0: use your own)
-           # theme settings
-           # pal="xman", # color palette [see piratepal(palette="all")]
-           #point.col="black", # points: color
-           #point.o=.3, # points: opacity (0-1)
-           avg.line.col="black", # average line: color
-           avg.line.lwd=2, # average line: line width
-           avg.line.o=1, # average line: opacity (0-1)
-           bar.b.col=NULL, # bars, border: color
-           bar.lwd=0, # bars, border: line width
-           bar.b.o=0, # bars, border: opacity (0-1)
-           bar.f.col=NULL, # bars, filling: color
-           bar.f.o=0, # bars, filling: opacity (0-1)
-           inf.b.col="black", # inference band, border: color
-           inf.lwd=0.1, # inference band, border: line width
-           inf.b.o=1, # inference band, border: opacity (0-1)
-           inf.f.col="black", # inference band, filling: color
-           inf.f.o=0, # inference band, filling: opacity (0-1)
-           bean.b.col="black", # bean border, color
-           bean.lwd=0.6, # bean border, line width
-           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-           bean.b.o=0.3, # bean border, opacity (0-1)
-           bean.f.col="gray", # bean filling, color
-           bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=TRUE, # max and min values of bean densities are capped at the limits found in the data
-           sortx = "sequential", # how to sort the x axis
-           # quant=c(.1,.9), # quantiles (e.g., 10th and 90th)
-           # quant.col="black", # quantiles, line: color
-           # quant.length=.7, # quantiles, horizontal line length
-           # quant.lwd=2, # quantiles, line width
-           gl.col="gray", # gridlines: color
-           gl.lwd=c(.75,0), # gridlines: line width
-           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-           cex.lab=1, # axis labels: size
-           cex.axis=1, # axis numbers: size
-           bty="l", # plot box type
-           back.col="white") # background, color
+pirateplot(formula = `Reaction time` ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
+            data=posterior_conditions, # data frame
+             main="Reaction times", # main title
+             ylim=c(485,600), # y-axis: limits
+             ylab="Reaction time", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             sortx = "sequential",
+             bty="l", # plot box type
+             back.col="white") # background, color
 ```
 
 
@@ -819,6 +730,8 @@ posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Re
 
 kable(posterior_means, caption = "Means per condition")
 ```
+
+### Inference about the best model
 
 Check the difference between high reward in baseline vs. acquisition 
 
