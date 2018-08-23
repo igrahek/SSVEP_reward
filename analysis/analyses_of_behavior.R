@@ -132,6 +132,7 @@ data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
   # Pirate plot
   pirateplot(formula=Hit.Rate ~ `Reward phase` + `Reward probability`, # dependent~independent variables
              data=data.plot, # data frame
+             main = "Hit rates",
              ylim=c(0.1,0.9), # y-axis: limits
              ylab="Hit Rate", # y-axis: label
              theme=0, # preset theme (0: use your own)
@@ -164,6 +165,7 @@ data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
              data=data.plot, # data frame
              ylim=c(400,700), # y-axis: limits
              ylab="Reaction time", # y-axis: label
+             main = "Reaction times",
              theme=0, # preset theme (0: use your own)
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
