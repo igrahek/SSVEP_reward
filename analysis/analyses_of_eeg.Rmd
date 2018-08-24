@@ -34,13 +34,14 @@ rm(list=ls())
 cat("\014")
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,knitr,broom, brmstools, BEST, tidyverse)
+pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,knitr,broom, brmstools, BEST, tidyverse, here)
 # set seed
 set.seed(42)
 # Set working directory
-setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/")
+#setwd(here())
 # import data
-data.raw = read.csv2(file="./data/amplitudes_rewardBoth_wholeSample.csv",header=TRUE,na.strings="NaN") #only good behavior: amplitudes_rewardBoth.csv  # full sample: amplitudes_rewardBoth_wholeSample.csv POORPERF_amplitude_rewardBoth.csv
+data.raw = read.csv2(file = here("data","amplitudes_rewardBoth_wholeSample.csv"),header=TRUE,na.strings="NaN") 
+
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -210,7 +211,7 @@ for (i in 1:length(plottingConditions)){
 ```{r, warning=FALSE, message=FALSE}
 # Set the working directory in order to load the models
 # Set working directory
-setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
+setwd(here("brms_models"))
 
 # # Set the intercept model
 # data$ExpPhase=relevel(data$ExpPhase,ref="Bsln")

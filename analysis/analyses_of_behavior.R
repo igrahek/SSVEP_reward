@@ -16,13 +16,13 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms,rstan, tidyverse)
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms,rstan, tidyverse, here)
 # set seed
 set.seed(42) 
 # set directory
-setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/")
+setwd(here())
 # import data
-data.raw = read.csv(file="./data/Data_behavior_exp1_48pps.csv",header=TRUE,na.strings="NaN") 
+data.raw = read.csv(file = here("data","Data_behavior_exp1_48pps.csv"),header=TRUE,na.strings="NaN")
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -193,7 +193,7 @@ data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
 # brms reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Set the working directory where to save the models
-setwd("./brms_models")
+setwd(here("brms_models"))
 
 #help stan run faster
 rstan_options(auto_write = TRUE)

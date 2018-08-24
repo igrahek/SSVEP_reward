@@ -32,13 +32,13 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr)
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr, here)
 # set seed
 set.seed(42) 
 # set directory
-setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/")
+setwd(here())
 # import data
-data.raw = read.csv(file="C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/data/Data_behavior_exp1_48pps.csv",header=TRUE,na.strings="NaN") 
+data.raw = read.csv(file = here("data","Data_behavior_exp1_48pps.csv"),header=TRUE,na.strings="NaN")
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -110,7 +110,7 @@ data.final$Condition = factor(data.final$Condition)
 ### Means - raw data
 
 ```{r, warning=FALSE, message=FALSE}
-summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hit.Rate, na.rm = TRUE), digits = 10), " [", round(hdi(Hit.Rate)[[1]], digits = 10), " ", round(hdi(Hit.Rate)[[2]], digits = 10), "]")))
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hit.Rate, na.rm = TRUE), digits = 2), " [", round(hdi(Hit.Rate)[[1]], digits = 2), " ", round(hdi(Hit.Rate)[[2]], digits = 2), "]")))
 
 names(summary) = c("Reward phase", "Reward probability", "Hit Rate")
 
@@ -183,7 +183,7 @@ data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
 ```{r, warning=FALSE, message=FALSE}
 # Set the working directory in order to load the models
 # Set working directory
-setwd("C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/brms_models")
+setwd(here("brms_models"))
 
 # # referencing for easier interpretation
 # data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")

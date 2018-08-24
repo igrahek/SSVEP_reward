@@ -17,12 +17,13 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,lme4, BEST, brmstools)
+pacman::p_load(reshape2,yarrr,BayesFactor,plyr,ez,schoRsch,brms,lme4, BEST, brmstools, here)
 # set seed
 set.seed(42) 
+# Set working directory
+setwd(here())
 # import data
-data.raw = read.csv2(file="C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren & Antonio/Experiment 1/SSVEP and reward/data/amplitudes_rewardBoth_wholeSample.csv",header=TRUE,na.strings="NaN") #only good behavior: amplitudes_rewardBoth.csv  # full sample: amplitudes_rewardBoth_wholeSample.csv POORPERF_amplitude_rewardBoth.csv
-
+data.raw = read.csv2(file = here("data","amplitudes_rewardBoth_wholeSample.csv"),header=TRUE,na.strings="NaN") 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Reshape to long format
@@ -168,7 +169,7 @@ for (i in 1:length(plottingConditions)){
 # brms three factors------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Set the working directory where to save the models
-setwd("./brms_models")
+setwd(here("brms_models"))
 
 #help stan run faster
 rstan_options(auto_write = TRUE)
