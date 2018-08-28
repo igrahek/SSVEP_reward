@@ -41,8 +41,8 @@ topo_10Hz <- topos %>%
     interp_limit = "skirt",
     contour = TRUE,
     chan_marker = "point",
-    quantity = "amplitude",
-    highlights = c("Oz", "POz", "O2", "PO3")
+    quantity = "amplitude"
+    # highlights = c("Oz", "POz", "O2", "PO3")
   ) +
   ggtitle("10 Hz") +
   theme(
@@ -62,8 +62,8 @@ topo_12Hz <- topos %>%
     interp_limit = "skirt",
     contour = TRUE,
     chan_marker = "point",
-    quantity = "amplitude",
-    highlights = c("Oz", "POz", "O2", "PO3")
+    quantity = "amplitude"
+    # highlights = c("Oz", "POz", "O2", "PO3")
   ) +
   ggtitle("12 Hz") +
   theme(
@@ -87,9 +87,9 @@ spectra <- read_csv(paste0(getwd(), "/figures/spectra.csv")) %>% # load data
     participant = as.factor(participant),
     condition = recode(
       factor(condition),
-      "1" = "BslnRedAttended", "2" = "BslnBlueAttended",
-      "3" = "AcqRedAttended", "4" = "AcqBlueAttended",
-      "5" = "ExtRedAttended", "6" = "ExtBlueAttended"
+      "1" = "baseline, red attended", "2" = "baseline, blue attended",
+      "3" = "acquisition, red attended", "4" = "acquisition, blue attended",
+      "5" = "extinction, red attended", "6" = "extinction, blue attended"
     ),
     frequency = as.numeric(frequency) # convert frequency as numeric, or subsequent filtering won't work
   ) %>%
@@ -231,7 +231,7 @@ plot_grid(topo.row,
           legend, 
           spectra_all,
           rel_widths = c(3, .3)) %>% # the second column (containing the legend) is 10 times smaller than the first one (containing the two topographies) 
-save_plot(paste0(getwd(), "/figures/topos_spectra.png"), 
+save_plot(paste0(getwd(), "/figures/topos_spectra.jpg"), 
           ., 
           base_height = 8,
           base_aspect_ratio = 1.1)
