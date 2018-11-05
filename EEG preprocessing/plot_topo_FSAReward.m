@@ -1,5 +1,5 @@
 
-function [elec_rank]=plot_topo_FSAReward(topo,plotgroup)
+function [elec_rank]=plot_topo_FSAReward(topo)
 
 data=zeros(topo.numchans,round(topo.time(2)*topo.samprate),numel(topo.subjects),numel(topo.conds),size(topo.freq,2)); % preallocate big matrix: electrodes x timepoints x participants x conditions x frequencies of interest
 amp_order=zeros(topo.numchans,numel(topo.subjects),size(topo.freq,2)); % preallocate matrix containing sorted amplitude values for each electrode
@@ -37,15 +37,7 @@ for ifreq=1:numel(topo.freq) % loop through frequencies
     color_bar=colorbar; xlabel(color_bar,'\muV','fontsize',15); set(gca,'CLim',topo.amp_topomaplim,'fontsize',15); % add title and limits to colorbar
     hold on
 end
-if plotgroup==1 % red was rewarded
-    suptitle('Red is rewarded') % ... red was rewarded
-elseif plotgroup==2 % blue was rewarded
-    suptitle('Blue is rewarded') % ... blue was rewarded
-elseif plotgroup==3 % ignore reward
-    suptitle('both colors') % reward is ignored
-elseif plotgroup==4 % subset of participants, selected based on behavioral performance
-    suptitle('Both colors, good performers')
-end
+suptitle('both colors') % reward is ignored
 hold off
 
 end

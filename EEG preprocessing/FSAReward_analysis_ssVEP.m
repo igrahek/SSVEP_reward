@@ -78,7 +78,7 @@ eventlabels = {'BslnRedAttended' 'BslnBlueAttended' 'AcqRedAttended' 'AcqBlueAtt
 csvname = 'rewardBoth'; % name of csv file containing amplitude values at specified frequencies
 
 % plot topography
-[elec_rank] = plot_topo_FSAReward(topo, plotgroup);
+[elec_rank] = plot_topo_FSAReward(topo);
 
 % select electrodes for spectral analysis
 elec_choice = 1;
@@ -95,7 +95,7 @@ topo.channels = elec; % selected electrodes
 topo.bound = [0 16]; % range of frequencies to plot
 
 % plot frequency amplitude spectrum & extract amplitude values
-[amplitudes] = spec_plot_FSAReward(topo, eventlabels, plotgroup);
+[amplitudes] = spec_plot_FSAReward(topo, eventlabels);
 cell2csv([pathexp '\' pathanalysis '\amplitudes_' csvname '.csv'], amplitudes); % save amplitude values in a .csv file
 
 %%

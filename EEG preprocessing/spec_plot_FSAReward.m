@@ -1,5 +1,5 @@
-l
-function [amplitudes]=spec_plot_FSAReward(topo,eventlabels,plotgroup)
+
+function [amplitudes]=spec_plot_FSAReward(topo,eventlabels)
 
 fft_data=[];
 for ifreq=1:numel(topo.freq) % loop through frequencies
@@ -50,15 +50,7 @@ for ifreq=1:numel(topo.freq) % loop through frequencies
         hold all
     end
 end
-if plotgroup==1 % red was rewarded
-    suptitle('Grand AVG 12 Hz') % focus on 12 Hz only
-elseif plotgroup==2 % blue was rewarded
-    suptitle('Grand AVG 10 Hz') % focus on 10 Hz only
-elseif plotgroup==3 % ignore reward
-    suptitle(['Grand AVG ' num2str(topo.freq) ' Hz']) % see 10 Hz and 12 Hz
-elseif plotgroup==4 % ignore reward
-    suptitle(['Grand AVG ' num2str(topo.freq) ' Hz']) % see 10 Hz and 12 Hz
-end
+suptitle(['Grand AVG ' num2str(topo.freq) ' Hz']) % see 10 Hz and 12 Hz
 legend(allplots,eventlabels); % condition names
 
 % look for point corresponding to frequency of interest
