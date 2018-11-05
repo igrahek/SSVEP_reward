@@ -1,4 +1,4 @@
-
+l
 function [amplitudes]=spec_plot_FSAReward(topo,eventlabels,plotgroup)
 
 fft_data=[];
@@ -10,14 +10,14 @@ for ifreq=1:numel(topo.freq) % loop through frequencies
         sprange=eegF_Time2Sp(EEG,topo.time(1)):eegF_Time2Sp(EEG,topo.time(2)); % time range of interest (i.e., excluding the initial ERP response)
         EEG=eeg_detrend_widmann(EEG); % detrend
         for isub=1:numel(topo.subjects) % loop through participants
-            fft_data(:,:,isub,icond,ifreq)=abs(fft(EEG.data(topo.channels(isub,:),sprange,topo.subjects(isub)),numel(sprange)*2,2))*2/size(sprange,2); % fast Fourier transform (normalized across conditions)
-            % (zeropadded to double the length of the data, in order to increase frequency resolution and be able to visualize exactly 10 Hz and 12 Hz)
+            fft_data(:,:,isub,icond,ifreq)=abs(fft(EEG.data(topo.channels(isub,:),sprange,topo.subjects(isub)),numel(sprange)*8,2))*2/size(sprange,2); % fast Fourier transform (normalized across conditions)
+            % zeropadded to 8 times the length of the data, to increase frequency resolution and be able to visualize exactly 10 Hz and 12 Hz (as well as visually magnify possible differences between conditions)
         end
     end
 end
 
 % % save data to plot in R
-% % freqs=((0:(numel(sprange)*2)-1)/(numel(sprange)*2))*topo.samprate; % frequencies
+% % freqs=((0:(numel(sprange)*8)-1)/(numel(sprange)*8))*topo.samprate; % frequencies
 % data=squeeze(mean(fft_data,1)); % average across electrodes
 % data_plot=zeros(size(data,2)*size(data,3)*size(data,4),size(data,1)+3);
 % counter=1;
@@ -39,7 +39,7 @@ end
 
 allplots=[];
 figure
-freq_axis=((0:(numel(sprange)*2)-1)/(numel(sprange)*2))*topo.samprate; % frequencies from which to extract amplitudes
+freq_axis=((0:(numel(sprange)*8)-1)/(numel(sprange)*8))*topo.samprate; % frequencies from which to extract amplitudes
 for ifreq=1:numel(topo.freq) % loop through frequencies
     for icond=1:numel(topo.conds) % loop through conditions
         spectradata=squeeze(mean(mean(fft_data(:,:,:,:,ifreq),3),1)); % average across participants and selected electrodes
