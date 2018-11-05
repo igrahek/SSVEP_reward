@@ -140,7 +140,7 @@ spectra_all <- ggplot(spectra, aes(frequency, amplitude)) +
   guides(fill = "none", color = guide_legend(title = NULL)) +
   theme_classic(base_size = 18) +
   theme(
-    legend.position = c(.2, .8),
+    legend.position = c(.3, .8),
     plot.title = element_text(size = 24, hjust = .5)
   )
 
@@ -236,9 +236,9 @@ plot_grid(topo.row,
           legend, 
           spectra_all,
           rel_widths = c(3, .3)) %>% # the second column (containing the legend) is 10 times smaller than the first one (containing the two topographies) 
-save_plot(paste0(getwd(), "/figures/topos_spectra.jpg"), 
+save_plot(paste0(getwd(), "/topos_spectra.jpg"), 
           ., 
-          base_height = 8,
+          base_height = 10,
           base_aspect_ratio = 1.1)
 
 ################################################################################################
