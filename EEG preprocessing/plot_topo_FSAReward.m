@@ -26,7 +26,7 @@ EEG=pop_chanedit(EEG,'load',{topo.elec_coords,'filetype','autodetect'}); % assig
 topodata=squeeze(mean(mean(data(:,eegF_Time2Sp(EEG,topo.timeplot),:,:,:),4),3)); % average across conditions and participants, and display the selected time point (topo.timeplot)
 
 % topodata_R=[[{'10 Hz'} {'12 Hz'}];num2cell(topodata)];
-% cell2csv('E:\Experiments\Grahek_Ivan\FSAReward\repo\figures\topos.csv',topodata_R); % save values in a .csv file (for topographies in R)
+% cell2csv('C:\Users\Antonio\Desktop\topos.csv',topodata_R); % save values in a .csv file (for topographies in R)
 
 figure
 for ifreq=1:numel(topo.freq) % loop through frequencies    
