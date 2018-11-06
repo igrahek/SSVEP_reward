@@ -66,10 +66,12 @@ data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor
 data = data[with(data, order(Subject)), ]
 
 # Normalize the two frequencies
-# Make a new variable with mean amplitude across all conditions for each participant and each frequency 
+# Make a new variable with mean amplitude across all conditions for each participant and each frequency  !!! originally did not include ExpPhase below !!!
 data = ddply(data,.(Subject,RecordedFrequency),transform,
                     MeanAmplitude = mean(Amplitude,na.rm=TRUE),
                     SDAmplitude =   sd(Amplitude,na.rm=TRUE))
+
+#MeanAmplitude = mean(Amplitude[ExpPhase=="Baseline"],na.rm=TRUE),   [ExpPhase=="Bsln"]
 
 # Divide amplitudes in each Subject, Frequency, and Condition by the Mean Amplitude
 data$Amplitude = data$Amplitude/data$MeanAmplitude
@@ -163,7 +165,31 @@ for (i in 1:length(plottingConditions)){
              back.col="white") # background, color
 }
   
-
+pirateplot(formula = Selectivity ~ ExpPhase + Condition, # dependent~independent variables
+           data=data.diff, # data frame
+           main='Selectivity', # main title
+           ylim=c(-0.5,1), # y-axis: limits
+           ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
+           theme=0, # preset theme (0: use your own)
+           point.col="black", # points: color
+           point.o=.3, # points: opacity (0-1)
+           avg.line.col="black", # average line: color
+           avg.line.lwd=2, # average line: line width
+           avg.line.o=1, # average line: opacity (0-1)
+           bean.b.col="black", # bean border, color
+           bean.lwd=0.6, # bean border, line width
+           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+           bean.b.o=0.3, # bean border, opacity (0-1)
+           bean.f.col="gray", # bean filling, color
+           bean.f.o=.1, # bean filling, opacity (0-1)
+           cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+           gl.col="gray", # gridlines: color
+           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+           cex.lab=1, # axis labels: size
+           cex.axis=1, # axis numbers: size
+           cex.names = 1,
+           bty="l", # plot box type
+           back.col="white") # background, color
 
 
 # brms three factors------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -270,17 +296,38 @@ full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase 
                               sample_prior = TRUE)
 saveRDS(full,file="full.EEG.allsubs.rds")
 
+
+
+# Set the intercept model
+data.diff$ExpPhase=relevel(data.diff$ExpPhase,ref="Bsln")
+data.diff$Condition=relevel(data.diff$Condition,ref="High_Rew")
+
+
+
+
+# Selectivity
+phaseANDattention = brm(Selectivity ~ ExpPhase * Condition + (ExpPhase * Condition|Subject),
+                        data=data.diff,
+                        family=gaussian(),
+                        warmup = 2000,
+                        iter = 10000,
+                        save_all_pars = TRUE,
+                        control = list(adapt_delta = 0.99),
+                        cores = 4,
+                        sample_prior = TRUE)
+saveRDS(phaseANDattention,file="full.selectivity.EEG.allsubs.rds")
+
 #Trial
 #full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject/Trial),
 
 # read in the models and comparisons
-null = readRDS("null.EEG.allsub.rds")
-attention = readRDS("attention.EEG.allsubs.rds")
-expphase = readRDS("expphase.EEG.allsubs.rds")
-phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
-phaseANDattention_interaction = readRDS("phaseANDattention_interaction.EEG.allsubs.rds")
-rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
-full = readRDS("full.EEG.allsubs.rds")
+# null = readRDS("null.EEG.allsub.rds")
+# attention = readRDS("attention.EEG.allsubs.rds")
+# expphase = readRDS("expphase.EEG.allsubs.rds")
+# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
+# phaseANDattention_interaction = readRDS("phaseANDattention_interaction.EEG.allsubs.rds")
+# rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
+# full = readRDS("full.EEG.allsubs.rds")
 # waic = readRDS("compare.EEG.waic.allsubs.rds")
 
 # color_scheme_set("viridis")
@@ -291,8 +338,8 @@ compare.EEG.waic = WAIC(null, expphase, attention, phaseANDattention, phaseANDat
 saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.rds")
 
 # Weighted waic
-compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, weights = "waic")
-saveRDS(compare.EEG.waic.weights,file="compare.EEG.waic.weights")
+# compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, weights = "waic")
+# saveRDS(compare.EEG.waic.weights,file="compare.EEG.waic.weights")
 
 # Bayesian R2
 #Null
@@ -317,12 +364,12 @@ saveRDS(bR2.rewardTimesPhasePlusAtt.EEG,file="bR2.rewardTimesPhasePlusAtt.EEG")
 bR2.full.EEG = bayes_R2(full)
 saveRDS(bR2.full.EEG,file="bR2.full.EEG")
 
-null = readRDS("null.EEG.allsub.rds")
-attention = readRDS("attention.EEG.allsubs.rds")
-expphase = readRDS("expphase.EEG.allsubs.rds")
-phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
-rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
-full = readRDS("full.EEG.allsubs.rds")
+# null = readRDS("null.EEG.allsub.rds")
+# attention = readRDS("attention.EEG.allsubs.rds")
+# expphase = readRDS("expphase.EEG.allsubs.rds")
+# phaseANDattention = readRDS("phaseANDattention.EEG.allsubs.rds")
+# rewardTimesPhasePlusAtt = readRDS("rewardTimesPhasePlusAtt.EEG.allsubs.rds")
+# full = readRDS("full.EEG.allsubs.rds")
 
 
 # Analyzing the posterior and differences between conditions

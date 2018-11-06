@@ -85,13 +85,21 @@ data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor
 data = data[with(data, order(Subject)), ]
 
 # Normalize the two frequencies
+# Make a new variable with mean amplitude across all conditions for each participant and each frequency   [ExpPhase=="Bsln"]
+# data = ddply(data,.(Subject,RecordedFrequency),transform,
+#                     MeanAmplitude = mean(Amplitude,na.rm=TRUE),
+#                     SDAmplitude =   sd(Amplitude,na.rm=TRUE))
+
 # Make a new variable with mean amplitude across all conditions for each participant and each frequency
 data = ddply(data,.(Subject,RecordedFrequency),transform,
-                    MeanAmplitude = mean(Amplitude,na.rm=TRUE),
+                    MeanAmplitude = mean(Amplitude[ExpPhase=="Bsln"],na.rm=TRUE),
                     SDAmplitude =   sd(Amplitude,na.rm=TRUE))
 
 # Divide amplitudes in each Subject, Frequency, and Condition by the Mean Amplitude
 data$Amplitude = data$Amplitude/data$MeanAmplitude
+
+# Sort the data
+#data = data[with(data, order(Subject,RecordedFrequency,ExpPhase)), ]
 
 # Calculate the attention indexes - Selectivity (attended-unattended) & total enhancement (attended+unattended) (Andersen & Muller, 2010, PNAS)
 data.diff = ddply(data, .(Subject,ExpPhase,Condition), transform, Selectivity = Amplitude[Attention=="Att"]-Amplitude[Attention=="NotAtt"],TotalEnhancement=Amplitude[Attention=="Att"]+Amplitude[Attention=="NotAtt"])
@@ -533,7 +541,7 @@ for (i in 1:length(plottingConditions)){
     pirateplot(formula = Amplitude ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
              data=dataAmplitudePlot, # data frame
              main=plottingConditions[i], # main title
-             ylim=c(0.7,1.2), # y-axis: limits
+             ylim=c(0.7,1.3), # y-axis: limits
              ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
              theme=0, # preset theme (0: use your own)
              avg.line.col="black", # average line: color
@@ -703,14 +711,14 @@ plotPost(Diff_Acq_Ext_Low_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve
 
 #### Baseline difference
 
-Check the difference between baseline and acquisition in high reward attended
+Check the difference between high and low reward in baseline attended
 
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_High_Low_Att = Baseline_High_Attended - Baseline_Low_Attended
 plotPost(Diff_Bsln_High_Low_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
-Check the difference between baseline and acquisition in high reward unattended
+Check the difference between high and low reward in baseline not attended
 
 ```{r, warning=FALSE, message=FALSE}
 Diff_Bsln_High_Low_NotAtt = Baseline_High_NotAttended - Baseline_Low_NotAttended
