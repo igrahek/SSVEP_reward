@@ -10,10 +10,9 @@ close all; clear all; clc;
 rng(7); % seed for pseudo-random number generator ('A scuppetta!)
 expname='FSAReward'; % experiment name
 pathexp=['E:\Experiments\Grahek_Ivan\' expname]; % main directory
-pathdata='data\EEG\Exp1'; % where to get the .bdf files
-pathanalysis='analysis\EEG\Exp1'; % where to store the analysis
+pathdata='data\EEG'; % where to get the .bdf files
+pathanalysis='analysis\EEG'; % where to store the analysis
 pathpreproc='preproc'; % where to store the preprocessed single-subject data (for grand average)
-pathblocks='control_analyses\blocks'; % where to store the preprocessed single-subject data separated into blocks
 Avg.channs=[pathexp '\scripts\EEG\Antonio_BioSemi70.locs']; % channel locations
 Avg.prefix='VP'; % prefix of data files
 begin_epoch=0; % begin epoch (in seconds)
@@ -21,9 +20,9 @@ end_epoch=3.25; % end epoch (in seconds)
 nblocks=12; % number of trial blocks
 
 % discarded participants due to  technical problems (no EEG recording from the beginning of the experiment, problems with battery):
-% - VP05, VP10, VP13, VP27.
-% datasets to preprocess:
-Avg.subjects=[1 2 3 4 6 7 8 9 11 12 14 15 16 17 18 19 20 21 22 23 24 25 26 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48]; % final sample
+% - VP05, VP10, VP13, VP27
+% final sample
+Avg.subjects=[1 2 3 4 6 7 8 9 11 12 14 15 16 17 18 19 20 21 22 23 24 25 26 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48];
 
 % TRIGGERS (only conditions in which no dot movement occurred):
 % 1: baseline, red attended; 2: baseline, blue attended;
@@ -82,19 +81,6 @@ for isub=1:numel(Avg.subjects) % index of participant number
      EEG=pop_select(EEG,'nochannel',[65 66]); % remove bipolar eye channels
      
      TotTrials2Remove=unique([trials2removeFASTER,trials2removeBlinks,trials2removeEyeMov]); % total trials to remove according to all artifact rejection methods
-     
-     % save each block in separate files (for control analyses)
-     iblockcount=1; % counter (used to save block name)
-     for iblock=EEG.trials/nblocks+1:EEG.trials/nblocks:EEG.trials+1 % loop through 12 blocks in steps of 20 trials (the +1 is necessary for the first block)
-         trials2keep=setdiff(iblock-EEG.trials/nblocks:iblock-1,... % select values from current block...
-             TotTrials2Remove); % ... that have not been marked as contaminated by artifacts
-         if ~isempty(trials2keep) % if all trials in a block are contaminated do not attempt to save (pop_select would throw an error), otherwise...
-             EEG_block=pop_select(EEG,'trial',trials2keep); % ... select clean trials
-             EEG_block=pop_reref(EEG_block,[],'keepref','on'); % re-reference to average
-             pop_saveset(EEG_block,'filename',[Avg.prefix num2str(Avg.subjects(1,isub),'%.2d') '_block' num2str(iblockcount)],'filepath',[pathexp '\' pathanalysis '\' pathblocks '\']); % save
-         end
-         iblockcount=iblockcount+1; % update counter
-     end
      
      EEG=pop_select(EEG,'notrial',TotTrials2Remove); % remove epochs contaminated by artifacts
  
