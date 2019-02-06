@@ -33,7 +33,7 @@ Avg.trig=[1 2 3 4 5 6]; % select triggers
 %% PREPROCESSING
 
 for isub=1:numel(Avg.subjects) % index of participant number
-
+    
     % display participant number
     disp(['Processing ' Avg.prefix num2str(Avg.subjects(1,isub),'%.2d') '...'])
     
@@ -48,16 +48,16 @@ for isub=1:numel(Avg.subjects) % index of participant number
         EEG=pop_biosig([pathexp '\' pathdata '\' Avg.prefix num2str(Avg.subjects(1,isub),'%.2d') '.bdf'],'channels',[1:70],'ref',[69 70],'refoptions',{'keepref' 'on'}); % referenced to average mastoids
     end
     
-%     pop_eegplot(EEG,1,1,1); % check data
-
+    %     pop_eegplot(EEG,1,1,1); % check data
+    
     EEG=pop_chanedit(EEG,'load',{Avg.channs,'filetype','autodetect'}); % assign channel locations
-%     topoplot([],EEG.chanlocs,'style','blank', 'electrodes','labelpoint','chaninfo',EEG.chaninfo); % see channel locations
+    %     topoplot([],EEG.chanlocs,'style','blank', 'electrodes','labelpoint','chaninfo',EEG.chaninfo); % see channel locations
     EEG=pop_rmbase(EEG,'Warning','off'); % remove DC
     
-%     pop_eegplot(EEG,1,1,1); % check data
+    %     pop_eegplot(EEG,1,1,1); % check data
     
     EEG=pop_epoch(EEG,num2cell(Avg.trig),[begin_epoch end_epoch]); % epoching
-
+    
     % for log file
     for irej=1:numel(EEG.epoch)
         trigtotepochs{irej,:}=EEG.epoch(1,irej).eventtype(1,1); % create vector with the sum of total epochs for each condition
@@ -74,18 +74,18 @@ for isub=1:numel(Avg.subjects) % index of participant number
     [gen_bad_chans,EEG,trials2removeFASTER]=eegF_FASTER(cfg,EEG); % find & interpolate noisy channels; find trials contaminated by artifacts (does not eliminate them!)
     EEG=pop_reref(EEG,[69 70],'keepref','off'); % re-reference to mastoids (the eegF_FASTER function re-references to Cz, hence the need for re-referencing here) and discard them afterwards
     
-     % detect residual blinks and horizontal eye movements with SCADS
-     EEG=eegF_Bipolarize(EEG);  % create bipolar vEOG and hEOG channels
-     [EEG,trials2removeBlinks]=SCADS_RemoveBlinks(EEG,65); % find trials contaminated by blinks (does not eliminate them!)
-     [EEG,trials2removeEyeMov]=SCADS_RemoveEyeMovements(EEG,66); % find trials contaminated by horizontal eye movements (does not eliminate them!)
-     EEG=pop_select(EEG,'nochannel',[65 66]); % remove bipolar eye channels
-     
-     TotTrials2Remove=unique([trials2removeFASTER,trials2removeBlinks,trials2removeEyeMov]); % total trials to remove according to all artifact rejection methods
-     
-     EEG=pop_select(EEG,'notrial',TotTrials2Remove); % remove epochs contaminated by artifacts
- 
-%     pop_eegplot(EEG,1,1,1); % check data
-
+    % detect residual blinks and horizontal eye movements with SCADS
+    EEG=eegF_Bipolarize(EEG);  % create bipolar vEOG and hEOG channels
+    [EEG,trials2removeBlinks]=SCADS_RemoveBlinks(EEG,65); % find trials contaminated by blinks (does not eliminate them!)
+    [EEG,trials2removeEyeMov]=SCADS_RemoveEyeMovements(EEG,66); % find trials contaminated by horizontal eye movements (does not eliminate them!)
+    EEG=pop_select(EEG,'nochannel',[65 66]); % remove bipolar eye channels
+    
+    TotTrials2Remove=unique([trials2removeFASTER,trials2removeBlinks,trials2removeEyeMov]); % total trials to remove according to all artifact rejection methods
+    
+    EEG=pop_select(EEG,'notrial',TotTrials2Remove); % remove epochs contaminated by artifacts
+    
+    %     pop_eegplot(EEG,1,1,1); % check data
+    
     pop_saveset(EEG,'filename',[Avg.prefix num2str(Avg.subjects(1,isub),'%.2d')],'filepath',[pathexp '\' pathanalysis '\' pathpreproc '\']); % save (for grand averages)
     % EEG=pop_loadset('filename',[Avg.prefix num2str(Avg.subjects(1,isub),'%.2d') '.set'],'filepath',[pathexp '\' pathanalysis '\' pathpreproc '\']); % load file
     
@@ -106,7 +106,7 @@ for isub=1:numel(Avg.subjects) % index of participant number
     
     % clear variables before starting the preprocessing of a new participant
     clear EEG EEG_block trigtotepochs totepochs trigepochsleft epochsleft rejepxcond
-   
+    
 end
 
 % save log file
