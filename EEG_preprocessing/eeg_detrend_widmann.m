@@ -1,7 +1,7 @@
-% eeg_detrend() - Remove linear trends from epochs
+% eeg_detrend_widmann() - Remove linear trends from epochs
 %
 % Usage:
-% >> EEG = eeg_detrend(EEG);
+% >> EEG = eeg_detrend_widmann(EEG);
 %
 % Inputs:
 % EEG - EEGLAB EEG structure
