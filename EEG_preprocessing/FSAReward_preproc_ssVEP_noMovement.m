@@ -18,7 +18,7 @@ end_epoch = 3.25; % end epoch (in seconds)
 % 1: baseline, red attended; 2: baseline, blue attended;
 % 3: acquisition, red attended; 4: acquisition, blue attended;
 % 5: extinction, red attended; 6: extinction, blue attended.
-Avg.trig=[1 2 3 4 5 6]; % select triggers
+Avg.trig = [1 2 3 4 5 6]; % select triggers
 
 filenames = dir([pathdata '*.bdf']); % read file names in folder path (puts it in a structure called filenames)
 % discarded participants due to  technical problems (no EEG recording from the beginning of the experiment, problems with battery):
@@ -52,7 +52,7 @@ for isub = 1:numel(filenames) % loop through files
     else
         EEG = pop_biosig([pathdata dispname '.bdf'], 'channels', [1:68], 'ref', 1:64, 'refoptions', {'keepref' 'on'});
     end
-       
+    
     %     pop_eegplot(EEG,1,1,1); % check data
     
     EEG = pop_chanedit(EEG, 'load', {Avg.channs, 'filetype', 'autodetect'}); % assign channel locations
@@ -64,7 +64,7 @@ for isub = 1:numel(filenames) % loop through files
     EEG = pop_epoch(EEG, num2cell(Avg.trig), [begin_epoch end_epoch]); % epoching
     
     %     pop_eegplot(EEG, 1, 1, 1); % check data
-
+    
     % for log file
     for irej = 1:numel(EEG.epoch)
         trigtotepochs{irej, :} = EEG.epoch(1, irej).eventtype; % create vector with the sum of total epochs for each condition
@@ -96,7 +96,7 @@ for isub = 1:numel(filenames) % loop through files
     EEG = pop_select(EEG, 'notrial', TotTrials2Remove); % remove epochs contaminated by artifacts
     
     %     pop_eegplot(EEG,1,1,1); % check data
-        
+    
     % for log file
     for irej = 1:numel(EEG.epoch)
         trigepochsleft{irej, :} = EEG.epoch(1, irej).eventtype; % create vector with the sum of epochs left for each condition (after artifact rejection)
@@ -117,8 +117,8 @@ for isub = 1:numel(filenames) % loop through files
     
     % save preprocessed data
     pop_saveset(EEG,  'filepath', [pathanalysis 'preproc\'], 'filename', [dispname '_elist_be_artrej.set']);
-  
-        % stop timer
+    
+    % stop timer
     temp_elapsed = struct('subject', dispname, ... % participant number
         'elapsed_time', toc); % interpolated channels
     elapsed = [elapsed, temp_elapsed];
