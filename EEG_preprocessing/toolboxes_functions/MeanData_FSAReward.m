@@ -8,14 +8,14 @@ disp('Averaging...');
 disp('---------------------------');
 
 % Calculate Mean
-tempfiles = dir([Avg.pathin '*.set']);
+tempfiles = dir([Avg.pathssj '*.set']);
 
 for iSub = 1:numel(tempfiles)
     FileName = tempfiles(iSub).name;
     disp(FileName);
     
     % Load Data
-    EEG = pop_loadset(FileName, Avg.pathin);
+    EEG = pop_loadset(FileName, Avg.pathssj);
 %     EEG = eeg_detrend_widmann(EEG); % detrending
     
     if iSub == 1
@@ -35,7 +35,7 @@ end
 clear EEG
 
 % Store Mean in Different Files
-EEG = pop_loadset(FileName, Avg.pathin);
+EEG = pop_loadset(FileName, Avg.pathssj);
 
 EEG.trials = numel(Avg.subjects);
 EEG.event = EEG.event(1:numel(Avg.subjects));
@@ -44,7 +44,7 @@ EEG.epoch = EEG.epoch(1:numel(Avg.subjects));
 for iCond = 1:numel(Avg.trig);
     EEG.data = squeeze(AllSub(iCond, :, :, :));
     EEG.setname = ['Mean-C' int2str(iCond)];
-    pop_saveset(EEG, [EEG.setname '.set'], Avg.pathout); % save
+    pop_saveset(EEG, [EEG.setname '.set'], Avg.pathGM); % save
 end
 
 % display number of averaged epochs for each condition
