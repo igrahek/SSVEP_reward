@@ -28,7 +28,7 @@ disp('****************************')
 disp('Saving data...')
 disp('****************************')
 topodata_R = [[{'10 Hz'} {'12 Hz'}]; num2cell(topodata)];
-cell2csv([topo.pathout 'grandAverage_spectra.csv'], topodata_R); % save values in a .csv file (for topographies in R)
+cell2csv([topo.pathout 'grandAverage_topos.csv'], topodata_R); % save values in a .csv file (for topographies in R)
 
 figure
 for ifreq = 1:numel(topo.freq) % loop through frequencies    
