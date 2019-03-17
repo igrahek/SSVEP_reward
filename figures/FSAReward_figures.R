@@ -12,6 +12,7 @@ setwd(paste0(getwd(), "/figures/")) # when using R projects
 #                    "viridis", "cowplot"),
 #                  dependencies = TRUE)
 # devtools::install_github('craddm/eegUtils', dependencies = TRUE)
+# devtools::install_github("mikabr/ggpirate", dependencies = TRUE)
 
 ### load packages
 library(Rmisc) # must be loaded before 'tidyverse' or it will cause compatibility issues
@@ -19,6 +20,7 @@ library(tidyverse)
 library(viridis)
 library(cowplot)
 library(eegUtils)
+library(ggpirate)
 
 ########################################### FIGURE 1 ###########################################
 ######################################### TOPOGRAPHIES #########################################
@@ -244,3 +246,69 @@ save_plot(paste0(getwd(), "/topos_spectra.jpg"),
   base_height = 10,
   base_aspect_ratio = 1.1
 )
+
+################################################# FIGURE 2 ##################################################
+######################################### RDI PLOT SSVEP AMPLITUDES #########################################
+
+amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load data
+  gather(
+    key = cond,
+    value = amplitude,
+    "BslnRedAttended":"ExtBlueAttended"
+  ) %>%
+  mutate(
+    participant = as.factor(Subject),
+    frequency = as.factor(Frequency),
+    phase = recode(
+      factor(cond),
+      "BslnRedAttended" = "baseline", "BslnBlueAttended" = "baseline",
+      "AcqRedAttended" = "rewarded", "AcqBlueAttended" = "rewarded",
+      "ExtRedAttended" = "non-rewarded", "ExtBlueAttended" = "non-rewarded"
+    ),
+    attended = recode(
+      factor(cond),
+      "BslnRedAttended" = "red", "BslnBlueAttended" = "blue",
+      "AcqRedAttended" = "red", "AcqBlueAttended" = "blue",
+      "ExtRedAttended" = "red", "ExtBlueAttended" = "blue"
+    ),
+    condition = as.factor(paste(phase, attended, sep = " "))
+  ) %>%
+  dplyr::select(participant, frequency, condition, phase, attended, amplitude)
+
+# RDI plot
+ggplot(amps,
+       aes(x = phase, 
+           y = amplitude,
+           color = attended,
+           fill = attended)) +
+  geom_pirate(bars = FALSE, 
+              points_params = list(size = 3, alpha = .5),
+              violins_params = list(size = 1),
+              show.legend = TRUE) +
+  scale_color_manual(values = c("blue", "red")) +
+  scale_fill_manual(values = c("blue", "red")) +
+  
+  facet_wrap(~ frequency, scales = "free") + 
+  
+  
+  
+  
+  
+  
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  scale_y_continuous(limits = c(-.1, 1),
+                     breaks = seq(-.1, 1, .1)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  geom_hline(yintercept = seq(0, 1, .1),
+             linetype = "dotted",
+             colour = "#999999",
+             size = .8,
+             alpha = .5) +
+  labs(x = "",
+       y = "cosine sim index") +
+  facet_wrap(~ exp, scales = "free") + 
+  ggtitle("amplitude (regularity frequency)") +
+  theme_EmoSSR
+
+
