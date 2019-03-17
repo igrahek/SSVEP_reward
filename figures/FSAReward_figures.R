@@ -205,7 +205,8 @@ topo_row_temp <- plot_grid(topo_10Hz + theme(legend.position = "none"),
   topo_12Hz + theme(legend.position = "none"),
   align = "vh",
   hjust = -1,
-  nrow = 1)
+  nrow = 1
+)
 
 legend <- get_legend(topo_10Hz) # extract legend
 
@@ -239,7 +240,7 @@ figure_1 <- plot_grid(topo_row,
 )
 
 # save as jpg
-save_plot(paste0(getwd(), "/topos_spectra.jpg"),
+save_plot(paste0(getwd(), "/Figure1.jpg"),
   figure_1,
   base_height = 10,
   base_aspect_ratio = 1.1
@@ -257,7 +258,8 @@ amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load dat
   mutate(
     participant = as.factor(Subject),
     frequency = recode(factor(Frequency),
-                       "10" = "10 Hz", "12" = "12 Hz"),
+      "10" = "10 Hz", "12" = "12 Hz"
+    ),
     phase = recode(
       factor(cond),
       "BslnRedAttended" = "baseline", "BslnBlueAttended" = "baseline",
@@ -275,36 +277,56 @@ amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load dat
   dplyr::select(participant, frequency, condition, phase, attended, amplitude)
 
 # RDI plot
-ggplot(amps,
-       aes(x = phase, 
-           y = amplitude,
-           color = attended,
-           fill = attended)) +
-  geom_pirate(bars = FALSE, 
-              points_params = list(size = 3, alpha = .5),
-              violins_params = list(size = 1),
-              show.legend = TRUE) +
+obs_amps <-
+  ggplot(
+    amps,
+    aes(
+      x = phase,
+      y = amplitude,
+      color = attended,
+      fill = attended
+    )
+  ) +
+  geom_pirate(
+    bars = FALSE,
+    points_params = list(size = 3, alpha = .5),
+    violins_params = list(size = 1),
+    show.legend = TRUE
+  ) +
   scale_color_manual(values = c("blue", "red")) +
   scale_fill_manual(values = c("blue", "red")) +
-  scale_y_continuous(name = "amplitude (a.u.)",
-                     limits = c(0, 5),
-                     breaks = seq(0, 5, 1)) +
-  geom_hline(yintercept = seq(0, 5, 1),
-             linetype = "dotted",
-             colour = "#999999",
-             size = .8,
-             alpha = .5) +
-  facet_wrap(~ frequency, scales = "free") + 
+  scale_x_discrete(limits = c("baseline", "rewarded", "non-rewarded")) +
+  scale_y_continuous(
+    name = "amplitude (a.u.)",
+    limits = c(0, 5),
+    breaks = seq(0, 5, 1)
+  ) +
+  geom_hline(
+    yintercept = seq(0, 5, 1),
+    linetype = "dotted",
+    colour = "#999999",
+    size = .8,
+    alpha = .5
+  ) +
+  facet_wrap(~frequency, scales = "free") +
   ggtitle("observed amplitude") +
   theme_minimal(base_size = 18) +
   theme(
     strip.text = element_text(
       hjust = .5,
-      size = 24),
+      size = 24
+    ),
     panel.grid = element_blank(),
     legend.position = "none",
     plot.title = element_text(face = "bold", size = 26, hjust = .5)
   )
+
+# save as jpg
+save_plot(paste0(getwd(), "/Figure2.jpg"),
+  obs_amps,
+  base_height = 10,
+  base_aspect_ratio = 1.1
+)
 
 # HERE THERE WILL BE THE PREDICTED AMPLITUDE
 # (AMPLITUDE PREDICTED BY THE WINNING MODEL)
