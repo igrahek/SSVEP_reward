@@ -1,7 +1,7 @@
 
 ######################################### SETUP #########################################
 
-.libPaths("E:/R_workspace/packages") # add package directory
+# .libPaths("E:/R_workspace/packages") # add package directory (only on my Windows machine)
 
 setwd(paste0(getwd(), "/figures/")) # when using R projects
 # setwd("E:/Experiments/Grahek_Ivan/FSAReward/repo/figures")
@@ -67,7 +67,7 @@ topo_10Hz <-
     title.theme = element_text(angle = 270)
   )) +
   theme(
-    plot.title = element_text(size = 22, hjust = .5, face = "bold"), # modify plot title
+    plot.title = element_text(size = 22, hjust = .5), # modify plot title
     plot.margin = unit(c(6, 0, 6, 0), "pt") # decrease plot margins
   )
 
@@ -96,7 +96,7 @@ topo_12Hz <-
     title.theme = element_text(angle = 270)
   )) +
   theme(
-    plot.title = element_text(size = 22, hjust = .5, face = "bold"),
+    plot.title = element_text(size = 22, hjust = .5),
     plot.margin = unit(c(6, 0, 6, 0), "pt")
   )
 
@@ -171,7 +171,7 @@ spectra_all <-
   theme_classic(base_size = 18) +
   theme(
     legend.position = c(.2, .7),
-    plot.title = element_text(size = 24, hjust = .5)
+    plot.title = element_text(size = 22, hjust = .5)
   )
 
 # zoom-in to relevant frequencies
@@ -205,9 +205,7 @@ topo_row_temp <- plot_grid(topo_10Hz + theme(legend.position = "none"),
   topo_12Hz + theme(legend.position = "none"),
   align = "vh",
   hjust = -1,
-  nrow = 1,
-  scale = .8 # slightly smaller size
-)
+  nrow = 1)
 
 legend <- get_legend(topo_10Hz) # extract legend
 
@@ -232,7 +230,7 @@ spectra_row <- plot_grid(spectra_10Hz,
   labels = "C"
 )
 
-# all figures
+# all plots
 figure_1 <- plot_grid(topo_row,
   spectra_all,
   spectra_row,
@@ -258,7 +256,8 @@ amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load dat
   ) %>%
   mutate(
     participant = as.factor(Subject),
-    frequency = as.factor(Frequency),
+    frequency = recode(factor(Frequency),
+                       "10" = "10 Hz", "12" = "12 Hz"),
     phase = recode(
       factor(cond),
       "BslnRedAttended" = "baseline", "BslnBlueAttended" = "baseline",
@@ -287,28 +286,28 @@ ggplot(amps,
               show.legend = TRUE) +
   scale_color_manual(values = c("blue", "red")) +
   scale_fill_manual(values = c("blue", "red")) +
-  
-  facet_wrap(~ frequency, scales = "free") + 
-  
-  
-  
-  
-  
-  
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() +
-  scale_y_continuous(limits = c(-.1, 1),
-                     breaks = seq(-.1, 1, .1)) +
-  coord_cartesian(ylim = c(0, 1)) +
-  geom_hline(yintercept = seq(0, 1, .1),
+  scale_y_continuous(name = "amplitude (a.u.)",
+                     limits = c(0, 5),
+                     breaks = seq(0, 5, 1)) +
+  geom_hline(yintercept = seq(0, 5, 1),
              linetype = "dotted",
              colour = "#999999",
              size = .8,
              alpha = .5) +
-  labs(x = "",
-       y = "cosine sim index") +
-  facet_wrap(~ exp, scales = "free") + 
-  ggtitle("amplitude (regularity frequency)") +
-  theme_EmoSSR
+  facet_wrap(~ frequency, scales = "free") + 
+  ggtitle("observed amplitude") +
+  theme_minimal(base_size = 18) +
+  theme(
+    strip.text = element_text(
+      hjust = .5,
+      size = 24),
+    panel.grid = element_blank(),
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 26, hjust = .5)
+  )
+
+# HERE THERE WILL BE THE PREDICTED AMPLITUDE
+# (AMPLITUDE PREDICTED BY THE WINNING MODEL)
+# BOTH PLOTS WILL BE PUT IN FIGURE 2
 
 
