@@ -24,9 +24,11 @@ elec_rank = permute(elec_rank, [2 1 3]); % rearrange matrix dimensions for compa
 %% PLOT TOPO
 EEG = pop_chanedit(EEG, 'load', {topo.elec_coords, 'filetype', 'autodetect'}); % assign channel locations
 topodata = squeeze(mean(mean(data(:, eegF_Time2Sp(EEG, topo.timeplot), :, :, :), 4), 3)); % average across conditions and participants, and display the selected time point (topo.timeplot)
-
-% topodata_R = [[{'10 Hz'} {'12 Hz'}]; num2cell(topodata)];
-% cell2csv('C:\Users\Antonio\Desktop\topos.csv', topodata_R); % save values in a .csv file (for topographies in R)
+disp('****************************')
+disp('Saving data...')
+disp('****************************')
+topodata_R = [[{'10 Hz'} {'12 Hz'}]; num2cell(topodata)];
+cell2csv([topo.pathout 'grandAverage_spectra.csv'], topodata_R); % save values in a .csv file (for topographies in R)
 
 figure
 for ifreq = 1:numel(topo.freq) % loop through frequencies    
