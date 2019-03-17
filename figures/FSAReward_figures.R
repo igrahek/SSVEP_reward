@@ -146,8 +146,8 @@ spectra_all <-
   geom_line(size = 1.3) +
   geom_ribbon( # ribbons: 95% CI
     data = spectra.withinssjCI,
-    aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = attended),
-    linetype = "blank",
+    aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = attended, linetype = phase),
+    # linetype = "blank",
     alpha = .2
   ) +
   scale_color_manual(values = rep(c("blue", "red"), 3)) +
@@ -167,7 +167,40 @@ spectra_all <-
     legend.position = c(.2, .7),
     plot.title = element_text(size = 24, hjust = .5)
   )
-  
+
+# zoom in to relevant frequencies
+# plot (frequency range: 9-11 Hz)
+spectra_10Hz <- 
+  spectra_all +
+  coord_cartesian(xlim = c(9, 11), ylim = c(.5, 1.5)) +
+  ggtitle("10 Hz") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_blank(),
+        legend.position="none"
+  )
+
+# plot (frequency range: 11-13 Hz)
+spectra_12Hz <- 
+  spectra_all +
+  coord_cartesian(xlim = c(11, 13), ylim = c(.5, 1.5)) +
+  ggtitle("12 Hz") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x  = element_blank(),
+        legend.position="none"
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -207,6 +240,59 @@ spectra_all <-
     legend.position = c(.2, .8),
     plot.title = element_text(size = 24, hjust = .5)
   )
+
+# zoom in to relevant frequencies
+# plot (frequency range: 9-11 Hz)
+spectra_10Hz <- spectra_all +
+  scale_color_manual(values = c("red", "blue")) +
+  scale_fill_manual(values = c("red", "blue")) +
+  guides(fill = "none", color = "none") +
+  geom_vline(xintercept = seq(0, 16, 2), linetype = "dotted", color = "#999999", size = .8, alpha = .5) +
+  geom_hline(yintercept = seq(0, 1.5, .3), linetype = "dotted", color = "#999999", size = .8, alpha = .5) +
+  scale_y_continuous(breaks = seq(0, 1.5, .3)) +
+  scale_x_continuous(breaks = seq(0, 16, 2)) +
+  coord_cartesian(xlim = c(9, 11), ylim = c(.5, 1.5)) +
+  labs(
+    x = "frequency (Hz)",
+    y = "amplitude (a.u.)"
+  ) +
+  theme_classic(base_size = 18) +
+  theme(
+    legend.position = c(.2, .8),
+    plot.title = element_text(size = 24, hjust = .5)
+  )
+
+# plot (frequency range: 11-13 Hz)
+spectra_12Hz <- spectra_all +
+  scale_color_manual(values = c("red", "blue")) +
+  scale_fill_manual(values = c("red", "blue")) +
+  guides(fill = "none", color = "none") +
+  geom_vline(xintercept = seq(0, 16, 2), linetype = "dotted", color = "#999999", size = .8, alpha = .5) +
+  geom_hline(yintercept = seq(0, 1.5, .3), linetype = "dotted", color = "#999999", size = .8, alpha = .5) +
+  scale_y_continuous(breaks = seq(0, 1.5, .3)) +
+  scale_x_continuous(breaks = seq(0, 16, 2)) +
+  coord_cartesian(xlim = c(11, 13), ylim = c(.5, 1.5)) +
+  labs(
+    x = "frequency (Hz)",
+    y = "amplitude (a.u.)"
+  ) +
+  theme_classic(base_size = 18) +
+  theme(
+    legend.position = c(.2, .8),
+    plot.title = element_text(size = 24, hjust = .5)
+  )
+
+
+
+
+
+
+
+
+
+
+
+
 
 # zoom in to relevant frequencies
 # plot (frequency range: 9-11 Hz)
