@@ -44,19 +44,32 @@ data.raw = read.csv(file = here("data","singleTrial_amplitudes_movement_and_nomo
 
 data = data.raw
 
-# Add new variable names based on the condition
+# Clean the subject name variable
+data$participant = gsub('VP', '', data$participant)
+data$participant = as.numeric(data$participant)
+
+# Change the names of the variables
+names(data)[names(data) == "participant"] = "Subject"
+names(data)[names(data) == "amplitude"] = "Amplitude"
+names(data)[names(data) == "frequency"] = "Frequency"
+
+
+# Add new variables based on the condition
 data$ExpPhase[data$condition == 1 | data$condition == 2 | data$condition == 11 | data$condition == 12]="Bsln"
 data$ExpPhase[data$condition == 3 | data$condition == 4 | data$condition == 13 | data$condition == 14]="Acq"
 data$ExpPhase[data$condition == 5 | data$condition == 6 | data$condition == 15 | data$condition == 16]="Ext"
 
-  data.raw$Rew_eff_fb[data.raw$feedbackOrder == 2 & data.raw$IsRewarded == "Reward"]="Reward"
+data$AttendedColor[data$condition == 1 | data$condition == 3 | data$condition == 5 | data$condition == 11 |data$condition == 13 | data$condition == 15]="Red"
+data$AttendedColor[data$condition == 2 | data$condition == 4 | data$condition == 6 | data$condition == 12 |data$condition == 14 | data$condition == 16]="Blue"
+
+data$Movement[data$condition == 1 | data$condition == 2 | data$condition == 3 | data$condition == 4 |data$condition == 5 | data$condition == 6]="NoMovement"
+data$Movement[data$condition == 11 | data$condition == 12 | data$condition == 13 | data$condition == 14 |data$condition == 15 | data$condition == 16]="Movement"
+
+data$ExpPhase[data$condition == 3 | data$condition == 4 | data$condition == 13 | data$condition == 14]="Acq"
+data$ExpPhase[data$condition == 5 | data$condition == 6 | data$condition == 15 | data$condition == 16]="Ext"
 
 # Add the variable defining which color is rewarded based on the participant number
 data$RewardedColor = ifelse(data$Subject%%2==0,"Blue","Red") # if participant number is even, blue was rewarded
-
-# Add the Conditions needed to the dataset
-data$ExpPhase = Conditions[,1]
-data$AttendedColor = Conditions[,2]
 
 # Switch the Frequency to the color
 data$RecordedFrequency = ifelse(data$Frequency==10,"Blue","Red") # if the recorded frequency is 10Hz assign Blue (color flickering at 10Hz), otherwise assign Red (color flickering at 12Hz)
@@ -71,7 +84,7 @@ data$Attention = ifelse(data$AttendedColor==data$RecordedFrequency, "Att","NotAt
 data$RecordingAndCondition = with(data, paste0(Condition,"_",Attention))
 
 # Select variables which we want to keep
-data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor","Condition","RecordedFrequency","Attention","RecordingAndCondition","Amplitude"))
+data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor","Condition","RecordedFrequency","Attention","RecordingAndCondition","Amplitude","Movement"))
 
 # Sort the data 
 data = data[with(data, order(Subject)), ]
