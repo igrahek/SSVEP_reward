@@ -25,22 +25,31 @@ set.seed(42)
 # Set working directory
 setwd(here())
 # import data
-data.raw = read.csv(file = here("data","singleTrial_amplitudes.csv"),header=TRUE,na.strings="NaN") 
+data.raw = read.csv(file = here("data","singleTrial_amplitudes_movement_and_nomovement.csv"),header=TRUE,na.strings="NaN") 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Reshape to long format
-data = melt(data.raw,id.vars=c("Subject","Frequency"),
-             measure.vars=c("BslnRedAttended","BslnBlueAttended","AcqRedAttended","AcqBlueAttended","ExtRedAttended","ExtBlueAttended"),
-             variable.name="Condition",value.name="Amplitude") 
+# data = melt(data.raw,id.vars=c("Subject","Frequency"),
+#              measure.vars=c("BslnRedAttended","BslnBlueAttended","AcqRedAttended","AcqBlueAttended","ExtRedAttended","ExtBlueAttended"),
+#              variable.name="Condition",value.name="Amplitude") 
 
 # Sort the new dataframe by participant name
-data = data[order(data$Subject),]
+# data = data[order(data$Subject),]
 
 # Split the variable Condition based on capital letters
-data$Condition = gsub("(?!^)(?=[[:upper:]])", " ", data$Condition, perl=T)
+# data$Condition = gsub("(?!^)(?=[[:upper:]])", " ", data$Condition, perl=T)
 
 # Split the variable condition into multiple variables
-Conditions = colsplit(data$Condition, pattern="\\s+",names = c('ExpPhase', 'ColorMoved',"attended","no","moved"))
+# Conditions = colsplit(data$Condition, pattern="\\s+",names = c('ExpPhase', 'ColorMoved',"attended","no","moved"))
+
+data = data.raw
+
+# Add new variable names based on the condition
+data$ExpPhase[data$condition == 1 | data$condition == 2 | data$condition == 11 | data$condition == 12]="Bsln"
+data$ExpPhase[data$condition == 3 | data$condition == 4 | data$condition == 13 | data$condition == 14]="Acq"
+data$ExpPhase[data$condition == 5 | data$condition == 6 | data$condition == 15 | data$condition == 16]="Ext"
+
+  data.raw$Rew_eff_fb[data.raw$feedbackOrder == 2 & data.raw$IsRewarded == "Reward"]="Reward"
 
 # Add the variable defining which color is rewarded based on the participant number
 data$RewardedColor = ifelse(data$Subject%%2==0,"Blue","Red") # if participant number is even, blue was rewarded

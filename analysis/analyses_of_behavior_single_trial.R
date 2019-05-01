@@ -148,9 +148,9 @@ data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor
 data.final$Condition = factor(data.final$Condition)
 
 # add a new variable specifying whether the participant is attending the high or Low_Rewed color
-data.final.cor$Condition = ifelse(data.final.cor$RewardedColor==data.final.cor$AttendedColor,"High_Rew","Low_Rew")
+data.final.corr$Condition = ifelse(data.final.corr$RewardedColor==data.final.corr$AttendedColor,"High_Rew","Low_Rew")
 # make this variable a factor for further analyses
-data.final.cor$Condition = factor(data.final.cor$Condition)
+data.final.corr$Condition = factor(data.final.corr$Condition)
 
 
 ################################################################## Add Questionnaires ###############################################################################################################################################################################################################
@@ -487,6 +487,8 @@ model.null.RT = brm(RT ~ 1 + (1|ParticipantNo),
                  sample_prior = TRUE,
                  inits = 0)
 saveRDS(model.null.RT,file="nullmodel.RT.rds")
+
+
 
 # Set the priors for the models with slope
 prior = c(

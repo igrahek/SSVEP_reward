@@ -2,7 +2,7 @@
 
 
 # Experiment: FSAReward (Ivan Grahek*, Antonio Schettino*, Gilles Pourtois, Ernst Koster, & Søren Andersen) (*: co-first authors)
-# Code written by: Ivan Grahek & Antonio Schettino (2016-2018)
+# Code written by: Ivan Grahek & Antonio Schettino (2016-2019)
 # Description: Code for the analysis of behavioral data for Experiment 1 of the SSVEP - reward project. 
 
 ################################################################## Importing data & first steps ###############################################################################################################################################################################################################
