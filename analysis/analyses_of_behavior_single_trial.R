@@ -59,18 +59,28 @@ data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPh
 # count hits, false alarms, misses, correct rejections, and RT separately for each participant (their calculation is done in Matlab: see DataProcessing.m)
 
 # First we take out the responses that are correct rejections
-data.final = subset(data.raw, data.raw$Response!=3)
+data.final = subset(data.raw, data.raw$Response!=3 & data.raw$Response!=0)
+
+data.final$Response = ifelse(data.final$Response==1,"Hit","FA")
+data.final$Response = as.factor(data.final$Response)
+
+# For the correct vs. incorrect analysis
+data.final.corr = subset(data.raw, data.raw$Response!=3)
+data.final.corr = subset(data.final.corr,MovedDots==AttendedColor)
+
+data.final.corr$Response = ifelse(data.final.corr$Response==1,"Correct","Incorrect")
+data.final.corr$Response = as.factor(data.final.corr$Response)
 
 # Then we turn the responses coded as hits (1) and false alarms ()
 
-data.final = ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots,Trial),summarise,
-                   Response = if()
-                   numtrials=length(which(Response!=99)), # number of trials per condition (anything that is not 99 or any other number that we're not using)
-                   Hits=length(which(Response==1)), # hits: attended color moved, correct response
-                   FAs=length(which(Response==2)), # false alarms: attended color did not move, (wrong) response
-                   Misses=length(which(Response==0)), # misses: attended color moved, no response
-                   CRs=length(which(Response==3)), # correct rejections: attended color did not move, no response
-                   mean.RT=mean(RT,na.rm=TRUE)) # mean RT per condition
+# data.final = ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots,Trial),summarise,
+#                    Response = if()
+#                    numtrials=length(which(Response!=99)), # number of trials per condition (anything that is not 99 or any other number that we're not using)
+#                    Hits=length(which(Response==1)), # hits: attended color moved, correct response
+#                    FAs=length(which(Response==2)), # false alarms: attended color did not move, (wrong) response
+#                    Misses=length(which(Response==0)), # misses: attended color moved, no response
+#                    CRs=length(which(Response==3)), # correct rejections: attended color did not move, no response
+#                    mean.RT=mean(RT,na.rm=TRUE)) # mean RT per condition
 
 
 ################################################################## Calculate accuracy and RTs per condition ###############################################################################################################################################################################################################
@@ -81,12 +91,12 @@ data.final = ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor
 # Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
 # False alarms are  calculated for each participant in each condition on trials when they are attending the color that didn't move (the unattended color moved, but they responded)  
 # Here we create the same number of hits & fas for each of the two conditions (moved attended or not)
-data.final = ddply(data.final, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
-                 Hits = Hits[MovedDots==AttendedColor],
-                 FAs = FAs[MovedDots!=AttendedColor])
+# data.final = ddply(data.final, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
+#                  Hits = Hits[MovedDots==AttendedColor],
+#                  FAs = FAs[MovedDots!=AttendedColor])
 
 # Keep only trials on which the attended color moved (we can do behavioral analysis only on those)
-data.final = subset(data.final,MovedDots==AttendedColor)
+# data.final = subset(data.final,MovedDots==AttendedColor)
 
 ### Calculate d'
 # use loglinear transformation: add 0.5 to Hits, FAs, Misses, and CRs (Hautus, 1995, Behavior Research Methods, Instruments, & Computers),
@@ -100,21 +110,21 @@ data.final = subset(data.final,MovedDots==AttendedColor)
 #                       FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
 #                       dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
 #                       Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
-
-data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarise,
-                    tot.Hits=Hits+.5, # hits
-                    tot.FAs=FAs+.5, # false alarms
-                    tot.Misses=(numtrials-Hits)+.5, # misses
-                    tot.CRs=(numtrials-FAs)+.5, # correct rejections
-                    #Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
-                    #FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
-                    #dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
-                    Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
+# 
+# data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarise,
+#                     tot.Hits=Hits+.5, # hits
+#                     tot.FAs=FAs+.5, # false alarms
+#                     tot.Misses=(numtrials-Hits)+.5, # misses
+#                     tot.CRs=(numtrials-FAs)+.5, # correct rejections
+#                     #Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
+#                     #FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
+#                     #dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
+#                     Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
 
 # Calculate SDT indices with psycho
-indices = psycho::dprime(data.final$tot.Hits, data.final$tot.FAs, data.final$tot.Misses, data.final$tot.CRs) 
-
-data.final = cbind(data.final, indices)                      
+# indices = psycho::dprime(data.final$tot.Hits, data.final$tot.FAs, data.final$tot.Misses, data.final$tot.CRs) 
+# 
+# data.final = cbind(data.final, indices)                      
 
 # Handle outliers------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -136,6 +146,11 @@ data.final = cbind(data.final, indices)
 data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High_Rew","Low_Rew")
 # make this variable a factor for further analyses
 data.final$Condition = factor(data.final$Condition)
+
+# add a new variable specifying whether the participant is attending the high or Low_Rewed color
+data.final.cor$Condition = ifelse(data.final.cor$RewardedColor==data.final.cor$AttendedColor,"High_Rew","Low_Rew")
+# make this variable a factor for further analyses
+data.final.cor$Condition = factor(data.final.cor$Condition)
 
 
 ################################################################## Add Questionnaires ###############################################################################################################################################################################################################
@@ -461,9 +476,9 @@ prior = c(
 
 
 # Null model
-model.null.RT = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
-                 data=data.final,
-                 family=gaussian(),
+model.null.RT = brm(RT ~ 1 + (1|ParticipantNo),
+                 data=subset(data.final,data.final$Response=="Hit"),
+                 family=exgaussian(),
                  prior = prior,
                  iter = 6000,
                  save_all_pars = TRUE,
@@ -479,29 +494,29 @@ prior = c(
   prior(normal(0, 200), class = b)) # a wide prior
 
 # ExpPhase model
-model.expphase.RT = brm(Hits.RTs ~ ExpPhase + (ExpPhase|ParticipantNo),
-                 data=data.final,
-                 family=gaussian(),
-                 prior = prior,
-                 iter = 6000,
-                 save_all_pars = TRUE,
-                 control = list(adapt_delta = 0.99,max_treedepth = 15),
-                 cores = 4,
-                 sample_prior = TRUE,
-                 inits = 0)
+model.expphase.RT = brm(RT ~ ExpPhase + (ExpPhase|ParticipantNo),
+                        data=subset(data.final,data.final$Response=="Hit"),
+                        family=exgaussian(),
+                        prior = prior,
+                        iter = 6000,
+                        save_all_pars = TRUE,
+                        control = list(adapt_delta = 0.99,max_treedepth = 15),
+                        cores = 4,
+                        sample_prior = TRUE,
+                        inits = 0)
 saveRDS(model.expphase.RT,file="expphasemodel.RT.rds")
 
 #Interaction model
-model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
-                 data=data.final,
-                 family=gaussian(),
-                 prior = prior,
-                 iter = 6000,
-                 save_all_pars = TRUE,
-                 control = list(adapt_delta = 0.99,max_treedepth = 15),
-                 cores = 4,
-                 sample_prior = TRUE,
-                 inits = 0)
+model.full.RT = brm(RT ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+                    data=subset(data.final,data.final$Response=="Hit"),
+                    family=exgaussian(),
+                    prior = prior,
+                    iter = 6000,
+                    save_all_pars = TRUE,
+                    control = list(adapt_delta = 0.99,max_treedepth = 15),
+                    cores = 4,
+                    sample_prior = TRUE,
+                    inits = 0)
 saveRDS(model.full.RT,file="model.full.RT.rds")
 
 # #Depression model
@@ -669,50 +684,58 @@ saveRDS(bR2.full.RT,file="bR2.full.RT")
 
 # # brms accuracy (hit rates)------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # # Set the working directory where to save the models
-# setwd(here("brms_models"))
-# # referencing for easier interpretation
-# data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
-# data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+setwd(here("brms_models"))
+# referencing for easier interpretation
+data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
 # 
-# 
-# # Null model
-# model.null.Acc = brm(Hit.Rate ~ 1 + (1|ParticipantNo),
-#                  data=data.final,
-#                  family=gaussian(),
-#                  prior = prior,
-#                  iter = 6000,
-#                  save_all_pars = TRUE,
-#                  control = list(adapt_delta = 0.99),
-#                  control = list(max_treedepth = 15),
-#                  cores = 4,
-#                  sample_prior = TRUE)
-# saveRDS(model.null.Acc,file="nullmodel.Acc.rds")
-# 
-# # ExpPhase model
-# model.expphase.Acc = brm(Hit.Rate ~ ExpPhase + (ExpPhase|ParticipantNo),
-#                      data=data.final,
-#                      family=gaussian(),
-#                      prior = prior,
-#                      iter = 6000,
-#                      save_all_pars = TRUE,
-#                      control = list(adapt_delta = 0.99),
-#                      control = list(max_treedepth = 15),
-#                      cores = 4,
-#                      sample_prior = TRUE)
-# saveRDS(model.expphase.Acc,file="expphasemodel.Acc.rds")
-# 
-# #Interaction model
-# model.full.Acc = brm(Hit.Rate ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
-#                  data=data.final,
-#                  family=gaussian(),
-#                  prior = prior,
-#                  iter = 6000,
-#                  save_all_pars = TRUE,
-#                  control = list(adapt_delta = 0.99),
-#                  control = list(max_treedepth = 15),
-#                  cores = 4,
-#                  sample_prior = TRUE)
-# saveRDS(model.full.Acc,file="model.full.Acc.rds")
+# Set the prior for the intercept only model
+prior = c(
+  prior(normal(0.5, 1), class = Intercept)) # A wide prior sensible for this type of task
+
+# Null model
+model.null.Acc = brm(Response ~ 1 + (1|ParticipantNo),
+                 data=data.final,
+                 family=bernoulli(),
+                 prior = prior,
+                 iter = 6000,
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99,max_treedepth = 15),
+                 cores = 4,
+                 sample_prior = TRUE,
+                 inits = 0)
+saveRDS(model.null.Acc,file="nullmodel.Acc.rds")
+
+# Set the priors for the models with slope
+prior = c(
+  prior(normal(0.5, 1), class = Intercept), # A wide prior sensible for this type of task
+  prior(normal(0, 1), class = b)) # a wide prior
+
+# ExpPhase model
+model.expphase.Acc = brm(Response ~ ExpPhase + (ExpPhase|ParticipantNo),
+                     data=data.final,
+                     family=bernoulli(),
+                     prior = prior,
+                     iter = 6000,
+                     save_all_pars = TRUE,
+                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+                     cores = 4,
+                     sample_prior = TRUE,
+                     inits = 0)
+saveRDS(model.expphase.Acc,file="expphasemodel.Acc.rds")
+
+#Interaction model
+model.full.Acc = brm(Response ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+                 data=data.final,
+                 family=bernoulli(),
+                 prior = prior,
+                 iter = 6000,
+                 save_all_pars = TRUE,
+                 control = list(adapt_delta = 0.99,max_treedepth = 15),
+                 cores = 4,
+                 sample_prior = TRUE,
+                 inits = 0)
+saveRDS(model.full.Acc,file="model.full.Acc.rds")
 # 
 # #Depression model
 # model.full.Acc.depression = brm(Hit.Rate ~ ExpPhase * Condition * BDI + (ExpPhase * Condition * BDI|ParticipantNo),
@@ -760,31 +783,31 @@ saveRDS(bR2.full.RT,file="bR2.full.RT")
 # # compare.waic.Acc = readRDS("compare.Acc.waic")
 # 
 # #WAIC
-# compare.Acc.waic = WAIC(model.null.Acc,model.expphase.Acc,model.full.Acc, compare = TRUE)
-# saveRDS(compare.Acc.waic,file="compare.Acc.waic")
+compare.Acc.waic = WAIC(model.null.Acc,model.expphase.Acc,model.full.Acc, compare = TRUE)
+saveRDS(compare.Acc.waic,file="compare.Acc.waic")
 # 
 # #WAIC questionnaires
 # compare.Acc.waic.questionnaires = WAIC(model.full.Acc,model.full.Acc.depression,model.full.Acc.BAS,model.full.Acc.REWARD, compare = TRUE)
 # saveRDS(compare.Acc.waic.questionnaires,file="compare.Acc.waic.questionnaires")
 # 
 # # Weighted waic
-# compare.Acc.waic.weights = model_weights(model.null.Acc,model.expphase.Acc,model.full.Acc, weights = "waic")
-# saveRDS(compare.Acc.waic.weights,file="compare.Acc.waic.weights")
+compare.Acc.waic.weights = model_weights(model.null.Acc,model.expphase.Acc,model.full.Acc, weights = "waic")
+saveRDS(compare.Acc.waic.weights,file="compare.Acc.waic.weights")
 # 
 # # Weighted waic questionnaires
 # compare.Acc.waic.questionnaires.weights = WAIC(model.full.Acc,model.full.Acc.depression,model.full.Acc.BAS,model.full.Acc.REWARD, compare = TRUE)
 # saveRDS(compare.Acc.waic.questionnaires.weights,file="compare.Acc.waic.questionnaires.weights")
 # 
 # # Bayesian R2
-# #Null
-# bR2.null.Acc = bayes_R2(model.null.Acc)
-# saveRDS(bR2.null.Acc,file="bR2.null.Acc")
-# #ExpPhase
-# bR2.expphase.Acc = bayes_R2(model.expphase.Acc)
-# saveRDS(bR2.expphase.Acc,file="bR2.expphase.Acc")
-# #Full
-# bR2.full.Acc = bayes_R2(model.full.Acc)
-# saveRDS(bR2.full.Acc,file="bR2.full.Acc")
+#Null
+bR2.null.Acc = bayes_R2(model.null.Acc)
+saveRDS(bR2.null.Acc,file="bR2.null.Acc")
+#ExpPhase
+bR2.expphase.Acc = bayes_R2(model.expphase.Acc)
+saveRDS(bR2.expphase.Acc,file="bR2.expphase.Acc")
+#Full
+bR2.full.Acc = bayes_R2(model.full.Acc)
+saveRDS(bR2.full.Acc,file="bR2.full.Acc")
 # #Depression
 # bR2.full.Acc.depression = bayes_R2(model.full.Acc.depression)
 # saveRDS(bR2.full.Acc.depression,file="bR2.full.Acc.depression")
@@ -800,6 +823,133 @@ saveRDS(bR2.full.RT,file="bR2.full.RT")
 # post = posterior_samples(model.full.Acc, "^b")
 # 
 # 
+# # brms accuracy (hit rates vs. everything else)------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# # Set the working directory where to save the models
+setwd(here("brms_models"))
+# referencing for easier interpretation
+data.final.corr$ExpPhase=relevel(data.final.corr$ExpPhase,ref="Bsln")
+data.final.corr$Condition=relevel(data.final.corr$Condition,ref="High_Rew")
+# 
+# Set the prior for the intercept only model
+prior = c(
+  prior(normal(0.5, 1), class = Intercept)) # A wide prior sensible for this type of task
+
+# Null model
+model.null.Cor = brm(Response ~ 1 + (1|ParticipantNo),
+                     data=data.final.corr,
+                     family=bernoulli(),
+                     prior = prior,
+                     iter = 6000,
+                     save_all_pars = TRUE,
+                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+                     cores = 4,
+                     sample_prior = TRUE,
+                     inits = 0)
+saveRDS(model.null.Cor,file="nullmodel.Cor.rds")
+
+# Set the priors for the models with slope
+prior = c(
+  prior(normal(0.5, 1), class = Intercept), # A wide prior sensible for this type of task
+  prior(normal(0, 1), class = b)) # a wide prior
+
+# ExpPhase model
+model.expphase.Cor = brm(Response ~ ExpPhase + (ExpPhase|ParticipantNo),
+                         data=data.final.corr,
+                         family=bernoulli(),
+                         prior = prior,
+                         iter = 6000,
+                         save_all_pars = TRUE,
+                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+                         cores = 4,
+                         sample_prior = TRUE,
+                         inits = 0)
+saveRDS(model.expphase.Cor,file="expphasemodel.Cor.rds")
+
+#Interaction model
+model.full.Cor = brm(Response ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+                     data=data.final.corr,
+                     family=bernoulli(),
+                     prior = prior,
+                     iter = 6000,
+                     save_all_pars = TRUE,
+                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+                     cores = 4,
+                     sample_prior = TRUE,
+                     inits = 0)
+saveRDS(model.full.Cor,file="model.full.Cor.rds")
+# 
+# #Depression model
+# model.full.Acc.depression = brm(Hit.Rate ~ ExpPhase * Condition * BDI + (ExpPhase * Condition * BDI|ParticipantNo),
+#                      data=data.final,
+#                      family=gaussian(),
+#                      prior = prior,
+#                      iter = 6000,
+#                      save_all_pars = TRUE,
+#                      control = list(adapt_delta = 0.99),
+#                      control = list(max_treedepth = 15),
+#                      cores = 4,
+#                      sample_prior = TRUE)
+# saveRDS(model.full.Acc,file="model.full.Acc.depression.rds")
+# 
+# #BAS model
+# model.full.Acc.BAS = brm(Hit.Rate ~ ExpPhase * Condition * BAS + (ExpPhase * Condition * BAS|ParticipantNo),
+#                                 data=data.final,
+#                                 family=gaussian(),
+#                          prior = prior,
+#                          iter = 6000,
+#                          save_all_pars = TRUE,
+#                          control = list(adapt_delta = 0.99),
+#                          control = list(max_treedepth = 15),
+#                          cores = 4,
+#                          sample_prior = TRUE)
+# saveRDS(model.full.Acc,file="model.full.Acc.BAS.rds")
+# 
+# #REWARD model
+# model.full.Acc.REWARD = brm(Hit.Rate ~ ExpPhase * Condition * REWARD + (ExpPhase * Condition * REWARD|ParticipantNo),
+#                          data=data.final,
+#                          family=gaussian(),
+#                          prior = prior,
+#                          iter = 6000,
+#                          save_all_pars = TRUE,
+#                          control = list(adapt_delta = 0.99),
+#                          control = list(max_treedepth = 15),
+#                          cores = 4,
+#                          sample_prior = TRUE)
+# saveRDS(model.full.Acc,file="model.full.Acc.REWARD.rds")
+# 
+# #read in the models and comparisons
+#  # model.null.Acc = readRDS("nullmodel.Acc.rds")
+#  # model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
+#  # model.full.Acc = readRDS("model.full.Acc.rds")
+# # compare.waic.Acc = readRDS("compare.Acc.waic")
+# 
+# #WAIC
+compare.Cor.waic = WAIC(model.null.Cor,model.expphase.Cor,model.full.Cor, compare = TRUE)
+saveRDS(compare.Cor.waic,file="compare.Cor.waic")
+# 
+# #WAIC questionnaires
+# compare.Acc.waic.questionnaires = WAIC(model.full.Acc,model.full.Acc.depression,model.full.Acc.BAS,model.full.Acc.REWARD, compare = TRUE)
+# saveRDS(compare.Acc.waic.questionnaires,file="compare.Acc.waic.questionnaires")
+# 
+# # Weighted waic
+compare.Cor.waic.weights = model_weights(model.null.Cor,model.expphase.Cor,model.full.Cor, weights = "waic")
+saveRDS(compare.Cor.waic.weights,file="compare.Cor.waic.weights")
+# 
+# # Weighted waic questionnaires
+# compare.Acc.waic.questionnaires.weights = WAIC(model.full.Acc,model.full.Acc.depression,model.full.Acc.BAS,model.full.Acc.REWARD, compare = TRUE)
+# saveRDS(compare.Acc.waic.questionnaires.weights,file="compare.Acc.waic.questionnaires.weights")
+# 
+# # Bayesian R2
+#Null
+bR2.null.Cor = bayes_R2(model.null.Cor)
+saveRDS(bR2.null.Cor,file="bR2.null.Cor")
+#ExpPhase
+bR2.expphase.Cor = bayes_R2(model.expphase.Cor)
+saveRDS(bR2.expphase.Cor,file="bR2.expphase.Cor")
+#Full
+bR2.full.Corr = bayes_R2(model.full.Cor)
+saveRDS(bR2.full.Cor,file="bR2.full.Cor")
+
 # ################################################ Baseline ####
 # 
 # ######### High reward
@@ -1038,60 +1188,60 @@ saveRDS(bR2.full.RT,file="bR2.full.RT")
 # 
 # brms accuracy (d prime)------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Set the working directory where to save the models
-setwd(here("brms_models"))
-# referencing for easier interpretation
-data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
-data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
-
-# Set the priors for the model with only intercept
-prior = c(
-  prior(normal(1.8, 1), class = Intercept)) # based on Andersen & Mueller, 2011
-
-
-# Null model
-model.null.Acc.dprime = brm(dprime ~ 1 + (1|ParticipantNo),
-                        data=data.final,
-                        family=gaussian(),
-                        prior = prior,
-                        iter = 6000,
-                        save_all_pars = TRUE,
-                        control = list(adapt_delta = 0.99,max_treedepth = 15),
-                        cores = 4,
-                        sample_prior = TRUE,
-                        inits = 0)
-saveRDS(model.null.Acc.dprime,file="nullmodel.Acc.dprime.rds")
-
-# Set the priors for the models with slopes
-prior = c(
-  prior(normal(1.8, 1), class = Intercept), # based on Andersen & Mueller, 2011
-  prior(normal(0, 2), class = b)) # a wide prior
-
-# ExpPhase model
-model.expphase.Acc.dprime = brm(dprime ~ ExpPhase + (ExpPhase|ParticipantNo),
-                            data=data.final,
-                            family=gaussian(),
-                            prior = prior,
-                            iter = 6000,
-                            save_all_pars = TRUE,
-                            control = list(adapt_delta = 0.99,max_treedepth = 15),
-                            cores = 4,
-                            sample_prior = TRUE,
-                            inits = 0)
-saveRDS(model.expphase.Acc.dprime,file="expphasemodel.Acc.dprime.rds")
-
-#Interaction model
-model.full.Acc.dprime = brm(dprime ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
-                        data=data.final,
-                        family=gaussian(),
-                        prior = prior,
-                        iter = 6000,
-                        save_all_pars = TRUE,
-                        control = list(adapt_delta = 0.99,max_treedepth = 15),
-                        cores = 4,
-                        sample_prior = TRUE,
-                        inits = 0)
-saveRDS(model.full.Acc.dprime,file="model.full.Acc.dprime.rds")
-
+# setwd(here("brms_models"))
+# # referencing for easier interpretation
+# data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+# data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+# 
+# # Set the priors for the model with only intercept
+# prior = c(
+#   prior(normal(1.8, 1), class = Intercept)) # based on Andersen & Mueller, 2011
+# 
+# 
+# # Null model
+# model.null.Acc.dprime = brm(dprime ~ 1 + (1|ParticipantNo),
+#                         data=data.final,
+#                         family=gaussian(),
+#                         prior = prior,
+#                         iter = 6000,
+#                         save_all_pars = TRUE,
+#                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                         cores = 4,
+#                         sample_prior = TRUE,
+#                         inits = 0)
+# saveRDS(model.null.Acc.dprime,file="nullmodel.Acc.dprime.rds")
+# 
+# # Set the priors for the models with slopes
+# prior = c(
+#   prior(normal(1.8, 1), class = Intercept), # based on Andersen & Mueller, 2011
+#   prior(normal(0, 2), class = b)) # a wide prior
+# 
+# # ExpPhase model
+# model.expphase.Acc.dprime = brm(dprime ~ ExpPhase + (ExpPhase|ParticipantNo),
+#                             data=data.final,
+#                             family=gaussian(),
+#                             prior = prior,
+#                             iter = 6000,
+#                             save_all_pars = TRUE,
+#                             control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                             cores = 4,
+#                             sample_prior = TRUE,
+#                             inits = 0)
+# saveRDS(model.expphase.Acc.dprime,file="expphasemodel.Acc.dprime.rds")
+# 
+# #Interaction model
+# model.full.Acc.dprime = brm(dprime ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+#                         data=data.final,
+#                         family=gaussian(),
+#                         prior = prior,
+#                         iter = 6000,
+#                         save_all_pars = TRUE,
+#                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                         cores = 4,
+#                         sample_prior = TRUE,
+#                         inits = 0)
+# saveRDS(model.full.Acc.dprime,file="model.full.Acc.dprime.rds")
+# 
 
 
 #read in the models and comparisons
@@ -1100,24 +1250,24 @@ saveRDS(model.full.Acc.dprime,file="model.full.Acc.dprime.rds")
 # model.full.Acc.FA = readRDS("model.full.Acc.FA.rds")
 # compare.waic.Acc = readRDS("compare.Acc.waic")
 
-#WAIC
-compare.Acc.dprime.waic = WAIC(model.null.Acc.dprime,model.expphase.Acc.dprime,model.full.Acc.dprime, compare = TRUE)
-saveRDS(compare.Acc.dprime.waic,file="compare.Acc.dprime.waic")
-
-# Weighted waic
-compare.Acc.dprime.waic.weights = model_weights(model.null.Acc.dprime,model.expphase.Acc.dprime,model.full.Acc.dprime, weights = "waic")
-saveRDS(compare.Acc.dprime.waic.weights,file="compare.Acc.dprime.waic.weights")
-
-# Bayesian R2
-#Null
-bR2.null.Acc.dprime = bayes_R2(model.null.Acc.dprime)
-saveRDS(bR2.null.Acc.dprime,file="bR2.null.Acc.dprime")
-#ExpPhase
-bR2.expphase.Acc.dprime = bayes_R2(model.expphase.Acc.dprime)
-saveRDS(bR2.expphase.Acc.dprime,file="bR2.expphase.Acc.dprime")
-#Full
-bR2.full.Acc.dprime = bayes_R2(model.full.Acc.dprime)
-saveRDS(bR2.full.Acc.dprime,file="bR2.full.Acc.dprime")
+# #WAIC
+# compare.Acc.dprime.waic = WAIC(model.null.Acc.dprime,model.expphase.Acc.dprime,model.full.Acc.dprime, compare = TRUE)
+# saveRDS(compare.Acc.dprime.waic,file="compare.Acc.dprime.waic")
+# 
+# # Weighted waic
+# compare.Acc.dprime.waic.weights = model_weights(model.null.Acc.dprime,model.expphase.Acc.dprime,model.full.Acc.dprime, weights = "waic")
+# saveRDS(compare.Acc.dprime.waic.weights,file="compare.Acc.dprime.waic.weights")
+# 
+# # Bayesian R2
+# #Null
+# bR2.null.Acc.dprime = bayes_R2(model.null.Acc.dprime)
+# saveRDS(bR2.null.Acc.dprime,file="bR2.null.Acc.dprime")
+# #ExpPhase
+# bR2.expphase.Acc.dprime = bayes_R2(model.expphase.Acc.dprime)
+# saveRDS(bR2.expphase.Acc.dprime,file="bR2.expphase.Acc.dprime")
+# #Full
+# bR2.full.Acc.dprime = bayes_R2(model.full.Acc.dprime)
+# saveRDS(bR2.full.Acc.dprime,file="bR2.full.Acc.dprime")
 # 
 # # Analyzing the posterior and differences between conditions
 # 

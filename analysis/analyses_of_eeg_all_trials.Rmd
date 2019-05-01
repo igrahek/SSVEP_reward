@@ -40,10 +40,27 @@ set.seed(42)
 # Set working directory
 #setwd(here())
 # import data
-data.raw = read.csv2(file = here("data","amplitudes_rewardBoth_wholeSample_MastRef_NoMovement.csv"),header=TRUE,na.strings="NaN") 
+data.raw = read.csv2(file = here("data","amplitudes_rewardBoth.csv"),header=TRUE,na.strings="NaN") 
 
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# # Average the movement and no movement trials
+# data.raw = ddply(data.raw,.(Subject,Frequency),transform,
+#              BslnRedAttended = (BslnRedAttended + BslnRedAttendedMovement)/2,
+#              BslnBlueAttended = (BslnBlueAttended + BslnBlueAttendedMovement)/2,
+#              AcqRedAttended = (AcqRedAttended + AcqRedAttendedMovement)/2,
+#              AcqBlueAttended = (AcqBlueAttended + AcqBlueAttendedMovement)/2,
+#              ExtRedAttended = (ExtRedAttended + ExtRedAttendedMovement)/2,
+#              ExtBlueAttended = (ExtBlueAttended + ExtBlueAttendedMovement)/2)
+
+#Take 34 out to make the even number!!!!
+  
+data.raw = data.raw[!data.raw$Subject %in% c(34),] 
+
+# Select only movement or no movement trials
+data.raw = select(data.raw,"Subject","Frequency","BslnRedAttended","BslnBlueAttended","AcqRedAttended","AcqBlueAttended","ExtRedAttended","ExtBlueAttended")
+
 
 # Reshape to long format
 data = melt(data.raw,id.vars=c("Subject","Frequency"),
@@ -85,15 +102,15 @@ data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor
 data = data[with(data, order(Subject)), ]
 
 # Normalize the two frequencies
-#Make a new variable with mean amplitude across all conditions for each participant and each frequency   [ExpPhase=="Bsln"]
-data = ddply(data,.(Subject,RecordedFrequency),transform,
-                    MeanAmplitude = mean(Amplitude,na.rm=TRUE),
-                    SDAmplitude =   sd(Amplitude,na.rm=TRUE))
+# Make a new variable with mean amplitude across all conditions for each participant and each frequency   [ExpPhase=="Bsln"]
+# data = ddply(data,.(Subject,RecordedFrequency),transform,
+#                     MeanAmplitude = mean(Amplitude,na.rm=TRUE),
+#                     SDAmplitude =   sd(Amplitude,na.rm=TRUE))
 
 # Make a new variable with mean amplitude across all conditions for each participant and each frequency
-# data = ddply(data,.(Subject,RecordedFrequency),transform,
-#                     MeanAmplitude = mean(Amplitude[ExpPhase=="Bsln"],na.rm=TRUE),
-#                     SDAmplitude =   sd(Amplitude,na.rm=TRUE))
+data = ddply(data,.(Subject,RecordedFrequency),transform,
+                    MeanAmplitude = mean(Amplitude[ExpPhase=="Bsln"],na.rm=TRUE),
+                    SDAmplitude =   sd(Amplitude,na.rm=TRUE))
 
 # Divide amplitudes in each Subject, Frequency, and Condition by the Mean Amplitude
 data$Amplitude = data$Amplitude/data$MeanAmplitude

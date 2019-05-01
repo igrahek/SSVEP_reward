@@ -32,7 +32,7 @@ rm(list=ls())
 cat("\014") 
 #load packages and install them if they're not installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr, here)
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr, here,psych)
 # set seed
 set.seed(42) 
 # set directory
@@ -89,15 +89,20 @@ data.final = subset(data.final,MovedDots==AttendedColor)
 ### Calculate d'
 # use loglinear transformation: add 0.5 to Hits, FAs, Misses, and CRs (Hautus, 1995, Behavior Research Methods, Instruments, & Computers),
 # which is preferred over the 1/2N rule (Macmillan & Kaplan, 1985, Psychological Bulletin) because it results in less biased estimates of d'.
-data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarize,
-                      tot.Hits=Hits+.5, # hits
-                      tot.FAs=FAs+.5, # false alarms
-                      tot.Misses=(numtrials-tot.Hits)+.5, # misses
-                      tot.CRs=(numtrials-tot.FAs)+.5, # correct rejections
-                      Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
-                      FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
-                      dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
-                      Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
+data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarise,
+                    tot.Hits=Hits+.5, # hits
+                    tot.FAs=FAs+.5, # false alarms
+                    tot.Misses=(numtrials-Hits)+.5, # misses
+                    tot.CRs=(numtrials-FAs)+.5, # correct rejections
+                    Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
+                    FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
+                    #dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
+                    Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
+
+# Calculate SDT indices with psycho
+indices = psycho::dprime(data.final$tot.Hits, data.final$tot.FAs, data.final$tot.Misses, data.final$tot.CRs) 
+
+data.final = cbind(data.final, indices) 
                       
 
 ### Create a final dataframe for accuracy and RTs analyses
