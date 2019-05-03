@@ -339,7 +339,7 @@ pirateplot(formula = Selectivity ~ ExpPhase + Condition, # dependent~independent
            back.col="white") # background, color
 
 
-# brms three factors------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# brms movement and no movement trials------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Set the working directory where to save the models
 setwd(here("brms_models"))
@@ -427,7 +427,7 @@ phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + ( ExpPhase + Attentio
 saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.rds")
 
 # Interaction between phase and attention
-phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + ( ExpPhase + Attention|Subject),
+phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + ( ExpPhase * Attention|Subject),
                         data=data,
                         family=gaussian(),
                         prior = prior,
@@ -440,7 +440,7 @@ phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + ( ExpPhas
 saveRDS(phaseANDattention_interaction,file="phaseANDattention_interaction.EEG.allsubs.rds")
 
 # Interaction between expphase and reward magnitude plus attention
-rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition + ExpPhase + Attention|Subject),
+rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
                          data=data,
                          family=gaussian(),
                          prior = prior,
@@ -455,7 +455,7 @@ saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.rds")
 # Full model
 
 
-full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition + ExpPhase + Attention|Subject),   
+full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),   
                              data=data,
                              family=gaussian(),
                              prior = prior,
@@ -466,8 +466,6 @@ full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition + ExpPhase 
                              sample_prior = TRUE,
                              inits = 0)
 saveRDS(full,file="full.EEG.allsubs.rds")
-
-
 
 # full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),   
 #            data=data,
@@ -634,163 +632,334 @@ saveRDS(bR2.full.EEG,file="bR2.full.EEG")
 # full = readRDS("full.EEG.allsubs.rds")
 
 
-# Analyzing the posterior and differences between conditions
-
-# post = posterior_samples(full, "^b")
-
-# 
-# ################################################ Baseline ####
-# 
-# ##################### Attended
-# 
-# ######### High reward
-# Baseline_High_Attended = post[["b_Intercept"]]
-# ######### Low reward
-# Baseline_Low_Attended = post[["b_Intercept"]] + 
-#   post[["b_ConditionLow_Rew"]] 
-# 
-# ##################### Not Attended
-# 
-# ######### High reward
-# Baseline_High_NotAttended = post[["b_Intercept"]] + 
-#   post[["b_AttentionNotAtt"]]
-# ######### Low reward
-# Baseline_Low_NotAttended = post[["b_Intercept"]] + 
-#   post[["b_AttentionNotAtt"]] + 
-#   post[["b_ConditionLow_Rew"]] + 
-#   post[["b_ConditionLow_Rew:AttentionNotAtt"]]
-# 
-# ################################################ Acquistion
-# 
-# ##################### Attended
-# 
-# ######### High reward
-# Acquisition_High_Attended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseAcq"]] 
-# ######### Low reward
-# Acquisition_Low_Attended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseAcq"]] + 
-#   post[["b_ConditionLow_Rew"]] + 
-#   post[["b_ConditionLow_Rew:ExpPhaseAcq"]]
-# 
-# ##################### Not Attended
-# 
-# ######### High reward
-# Acquisition_High_NotAttended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseAcq"]] + 
-#   post[["b_AttentionNotAtt"]] + 
-#   post[["b_ExpPhaseAcq:AttentionNotAtt"]]
-# ######### Low reward
-# Acquisition_Low_NotAttended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseAcq"]] + 
-#   post[["b_AttentionNotAtt"]] + 
-#   post[["b_ConditionLow_Rew"]] + 
-#   post[["b_ExpPhaseAcq:AttentionNotAtt"]] +
-#   post[["b_ConditionLow_Rew:ExpPhaseAcq"]] + 
-#   post[["b_ConditionLow_Rew:ExpPhaseAcq:AttentionNotAtt"]]
-# 
-# ################################################ Extinction
-# 
-# ##################### Attended
-# 
-# ######### High reward
-# Extinction_High_Attended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseExt"]] 
-# ######### Low reward
-# Extinction_Low_Attended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseExt"]] + 
-#   post[["b_ConditionLow_Rew"]] + 
-#   post[["b_ConditionLow_Rew:ExpPhaseExt"]]
-# 
-# ##################### Not Attended
-# 
-# ######### High reward
-# Extinction_High_NotAttended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseExt"]] + 
-#   post[["b_AttentionNotAtt"]] + 
-#   post[["b_ExpPhaseExt:AttentionNotAtt"]]
-# ######### Low reward
-# Extinction_Low_NotAttended = post[["b_Intercept"]] + 
-#   post[["b_ExpPhaseExt"]] + 
-#   post[["b_AttentionNotAtt"]] + 
-#   post[["b_ConditionLow_Rew"]] + 
-#   post[["b_ExpPhaseExt:AttentionNotAtt"]] +
-#   post[["b_ConditionLow_Rew:ExpPhaseExt"]] + 
-#   post[["b_ConditionLow_Rew:ExpPhaseExt:AttentionNotAtt"]]
-# 
-# 
-# 
-# ### Plotting the posterior ###
-# 
-# # make a data frame
-# 
-# posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
-# 
-# posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability", "Attention"), "_", extra = "merge")
-# 
-# posterior_conditions$Attention = recode(posterior_conditions$Attention,
-#                                         "Attended" = "Attended",
-#                                         "NotAttended" = "Unattended")
-# 
-# names(posterior_conditions)[4] = "Amplitude"
-# 
-# 
-# #order
-# #dataPlot$`Reward phase` = factor(dataPlot$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
-# #dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward phase`,dataPlot$`Reward probability`),]
-# 
-# 
-# plottingConditions = c("Attended","Unattended" )
-# for (i in 1:length(plottingConditions)){
-#   
-#   if(plottingConditions[i]=="Attended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Attended")}
-#   
-#   if(plottingConditions[i]=="Unattended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Unattended")}  
-#   
-#   # Pirate plot
-#   
-#   pirateplot(formula = Amplitude ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
-#              data=dataAmplitudePlot, # data frame
-#              main=plottingConditions[i], # main title
-#              ylim=c(0.7,1.2), # y-axis: limits
-#              ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
-#              theme=0, # preset theme (0: use your own)
-#              avg.line.col="black", # average line: color
-#              avg.line.lwd=2, # average line: line width
-#              avg.line.o=1, # average line: opacity (0-1)
-#              bean.b.col="black", # bean border, color
-#              bean.lwd=0.6, # bean border, line width
-#              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-#              bean.b.o=0.3, # bean border, opacity (0-1)
-#              bean.f.col="gray", # bean filling, color
-#              bean.f.o=.1, # bean filling, opacity (0-1)
-#              cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
-#              gl.col="gray", # gridlines: color
-#              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-#              cex.lab=1, # axis labels: size
-#              cex.axis=1, # axis numbers: size
-#              cex.names = 1,
-#              sortx = "sequential",
-#              bty="l", # plot box type
-#              back.col="white") # background, color
-# }
-# 
-# #Check the difference between high and low reward in acquisition attended
-# 
-# # Difference between high and low reward in acquisition attended
-# Diff_Rew_Acq_Att = Acquisition_High_Attended - Acquisition_Low_Attended
-# plotPost(Diff_Rew_Acq_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
-# 
-# mean(Acquisition_High_Attended>Acquisition_Low_Attended)
-# 
-# 
-# #Check the difference between high and low reward in baseline attended
-# 
-# # Difference between high and low reward in acquisition attended
-# Diff_Rew_Bsln_Att = Baseline_High_Attended - Baseline_Low_Attended
-# plotPost(Diff_Rew_Bsln_Att, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 
 
 
 
 
+
+
+# brms movement trials------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Set the working directory where to save the models
+setwd(here("brms_models"))
+
+#help stan run faster
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+# Modelling the effects of phase, attention, and reward magnitude - All subjects
+
+# Set the intercept model
+data$ExpPhase=relevel(data$ExpPhase,ref="Bsln")
+data$Condition=relevel(data$Condition,ref="High_Rew")
+data$Attention=relevel(data$Attention,ref="Att")
+
+# Contrast coding
+# data$Condition = ifelse(data$Condition == "High_Rew", 0.5, -0.5)
+# data$Attention = ifelse(data$Attention == "Att", 0.5, -0.5)
+
+# Prior for the intercept only model
+prior = c(
+  prior(normal(1, 2), class = Intercept), #based on Anderson & Mueller, 2010 and on logic - max attention effect (removal of the unattended stimulus) == 2
+  prior(student_t(3, 0,3), class = sd),
+  prior(student_t(3, 0,3), class = sigma)
+)
+
+# Null model
+null = brm(Amplitude ~ 1 + (1|Subject),
+           data=subset(data,Movement=="Movement"),
+           family=gaussian(),
+           prior = prior,
+           iter = 6000,
+           save_all_pars = TRUE,
+           control = list(adapt_delta = 0.99,max_treedepth = 15),
+           cores = 4,
+           sample_prior = TRUE,
+           inits = 0)
+saveRDS(null,file="null.EEG.allsub.movement.rds")
+
+# Priors for the models with slopes
+prior = c(
+  prior(normal(1, 3), class = Intercept), #based on Anderson & Mueller, 2010 and on logic - max attention effect (removal of the unattended stimulus) == 2
+  prior(normal(0, 3), class = b), #based on Anderson & Mueller, 2010 and on logic - max attention effect (removal of the unattended stimulus) == 2
+  prior(student_t(3, 0,3), class = sd),
+  prior(student_t(3, 0,3), class = sigma)
+)
+
+# Exp phase model
+expphase = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
+               data=subset(data,Movement=="Movement"),
+               family=gaussian(),
+               prior = prior,
+               iter = 6000,
+               save_all_pars = TRUE,
+               control = list(adapt_delta = 0.99,max_treedepth = 15),
+               cores = 4,
+               sample_prior = TRUE,
+               inits = 0)
+saveRDS(expphase,file="expphase.EEG.allsubs.movement.rds")
+
+# Attention model
+attention = brm(Amplitude ~ Attention + (Attention|Subject),
+                data=subset(data,Movement=="Movement"),
+                family=gaussian(),
+                prior = prior,
+                iter = 6000,
+                save_all_pars = TRUE,
+                control = list(adapt_delta = 0.99,max_treedepth = 15),
+                cores = 4,
+                sample_prior = TRUE,
+                inits = 0)
+saveRDS(attention,file="attention.EEG.allsubs.movement.rds")
+
+# Two main effects - phase and attention
+phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + ( ExpPhase + Attention|Subject),
+                        data=subset(data,Movement=="Movement"),
+                        family=gaussian(),
+                        prior = prior,
+                        iter = 6000,
+                        save_all_pars = TRUE,
+                        control = list(adapt_delta = 0.99,max_treedepth = 15),
+                        cores = 4,
+                        sample_prior = TRUE,
+                        inits = 0)
+saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.movement.rds")
+
+# Interaction between phase and attention
+phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + ( ExpPhase * Attention|Subject),
+                                    data=subset(data,Movement=="Movement"),
+                                    family=gaussian(),
+                                    prior = prior,
+                                    iter = 6000,
+                                    save_all_pars = TRUE,
+                                    control = list(adapt_delta = 0.99,max_treedepth = 15),
+                                    cores = 4,
+                                    sample_prior = TRUE,
+                                    inits = 0)
+saveRDS(phaseANDattention_interaction,file="phaseANDattention_interaction.EEG.allsubs.movement.rds")
+
+# Interaction between expphase and reward magnitude plus attention
+rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
+                              data=subset(data,Movement=="Movement"),
+                              family=gaussian(),
+                              prior = prior,
+                              iter = 6000,
+                              save_all_pars = TRUE,
+                              control = list(adapt_delta = 0.99,max_treedepth = 15),
+                              cores = 4,
+                              sample_prior = TRUE,
+                              inits = 0)
+saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.movement.rds")
+
+# Full model
+
+
+full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),   
+           data=subset(data,Movement=="Movement"),
+           family=gaussian(),
+           prior = prior,
+           iter = 6000,
+           save_all_pars = TRUE,
+           control = list(adapt_delta = 0.99,max_treedepth = 15),
+           cores = 4,
+           sample_prior = TRUE,
+           inits = 0)
+saveRDS(full,file="full.EEG.allsubs.movement.rds")
+
+# WAIC
+compare.EEG.waic = WAIC(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, compare = TRUE)
+saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.movement.rds")
+
+# # Questionnaires WAIC
+# compare.EEG.waic.questionnaires = WAIC(full, depression, bas, reward, compare = TRUE)
+# saveRDS(compare.EEG.waic.questionnaires,file="compare.EEG.waic.allsubs.questionnaires.rds")
+
+# Weighted waic
+# compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, weights = "waic")
+# saveRDS(compare.EEG.waic.weights,file="compare.EEG.waic.weights")
+
+# Bayesian R2
+#Null
+bR2.null.EEG = bayes_R2(null)
+saveRDS(bR2.null.EEG,file="bR2.null.EEG.movement")
+#ExpPhase
+bR2.expphase.EEG = bayes_R2(expphase)
+saveRDS(bR2.expphase.EEG,file="bR2.expphase.EEG.movement")
+#Attention
+bR2.attention.EEG = bayes_R2(attention)
+saveRDS(bR2.attention.EEG,file="bR2.attention.EEG.movement")
+#Phase and attention
+bR2.phaseANDattention.EEG = bayes_R2(phaseANDattention)
+saveRDS(bR2.phaseANDattention.EEG,file="bR2.phaseANDattention.EEG.movement")
+#Phase and attention interaction
+bR2.phaseANDattention_interaction.EEG = bayes_R2(phaseANDattention_interaction)
+saveRDS(bR2.phaseANDattention_interaction.EEG,file="bR2.phaseANDattention_interaction.EEG.movement")
+#Reward times phase plus attention
+bR2.rewardTimesPhasePlusAtt.EEG = bayes_R2(rewardTimesPhasePlusAtt)
+saveRDS(bR2.rewardTimesPhasePlusAtt.EEG,file="bR2.rewardTimesPhasePlusAtt.EEG.movement")
+#Full
+bR2.full.EEG = bayes_R2(full)
+saveRDS(bR2.full.EEG,file="bR2.full.EEG.movement")
+# brms No movement trials------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Set the working directory where to save the models
+setwd(here("brms_models"))
+
+#help stan run faster
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+# Modelling the effects of phase, attention, and reward magnitude - All subjects
+
+# Set the intercept model
+data$ExpPhase=relevel(data$ExpPhase,ref="Bsln")
+data$Condition=relevel(data$Condition,ref="High_Rew")
+data$Attention=relevel(data$Attention,ref="Att")
+
+# Contrast coding
+# data$Condition = ifelse(data$Condition == "High_Rew", 0.5, -0.5)
+# data$Attention = ifelse(data$Attention == "Att", 0.5, -0.5)
+
+# Prior for the intercept only model
+prior = c(
+  prior(normal(1, 2), class = Intercept), #based on Anderson & Mueller, 2010 and on logic - max attention effect (removal of the unattended stimulus) == 2
+  prior(student_t(3, 0,3), class = sd),
+  prior(student_t(3, 0,3), class = sigma)
+)
+
+# Null model
+null = brm(Amplitude ~ 1 + (1|Subject),
+           data=subset(data,Movement=="NoMovement"),
+           family=gaussian(),
+           prior = prior,
+           iter = 6000,
+           save_all_pars = TRUE,
+           control = list(adapt_delta = 0.99,max_treedepth = 15),
+           cores = 4,
+           sample_prior = TRUE,
+           inits = 0)
+saveRDS(null,file="null.EEG.allsub.nomovement.rds")
+
+# Priors for the models with slopes
+prior = c(
+  prior(normal(1, 3), class = Intercept), #based on Anderson & Mueller, 2010 and on logic - max attention effect (removal of the unattended stimulus) == 2
+  prior(normal(0, 3), class = b), #based on Anderson & Mueller, 2010 and on logic - max attention effect (removal of the unattended stimulus) == 2
+  prior(student_t(3, 0,3), class = sd),
+  prior(student_t(3, 0,3), class = sigma)
+)
+
+# Exp phase model
+expphase = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
+               data=subset(data,Movement=="NoMovement"),
+               family=gaussian(),
+               prior = prior,
+               iter = 6000,
+               save_all_pars = TRUE,
+               control = list(adapt_delta = 0.99,max_treedepth = 15),
+               cores = 4,
+               sample_prior = TRUE,
+               inits = 0)
+saveRDS(expphase,file="expphase.EEG.allsubs.nomovement.rds")
+
+# Attention model
+attention = brm(Amplitude ~ Attention + (Attention|Subject),
+                data=subset(data,Movement=="NoMovement"),
+                family=gaussian(),
+                prior = prior,
+                iter = 6000,
+                save_all_pars = TRUE,
+                control = list(adapt_delta = 0.99,max_treedepth = 15),
+                cores = 4,
+                sample_prior = TRUE,
+                inits = 0)
+saveRDS(attention,file="attention.EEG.allsubs.nomovement.rds")
+
+# Two main effects - phase and attention
+phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + ( ExpPhase + Attention|Subject),
+                        data=subset(data,Movement=="NoMovement"),
+                        family=gaussian(),
+                        prior = prior,
+                        iter = 6000,
+                        save_all_pars = TRUE,
+                        control = list(adapt_delta = 0.99,max_treedepth = 15),
+                        cores = 4,
+                        sample_prior = TRUE,
+                        inits = 0)
+saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.nomovement.rds")
+
+# Interaction between phase and attention
+phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + ( ExpPhase * Attention|Subject),
+                                    data=subset(data,Movement=="NoMovement"),
+                                    family=gaussian(),
+                                    prior = prior,
+                                    iter = 6000,
+                                    save_all_pars = TRUE,
+                                    control = list(adapt_delta = 0.99,max_treedepth = 15),
+                                    cores = 4,
+                                    sample_prior = TRUE,
+                                    inits = 0)
+saveRDS(phaseANDattention_interaction,file="phaseANDattention_interaction.EEG.allsubs.nomovement.rds")
+
+# Interaction between expphase and reward magnitude plus attention
+rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Condition * ExpPhase + Attention|Subject),
+                              data=subset(data,Movement=="NoMovement"),
+                              family=gaussian(),
+                              prior = prior,
+                              iter = 6000,
+                              save_all_pars = TRUE,
+                              control = list(adapt_delta = 0.99,max_treedepth = 15),
+                              cores = 4,
+                              sample_prior = TRUE,
+                              inits = 0)
+saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.nomovement.rds")
+
+# Full model
+
+
+full = brm(Amplitude ~ Condition * ExpPhase * Attention + (Condition * ExpPhase * Attention|Subject),   
+           data=subset(data,Movement=="NoMovement"),
+           family=gaussian(),
+           prior = prior,
+           iter = 6000,
+           save_all_pars = TRUE,
+           control = list(adapt_delta = 0.99,max_treedepth = 15),
+           cores = 4,
+           sample_prior = TRUE,
+           inits = 0)
+saveRDS(full,file="full.EEG.allsubs.nomovement.rds")
+
+# WAIC
+compare.EEG.waic = WAIC(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, compare = TRUE)
+saveRDS(compare.EEG.waic,file="compare.EEG.waic.allsubs.nomovement.rds")
+
+# # Questionnaires WAIC
+# compare.EEG.waic.questionnaires = WAIC(full, depression, bas, reward, compare = TRUE)
+# saveRDS(compare.EEG.waic.questionnaires,file="compare.EEG.waic.allsubs.questionnaires.rds")
+
+# Weighted waic
+# compare.EEG.waic.weights = model_weights(null, expphase, attention, phaseANDattention, phaseANDattention_interaction, rewardTimesPhasePlusAtt, full, weights = "waic")
+# saveRDS(compare.EEG.waic.weights,file="compare.EEG.waic.weights")
+
+# Bayesian R2
+#Null
+bR2.null.EEG = bayes_R2(null)
+saveRDS(bR2.null.EEG,file="bR2.null.EEG.nomovement")
+#ExpPhase
+bR2.expphase.EEG = bayes_R2(expphase)
+saveRDS(bR2.expphase.EEG,file="bR2.expphase.EEG.nomovement")
+#Attention
+bR2.attention.EEG = bayes_R2(attention)
+saveRDS(bR2.attention.EEG,file="bR2.attention.EEG.nomovement")
+#Phase and attention
+bR2.phaseANDattention.EEG = bayes_R2(phaseANDattention)
+saveRDS(bR2.phaseANDattention.EEG,file="bR2.phaseANDattention.EEG.nomovement")
+#Phase and attention interaction
+bR2.phaseANDattention_interaction.EEG = bayes_R2(phaseANDattention_interaction)
+saveRDS(bR2.phaseANDattention_interaction.EEG,file="bR2.phaseANDattention_interaction.EEG.nomovement")
+#Reward times phase plus attention
+bR2.rewardTimesPhasePlusAtt.EEG = bayes_R2(rewardTimesPhasePlusAtt)
+saveRDS(bR2.rewardTimesPhasePlusAtt.EEG,file="bR2.rewardTimesPhasePlusAtt.EEG.nomovement")
+#Full
+bR2.full.EEG = bayes_R2(full)
+saveRDS(bR2.full.EEG,file="bR2.full.EEG.nomovement")
