@@ -470,43 +470,43 @@ options(mc.cores = parallel::detectCores())
 data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
 data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
 
-# Set the prior for the intercept only model
-prior = c(
-  prior(normal(500, 200), class = Intercept)) # A wide prior sensible for this type of task
-
-
-# Null model
-model.null.RT = brm(RT ~ 1 + (1|ParticipantNo),
-                 data=subset(data.final,data.final$Response=="Hit"),
-                 family=exgaussian(),
-                 prior = prior,
-                 iter = 6000,
-                 save_all_pars = TRUE,
-                 control = list(adapt_delta = 0.99,max_treedepth = 15),
-                 cores = 4,
-                 sample_prior = TRUE,
-                 inits = 0)
-saveRDS(model.null.RT,file="nullmodel.RT.rds")
-
-
-
+# # Set the prior for the intercept only model
+# prior = c(
+#   prior(normal(500, 200), class = Intercept)) # A wide prior sensible for this type of task
+# 
+# 
+# # Null model
+# model.null.RT = brm(RT ~ 1 + (1|ParticipantNo),
+#                  data=subset(data.final,data.final$Response=="Hit"),
+#                  family=exgaussian(),
+#                  prior = prior,
+#                  iter = 6000,
+#                  save_all_pars = TRUE,
+#                  control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                  cores = 4,
+#                  sample_prior = TRUE,
+#                  inits = 0)
+# saveRDS(model.null.RT,file="nullmodel.RT.rds")
+# 
+# 
+# 
 # Set the priors for the models with slope
 prior = c(
   prior(normal(500, 200), class = Intercept), # A wide prior sensible for this type of task
   prior(normal(0, 200), class = b)) # a wide prior
-
-# ExpPhase model
-model.expphase.RT = brm(RT ~ ExpPhase + (ExpPhase|ParticipantNo),
-                        data=subset(data.final,data.final$Response=="Hit"),
-                        family=exgaussian(),
-                        prior = prior,
-                        iter = 6000,
-                        save_all_pars = TRUE,
-                        control = list(adapt_delta = 0.99,max_treedepth = 15),
-                        cores = 4,
-                        sample_prior = TRUE,
-                        inits = 0)
-saveRDS(model.expphase.RT,file="expphasemodel.RT.rds")
+# 
+# # ExpPhase model
+# model.expphase.RT = brm(RT ~ ExpPhase + (ExpPhase|ParticipantNo),
+#                         data=subset(data.final,data.final$Response=="Hit"),
+#                         family=exgaussian(),
+#                         prior = prior,
+#                         iter = 6000,
+#                         save_all_pars = TRUE,
+#                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                         cores = 4,
+#                         sample_prior = TRUE,
+#                         inits = 0)
+# saveRDS(model.expphase.RT,file="expphasemodel.RT.rds")
 
 #Interaction model
 model.full.RT = brm(RT ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
@@ -558,8 +558,8 @@ saveRDS(model.full.RT,file="model.full.RT.rds")
 # saveRDS(model.full.RT.REWARD,file="model.full.RT.REWARD.rds")
 
 # # read in the models and comparisons
- # model.null.RT = readRDS("nullmodel.RT.rds")
- # model.expphase.RT = readRDS("expphasemodel.RT.rds")
+model.null.RT = readRDS("nullmodel.RT.rds")
+model.expphase.RT = readRDS("expphasemodel.RT.rds")
   #model.full.RT = readRDS("model.full.RT.rds")
 # compare.waic = readRDS("compare.RT.waic")
 
@@ -879,6 +879,21 @@ model.full.Cor = brm(Response ~ ExpPhase * Condition + (ExpPhase * Condition|Par
                      sample_prior = TRUE,
                      inits = 0)
 saveRDS(model.full.Cor,file="model.full.Cor.rds")
+
+
+# data.x = data.final.corr
+# data.x$Response = ifelse(data.x$Response=="Correct",1,0)
+# data.x$Response = as.numeric(data.x$Response)
+# 
+# library(lme4)
+# x = glmer(Response~ExpPhase*Condition + (1|ParticipantNo),data=data.x, family = "binomial")
+# summary(x)
+# 
+# 
+# cat_plot(x,pred="ExpPhase", modx = "Condition")
+
+
+
 # 
 # #Depression model
 # model.full.Acc.depression = brm(Hit.Rate ~ ExpPhase * Condition * BDI + (ExpPhase * Condition * BDI|ParticipantNo),

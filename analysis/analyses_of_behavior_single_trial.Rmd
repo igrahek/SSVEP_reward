@@ -1,0 +1,1107 @@
+---
+title: "SSVEP reward - behavioral results"
+author: 'Ivan Grahek & Antonio Schettino'
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+    theme: default 
+---
+
+
+## About the code
+
+Experiment: FSAReward (Ivan Grahek*, Antonio Schettino*, Gilles Pourtois, Ernst Koster, & Søren Andersen) (*: co-first authors)
+Code written by: Ivan Grahek & Antonio Schettino (2016-2018)
+Description: Code for the analysis of behavioral data for Experiment 1 of the SSVEP - reward project.  
+
+_This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>._
+
+
+\newpage
+
+### Accuracy data
+```{r, warning=FALSE, message=FALSE}
+# Clear environemnt and import data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# clear the environment
+rm(list=ls()) 
+# clear the console
+cat("\014") 
+#load packages and install them if they're not installed
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr, here,psych)
+# set seed
+set.seed(42) 
+# set directory
+setwd(here())
+# import data
+data.raw = read.csv(file = here("data","Data_behavior_exp1_48pps.csv"),header=TRUE,na.strings="NaN")
+
+# Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Adding and renaming variables 
+# rename EventType variable
+names(data.raw)[names(data.raw) == "EventType"] = "MovedDots" 
+# add a variable with the name of the attended color instead of a numbers
+data.raw$AttendedColor = ifelse(data.raw$AttendedColor==1,"red","blue")
+# add a variable saying which color was linked with High_Rew (even numbers - blue was High_Rew)
+data.raw$RewardedColor = ifelse(data.raw$ParticipantNo%%2==0,"blue","red") 
+# add a variable with the name of the moved color instead of a numbers
+data.raw$MovedDots = ifelse(data.raw$MovedDots==1,"red","blue") 
+# split experimental phases into 6 isntead of 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+#data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("Bsln1","Bsln2","Acq1","Acq2","Ext1","Ext2")) 
+# split experimental phases into 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("Bsln","Acq","Ext")) # trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext
+
+### Convert variables to be used in analyses into factors
+data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )] = 
+  lapply(data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )], factor)
+
+### Create variables needed for the accuracy analyses
+# count hits, false alarms, misses, correct rejections, and RT separately for each participant (their calculation is done in Matlab: see DataProcessing.m)
+data.final = ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots),summarize,
+                  numtrials=length(which(Response!=99)), # number of trials per condition (anything that is not 99 or any other number that we're not using)
+                  Hits=length(which(Response==1)), # hits: attended color moved, correct response
+                  FAs=length(which(Response==2)), # false alarms: attended color did not move, (wrong) response
+                  Misses=length(which(Response==0)), # misses: attended color moved, no response
+                  CRs=length(which(Response==3)), # correct rejections: attended color did not move, no response
+                  mean.RT=mean(RT,na.rm=TRUE)) # mean RT per condition
+
+
+################################################################## Calculate accuracy and RTs per condition ###############################################################################################################################################################################################################
+
+# Prepare the data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Calculate Hits and False alarms
+# Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
+# False alarms are  calculated for each participant in each condition on trials when they are attending the color that didn't move (the unattended color moved, but they responded)  
+# Here we create the same number of hits & fas for each of the two conditions (moved attended or not)
+data.final = ddply(data.final, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
+                 Hits = Hits[MovedDots==AttendedColor],
+                 FAs = FAs[MovedDots!=AttendedColor])
+
+# Keep only trials on which the attended color moved (we can do behavioral analysis only on those)
+data.final = subset(data.final,MovedDots==AttendedColor)
+
+### Calculate d'
+# use loglinear transformation: add 0.5 to Hits, FAs, Misses, and CRs (Hautus, 1995, Behavior Research Methods, Instruments, & Computers),
+# which is preferred over the 1/2N rule (Macmillan & Kaplan, 1985, Psychological Bulletin) because it results in less biased estimates of d'.
+data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarise,
+                    tot.Hits=Hits+.5, # hits
+                    tot.FAs=FAs+.5, # false alarms
+                    tot.Misses=(numtrials-Hits)+.5, # misses
+                    tot.CRs=(numtrials-FAs)+.5, # correct rejections
+                    Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
+                    FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
+                    #dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
+                    Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
+
+# Calculate SDT indices with psycho
+indices = psycho::dprime(data.final$tot.Hits, data.final$tot.FAs, data.final$tot.Misses, data.final$tot.CRs) 
+
+data.final = cbind(data.final, indices) 
+                      
+
+### Create a final dataframe for accuracy and RTs analyses
+# add a new variable specifying whether the participant is attending the high or Low_Rewed color
+data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High_Rew","Low_Rew")
+# make this variable a factor for further analyses
+data.final$Condition = factor(data.final$Condition)
+
+```
+## Hits vs. False alarams
+### Means - Hit rates - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hit.Rate, na.rm = TRUE), digits = 2), " [", round(hdi(Hit.Rate)[[1]], digits = 2), " ", round(hdi(Hit.Rate)[[2]], digits = 2), "]")))
+
+names(summary) = c("Reward phase", "Reward probability", "Hit Rate")
+
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                           "Acq" = "Acquisition",
+                           "Bsln" = "Baseline",
+                           "Ext" = "Extinction")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+kable(summary, caption = "Hit rates per condition")
+```
+
+### Plot
+
+```{r, warning=FALSE, message=FALSE}
+# # Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+  # Pirate plot
+  pirateplot(formula=Hit.Rate ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
+             main="Hit rates", # main title
+             ylim=c(0.1,0.9), # y-axis: limits
+             ylab="Hit Rate", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             point.col="black", # points: color
+             point.o=.3, # points: opacity (0-1)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             bty="l", # plot box type
+             back.col="white") # background, color
+  
+```
+
+\newpage
+
+### Statistics 
+
+```{r, warning=FALSE, message=FALSE}
+# # Set the working directory where to save the models
+setwd(here("brms_models"))
+# # referencing for easier interpretation
+# data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+# data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+# # 
+# # Set the prior for the intercept only model
+# prior = c(
+#   prior(normal(0.5, 1), class = Intercept)) # A wide prior sensible for this type of task
+# 
+# # Null model
+# model.null.Acc = brm(Response ~ 1 + (1|ParticipantNo),
+#                  data=data.final,
+#                  family=bernoulli(),
+#                  prior = prior,
+#                  iter = 6000,
+#                  save_all_pars = TRUE,
+#                  control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                  cores = 4,
+#                  sample_prior = TRUE,
+#                  inits = 0)
+# saveRDS(model.null.Acc,file="nullmodel.Acc.rds")
+# 
+# # Set the priors for the models with slope
+# prior = c(
+#   prior(normal(0.5, 1), class = Intercept), # A wide prior sensible for this type of task
+#   prior(normal(0, 1), class = b)) # a wide prior
+# 
+# # ExpPhase model
+# model.expphase.Acc = brm(Response ~ ExpPhase + (ExpPhase|ParticipantNo),
+#                      data=data.final,
+#                      family=bernoulli(),
+#                      prior = prior,
+#                      iter = 6000,
+#                      save_all_pars = TRUE,
+#                      control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                      cores = 4,
+#                      sample_prior = TRUE,
+#                      inits = 0)
+# saveRDS(model.expphase.Acc,file="expphasemodel.Acc.rds")
+# 
+# #Interaction model
+# model.full.Acc = brm(Response ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+#                  data=data.final,
+#                  family=bernoulli(),
+#                  prior = prior,
+#                  iter = 6000,
+#                  save_all_pars = TRUE,
+#                  control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                  cores = 4,
+#                  sample_prior = TRUE,
+#                  inits = 0)
+# saveRDS(model.full.Acc,file="model.full.Acc.rds")
+
+model.full.Acc = readRDS("model.full.Acc.rds")
+compare.waic.Acc = readRDS("compare.Acc.waic")
+compare.Acc.waic.weights = readRDS("compare.Acc.waic.weights")
+bR2.null.Acc = readRDS("bR2.null.Acc")
+bR2.expphase.Acc = readRDS("bR2.expphase.Acc")
+bR2.full.Acc = readRDS("bR2.full.Acc")
+```
+
+### Model comparison with WAIC
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.waic.Acc)
+```
+
+### Model comparison with WAIC weights
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.Acc.waic.weights)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.Acc)
+```
+
+Experiment phase model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.Acc)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.full.Acc)
+```
+
+### Checking the best model
+
+Plotting the chains
+```{r, warning=FALSE, message=FALSE}
+# Plot chains
+plot(model.full.Acc, pars = "^b_", ask = FALSE, N=6)
+```
+
+Summary of the best model 
+
+```{r, warning=FALSE, message=FALSE}
+# Summary of the best model
+print(tidy(model.full.Acc, par_type = "non-varying"), digits = 1)
+```
+
+### Plotting the best model
+#### Sample from the posterior
+```{r, warning=FALSE, message=FALSE}
+# Analyzing the posterior and differences between conditions
+
+post = posterior_samples(model.full.Acc, "^b")
+
+
+################################################ Baseline ####
+
+######### High reward
+Baseline_High = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Acquistion
+
+######### High reward
+Acquisition_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:ConditionLow_Rew"]]
+
+################################################ Extinction
+
+######### High reward
+Extinction_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:ConditionLow_Rew"]]
+```
+
+```{r, warning=FALSE, message=FALSE}
+
+# make a data frame
+posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
+
+names(posterior_conditions)[3] = "Hit rate"
+
+
+
+
+
+# Pirate plot
+pirateplot(formula = `Hit rate` ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
+             data=posterior_conditions, # data frame
+             main="Hit rates", # main title
+             ylim=c(1, 4), # y-axis: limits
+             ylab="Hit rate", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             sortx = "sequential",
+             bty="l", # plot box type
+             back.col="white") # background, color
+```
+
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+library(HDInterval)
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline High Reward", 
+                                  "Baseline Low Reward", 
+                                  "Acquisition High Reward", 
+                                  "Acquisition Low Reward", 
+                                  "Extinction High Reward", 
+                                  "Extinction Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline_High), digits = 2), " [", round(hdi(Baseline_High)[[1]], digits = 2), " ", round(hdi(Baseline_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_Low), digits = 2), " [", round(hdi(Baseline_Low)[[1]], digits = 2), " ", round(hdi(Baseline_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_High), digits = 2), " [", round(hdi(Acquisition_High)[[1]], digits = 2), " ", round(hdi(Acquisition_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_Low), digits = 2), " [", round(hdi(Acquisition_Low)[[1]], digits = 2), " ", round(hdi(Acquisition_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_High), digits = 2), " [", round(hdi(Extinction_High)[[1]], digits = 2), " ", round(hdi(Extinction_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_Low), digits = 2), " [", round(hdi(Extinction_Low)[[1]], digits = 2), " ", round(hdi(Extinction_Low)[[2]], digits = 2), "]"))
+
+names(posterior_means)[2] = "Mean [HDI]"
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+                        
+kable(posterior_means, caption = "Means per condition")
+
+```
+
+### Inference about the best model
+
+Check the difference between high reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High = Acquisition_High - Baseline_High
+plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_Low = Acquisition_Low - Baseline_Low
+plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between high and low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High_vs_Low = Diff_Bsln_Acq_Low - Diff_Bsln_Acq_High 
+plotPost(Diff_Bsln_Acq_High_vs_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+paste("Mean = ",round(mean(Diff_Bsln_Acq_High_vs_Low), digits = 2), " [", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[1]], digits = 2), " ", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[2]], digits = 2), "]")
+```
+
+
+Check the difference between high reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_High = Extinction_High - Acquisition_High
+plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between low reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_Low = Extinction_Low - Acquisition_Low
+plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+## Hits vs. all the other responses
+### Means - Hit rates - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hit.Rate, na.rm = TRUE), digits = 2), " [", round(hdi(Hit.Rate)[[1]], digits = 2), " ", round(hdi(Hit.Rate)[[2]], digits = 2), "]")))
+
+names(summary) = c("Reward phase", "Reward probability", "Hit Rate")
+
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                           "Acq" = "Acquisition",
+                           "Bsln" = "Baseline",
+                           "Ext" = "Extinction")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+kable(summary, caption = "Hit rates per condition")
+```
+
+### Plot
+
+```{r, warning=FALSE, message=FALSE}
+# # Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+  # Pirate plot
+  pirateplot(formula=Hit.Rate ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
+             main="Hit rates", # main title
+             ylim=c(0.1,0.9), # y-axis: limits
+             ylab="Hit Rate", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             point.col="black", # points: color
+             point.o=.3, # points: opacity (0-1)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             bty="l", # plot box type
+             back.col="white") # background, color
+  
+```
+
+\newpage
+
+### Statistics 
+
+```{r, warning=FALSE, message=FALSE}
+# # Set the working directory where to save the models
+setwd(here("brms_models"))
+# # referencing for easier interpretation
+# data.final.corr$ExpPhase=relevel(data.final.corr$ExpPhase,ref="Bsln")
+# data.final.corr$Condition=relevel(data.final.corr$Condition,ref="High_Rew")
+# # 
+# # Set the prior for the intercept only model
+# prior = c(
+#   prior(normal(0.5, 1), class = Intercept)) # A wide prior sensible for this type of task
+# 
+# # Null model
+# model.null.Cor = brm(Response ~ 1 + (1|ParticipantNo),
+#                      data=data.final.corr,
+#                      family=bernoulli(),
+#                      prior = prior,
+#                      iter = 6000,
+#                      save_all_pars = TRUE,
+#                      control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                      cores = 4,
+#                      sample_prior = TRUE,
+#                      inits = 0)
+# saveRDS(model.null.Cor,file="nullmodel.Cor.rds")
+# 
+# # Set the priors for the models with slope
+# prior = c(
+#   prior(normal(0.5, 1), class = Intercept), # A wide prior sensible for this type of task
+#   prior(normal(0, 1), class = b)) # a wide prior
+# 
+# # ExpPhase model
+# model.expphase.Cor = brm(Response ~ ExpPhase + (ExpPhase|ParticipantNo),
+#                          data=data.final.corr,
+#                          family=bernoulli(),
+#                          prior = prior,
+#                          iter = 6000,
+#                          save_all_pars = TRUE,
+#                          control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                          cores = 4,
+#                          sample_prior = TRUE,
+#                          inits = 0)
+# saveRDS(model.expphase.Cor,file="expphasemodel.Cor.rds")
+# 
+# #Interaction model
+# model.full.Cor = brm(Response ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+#                      data=data.final.corr,
+#                      family=bernoulli(),
+#                      prior = prior,
+#                      iter = 6000,
+#                      save_all_pars = TRUE,
+#                      control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                      cores = 4,
+#                      sample_prior = TRUE,
+#                      inits = 0)
+# saveRDS(model.full.Cor,file="model.full.Cor.rds")
+
+#read in the models and comparisons
+# model.null.Acc = readRDS("nullmodel.Acc.rds")
+# model.condition.Acc = readRDS("model.condition.Acc.rds")
+# model.expphase.Acc = readRDS("expphasemodel.Acc.rds")
+# model.twomaineffects.Acc = readRDS("model.twomaineffects.Acc.rds")
+model.full.Acc = readRDS("model.full.Cor.rds")
+compare.waic.Acc = readRDS("compare.Acc.waic")
+compare.Acc.waic.weights = readRDS("compare.Cor.waic.weights")
+bR2.null.Acc = readRDS("bR2.null.Cor")
+bR2.expphase.Acc = readRDS("bR2.expphase.Cor")
+# bR2.full.Acc = readRDS("bR2.full.Cor")
+```
+
+### Model comparison with WAIC
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.waic.Acc)
+```
+
+### Model comparison with WAIC weights
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.Acc.waic.weights)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.Acc)
+```
+
+Experiment phase model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.Acc)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+# print(bR2.full.Acc)
+```
+
+### Checking the best model
+
+Plotting the chains
+```{r, warning=FALSE, message=FALSE}
+# Plot chains
+plot(model.full.Acc, pars = "^b_", ask = FALSE, N=6)
+```
+
+Summary of the best model 
+
+```{r, warning=FALSE, message=FALSE}
+# Summary of the best model
+print(tidy(model.full.Acc, par_type = "non-varying"), digits = 1)
+```
+
+### Plotting the best model
+#### Sample from the posterior
+```{r, warning=FALSE, message=FALSE}
+# Analyzing the posterior and differences between conditions
+
+post = posterior_samples(model.full.Acc, "^b")
+
+
+################################################ Baseline ####
+
+######### High reward
+Baseline_High = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Acquistion
+
+######### High reward
+Acquisition_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:ConditionLow_Rew"]]
+
+################################################ Extinction
+
+######### High reward
+Extinction_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:ConditionLow_Rew"]]
+```
+
+```{r, warning=FALSE, message=FALSE}
+
+# make a data frame
+posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
+
+names(posterior_conditions)[3] = "Hit rate"
+
+
+
+
+
+# Pirate plot
+pirateplot(formula = `Hit rate` ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
+             data=posterior_conditions, # data frame
+             main="Hit rates", # main title
+             ylim=c(-1, 0.1), # y-axis: limits
+             ylab="Hit rate", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             sortx = "sequential",
+             bty="l", # plot box type
+             back.col="white") # background, color
+```
+
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+library(HDInterval)
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline High Reward", 
+                                  "Baseline Low Reward", 
+                                  "Acquisition High Reward", 
+                                  "Acquisition Low Reward", 
+                                  "Extinction High Reward", 
+                                  "Extinction Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline_High), digits = 2), " [", round(hdi(Baseline_High)[[1]], digits = 2), " ", round(hdi(Baseline_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_Low), digits = 2), " [", round(hdi(Baseline_Low)[[1]], digits = 2), " ", round(hdi(Baseline_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_High), digits = 2), " [", round(hdi(Acquisition_High)[[1]], digits = 2), " ", round(hdi(Acquisition_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_Low), digits = 2), " [", round(hdi(Acquisition_Low)[[1]], digits = 2), " ", round(hdi(Acquisition_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_High), digits = 2), " [", round(hdi(Extinction_High)[[1]], digits = 2), " ", round(hdi(Extinction_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_Low), digits = 2), " [", round(hdi(Extinction_Low)[[1]], digits = 2), " ", round(hdi(Extinction_Low)[[2]], digits = 2), "]"))
+
+names(posterior_means)[2] = "Mean [HDI]"
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+                        
+kable(posterior_means, caption = "Means per condition")
+
+```
+
+### Inference about the best model
+
+Check the difference between high reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High = Acquisition_High - Baseline_High
+plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_Low = Acquisition_Low - Baseline_Low
+plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between high and low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High_vs_Low = Diff_Bsln_Acq_Low - Diff_Bsln_Acq_High 
+plotPost(Diff_Bsln_Acq_High_vs_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+paste("Mean = ",round(mean(Diff_Bsln_Acq_High_vs_Low), digits = 2), " [", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[1]], digits = 2), " ", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[2]], digits = 2), "]")
+```
+
+
+Check the difference between high reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_High = Extinction_High - Acquisition_High
+plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between low reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_Low = Extinction_Low - Acquisition_Low
+plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+## Reaction times
+
+### Means - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hits.RTs, na.rm = TRUE), digits = 2), " [", round(hdi(Hits.RTs)[[1]], digits = 2), " ", round(hdi(Hits.RTs)[[2]], digits = 2), "]")))
+
+names(summary) = c("Reward phase", "Reward probability", "Reaction times")
+
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                           "Acq" = "Acquisition",
+                           "Bsln" = "Baseline",
+                           "Ext" = "Extinction")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+kable(summary, caption = "Reaction times per condition")
+```
+
+### Plot
+
+```{r, warning=FALSE, message=FALSE}
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] = "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] = "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+
+# Pirate plot
+  pirateplot(formula = Hits.RTs ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
+             main="Reaction times", # main title
+             ylim=c(400,700), # y-axis: limits
+             ylab="Reaction time", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             point.col="black", # points: color
+             point.o=.3, # points: opacity (0-1)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             bty="l", # plot box type
+             back.col="white") # background, color
+```
+
+### Statistics
+```{r, warning=FALSE, message=FALSE}
+
+# Set the working directory where to save the models
+setwd(here("brms_models"))
+
+# #help stan run faster
+# rstan_options(auto_write = TRUE)
+# options(mc.cores = parallel::detectCores())
+# 
+# # referencing for easier interpretation
+# data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln")
+# data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+# 
+# # # Set the prior for the intercept only model
+# # prior = c(
+# #   prior(normal(500, 200), class = Intercept)) # A wide prior sensible for this type of task
+# # 
+# # 
+# # # Null model
+# # model.null.RT = brm(RT ~ 1 + (1|ParticipantNo),
+# #                  data=subset(data.final,data.final$Response=="Hit"),
+# #                  family=exgaussian(),
+# #                  prior = prior,
+# #                  iter = 6000,
+# #                  save_all_pars = TRUE,
+# #                  control = list(adapt_delta = 0.99,max_treedepth = 15),
+# #                  cores = 4,
+# #                  sample_prior = TRUE,
+# #                  inits = 0)
+# # saveRDS(model.null.RT,file="nullmodel.RT.rds")
+# # 
+# # 
+# # 
+# # Set the priors for the models with slope
+# prior = c(
+#   prior(normal(500, 200), class = Intercept), # A wide prior sensible for this type of task
+#   prior(normal(0, 200), class = b)) # a wide prior
+# # 
+# # # ExpPhase model
+# # model.expphase.RT = brm(RT ~ ExpPhase + (ExpPhase|ParticipantNo),
+# #                         data=subset(data.final,data.final$Response=="Hit"),
+# #                         family=exgaussian(),
+# #                         prior = prior,
+# #                         iter = 6000,
+# #                         save_all_pars = TRUE,
+# #                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+# #                         cores = 4,
+# #                         sample_prior = TRUE,
+# #                         inits = 0)
+# # saveRDS(model.expphase.RT,file="expphasemodel.RT.rds")
+# 
+# #Interaction model
+# model.full.RT = brm(RT ~ ExpPhase * Condition + (ExpPhase * Condition|ParticipantNo),
+#                     data=subset(data.final,data.final$Response=="Hit"),
+#                     family=exgaussian(),
+#                     prior = prior,
+#                     iter = 6000,
+#                     save_all_pars = TRUE,
+#                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                     cores = 4,
+#                     sample_prior = TRUE,
+#                     inits = 0)
+# saveRDS(model.full.RT,file="model.full.RT.rds")
+
+# # read in the models and comparisons
+
+# model.null.RT = readRDS("nullmodel.RT.rds")
+# model.expphase.RT = readRDS("expphasemodel.RT.rds")
+model.full.RT = readRDS("model.full.RT.rds")
+compare.waic.RT = readRDS("compare.RT.waic")
+compare.RT.waic.weights = readRDS("compare.RT.waic.weights")
+bR2.null.RT = readRDS("bR2.null.RT")
+bR2.expphase.RT = readRDS("bR2.expphase.RT")
+bR2.full.RT = readRDS("bR2.full.RT")
+```
+
+### Model comparison with WAIC
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.waic.RT)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.RT)
+```
+
+Experiment phase model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.RT)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.full.RT)
+```
+
+### Checking the best model
+
+Plotting the chains
+```{r, warning=FALSE, message=FALSE}
+# Plot chains
+plot(model.full.RT, pars = "^b_", ask = FALSE, N=6)
+```
+
+Summary of the best model 
+
+```{r, warning=FALSE, message=FALSE}
+# Summary of the best model
+print(tidy(model.full.RT, par_type = "non-varying"), digits = 1)
+```
+
+
+### Plotting the best model
+#### Sample from the posterior
+```{r, warning=FALSE, message=FALSE}
+
+# Analyzing the posterior and differences between conditions
+
+post = posterior_samples(model.full.RT, "^b")
+
+
+################################################ Baseline ####
+
+######### High reward
+Baseline_High = post[["b_Intercept"]]
+######### Low reward
+Baseline_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Acquistion
+
+######### High reward
+Acquisition_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] 
+######### Low reward
+Acquisition_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq:ConditionLow_Rew"]]
+
+################################################ Extinction
+
+######### High reward
+Extinction_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] 
+######### Low reward
+Extinction_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt:ConditionLow_Rew"]]
+```
+
+```{r, warning=FALSE, message=FALSE}
+# make a data frame
+posterior_conditions = melt(data.frame(Baseline_High, Baseline_Low, Acquisition_High, Acquisition_Low, Extinction_High, Extinction_Low))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
+
+names(posterior_conditions)[3] = "Reaction time"
+
+
+
+# Pirate plot
+pirateplot(formula = `Reaction time` ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
+            data=posterior_conditions, # data frame
+             main="Reaction times", # main title
+             ylim=c(485,600), # y-axis: limits
+             ylab="Reaction time", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             sortx = "sequential",
+             bty="l", # plot box type
+             back.col="white") # background, color
+```
+
+
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+library(HDInterval)
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline High Reward", 
+                                  "Baseline Low Reward", 
+                                  "Acquisition High Reward", 
+                                  "Acquisition Low Reward", 
+                                  "Extinction High Reward", 
+                                  "Extinction Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline_High), digits = 2), " [", round(hdi(Baseline_High)[[1]], digits = 2), " ", round(hdi(Baseline_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline_Low), digits = 2), " [", round(hdi(Baseline_Low)[[1]], digits = 2), " ", round(hdi(Baseline_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_High), digits = 2), " [", round(hdi(Acquisition_High)[[1]], digits = 2), " ", round(hdi(Acquisition_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition_Low), digits = 2), " [", round(hdi(Acquisition_Low)[[1]], digits = 2), " ", round(hdi(Acquisition_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_High), digits = 2), " [", round(hdi(Extinction_High)[[1]], digits = 2), " ", round(hdi(Extinction_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction_Low), digits = 2), " [", round(hdi(Extinction_Low)[[1]], digits = 2), " ", round(hdi(Extinction_Low)[[2]], digits = 2), "]"))
+
+names(posterior_means)[2] = "Mean [HDI]"
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+kable(posterior_means, caption = "Means per condition")
+```
+
+### Inference about the best model
+
+Check the difference between high reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High = Acquisition_High - Baseline_High
+plotPost(Diff_Bsln_Acq_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_Low = Acquisition_Low - Baseline_Low 
+plotPost(Diff_Bsln_Acq_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between high and low reward in baseline vs. acquisition 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Acq_High_vs_Low = Diff_Bsln_Acq_High - Diff_Bsln_Acq_Low 
+plotPost(Diff_Bsln_Acq_High_vs_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+paste("Mean = ",round(mean(Diff_Bsln_Acq_High_vs_Low), digits = 2), " [", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[1]], digits = 2), " ", round(hdi(Diff_Bsln_Acq_High_vs_Low)[[2]], digits = 2), "]")
+```
+
+Check the difference between high reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_High = Extinction_High - Acquisition_High
+plotPost(Diff_Acq_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between low reward in acquisition vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Acq_Ext_Low = Extinction_Low - Acquisition_Low
+plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```

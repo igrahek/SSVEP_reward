@@ -40,7 +40,7 @@ set.seed(42)
 # Set working directory
 #setwd(here())
 # import data
-data.raw = read.csv2(file = here("data","amplitudes_rewardBoth_wholeSample_MastRef_NoMovement.csv"),header=TRUE,na.strings="NaN") 
+data.raw = read.csv2(file = here("data","singleTrial_amplitudes_movement_and_nomovement.csv"),header=TRUE,na.strings="NaN") 
 
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
