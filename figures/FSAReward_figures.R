@@ -60,7 +60,7 @@ topo_10Hz <-
   ) +
   ggtitle("10 Hz") +
   guides(fill = guide_colorbar(
-    title = "amplitude (a.u.)",
+    title = expression(paste("amplitude (", mu, "V)")),
     title.position = "right",
     barwidth = rel(1),
     barheight = rel(6),
@@ -89,7 +89,7 @@ topo_12Hz <-
   ) +
   ggtitle("12 Hz") +
   guides(fill = guide_colorbar(
-    title = "amplitude (a.u.)",
+    title = expression(paste("amplitude (", mu, "V)")),
     title.position = "right",
     barwidth = rel(1),
     barheight = rel(6),
@@ -166,8 +166,8 @@ spectra_all <-
   coord_cartesian(xlim = c(0, 16), ylim = c(0, 1.5)) +
   labs(
     x = "frequency (Hz)",
-    y = "amplitude (a.u.)"
-  ) +
+    y = expression(paste("amplitude (", mu, "V)"))
+    ) +
   theme_classic(base_size = 18) +
   theme(
     legend.position = c(.2, .7),
@@ -297,7 +297,7 @@ obs_amps <-
   scale_fill_manual(values = c("blue", "red")) +
   scale_x_discrete(limits = c("baseline", "rewarded", "non-rewarded")) +
   scale_y_continuous(
-    name = "amplitude (a.u.)",
+    name = expression(paste("amplitude (", mu, "V)")),
     limits = c(0, 5),
     breaks = seq(0, 5, 1)
   ) +
@@ -308,7 +308,7 @@ obs_amps <-
     size = .8,
     alpha = .5
   ) +
-  facet_wrap(~frequency, scales = "free") +
+  facet_wrap(~ frequency, scales = "free") +
   ggtitle("observed amplitude") +
   theme_minimal(base_size = 18) +
   theme(
