@@ -62,13 +62,16 @@ data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPh
 data.final = subset(data.raw, data.raw$Response!=3 & data.raw$Response!=0)
 
 data.final$Response = ifelse(data.final$Response==1,"Hit","FA")
+data.final$Response = ifelse(data.final$Response=="Hit",1,0)
 data.final$Response = as.factor(data.final$Response)
+
 
 # For the correct vs. incorrect analysis
 data.final.corr = subset(data.raw, data.raw$Response!=3)
 data.final.corr = subset(data.final.corr,MovedDots==AttendedColor)
 
 data.final.corr$Response = ifelse(data.final.corr$Response==1,"Correct","Incorrect")
+data.final.corr$Response = ifelse(data.final.corr$Response=="Correct",1,0)
 data.final.corr$Response = as.factor(data.final.corr$Response)
 
 # Then we turn the responses coded as hits (1) and false alarms ()
@@ -482,7 +485,7 @@ data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
 #                  prior = prior,
 #                  iter = 6000,
 #                  save_all_pars = TRUE,
-#                  control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                  control = list(adapt_delta = 0.99),
 #                  cores = 4,
 #                  sample_prior = TRUE,
 #                  inits = 0)
@@ -502,7 +505,7 @@ prior = c(
 #                         prior = prior,
 #                         iter = 6000,
 #                         save_all_pars = TRUE,
-#                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                         control = list(adapt_delta = 0.99),
 #                         cores = 4,
 #                         sample_prior = TRUE,
 #                         inits = 0)
@@ -515,7 +518,7 @@ model.full.RT = brm(RT ~ ExpPhase * Condition + (ExpPhase * Condition|Participan
                     prior = prior,
                     iter = 6000,
                     save_all_pars = TRUE,
-                    control = list(adapt_delta = 0.99,max_treedepth = 15),
+                    control = list(adapt_delta = 0.99),
                     cores = 4,
                     sample_prior = TRUE,
                     inits = 0)
@@ -528,7 +531,7 @@ saveRDS(model.full.RT,file="model.full.RT.rds")
 #                     prior = prior,
 #                     iter = 6000,
 #                     save_all_pars = TRUE,
-#                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                     control = list(adapt_delta = 0.99),
 #                     cores = 4,
 #                     sample_prior = TRUE)
 # saveRDS(model.full.RT.depression,file="model.full.RT.depression.rds")
@@ -540,7 +543,7 @@ saveRDS(model.full.RT,file="model.full.RT.rds")
 #                     prior = prior,
 #                     iter = 6000,
 #                     save_all_pars = TRUE,
-#                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                     control = list(adapt_delta = 0.99),
 #                     cores = 4,
 #                     sample_prior = TRUE)
 # saveRDS(model.full.RT.BAS,file="model.full.RT.BAS.rds")
@@ -552,7 +555,7 @@ saveRDS(model.full.RT,file="model.full.RT.rds")
 #                     prior = prior,
 #                     iter = 6000,
 #                     save_all_pars = TRUE,
-#                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                     control = list(adapt_delta = 0.99),
 #                     cores = 4,
 #                     sample_prior = TRUE)
 # saveRDS(model.full.RT.REWARD,file="model.full.RT.REWARD.rds")
@@ -702,7 +705,7 @@ model.null.Acc = brm(Response ~ 1 + (1|ParticipantNo),
                  prior = prior,
                  iter = 6000,
                  save_all_pars = TRUE,
-                 control = list(adapt_delta = 0.99,max_treedepth = 15),
+                 control = list(adapt_delta = 0.99),
                  cores = 4,
                  sample_prior = TRUE,
                  inits = 0)
@@ -720,7 +723,7 @@ model.expphase.Acc = brm(Response ~ ExpPhase + (ExpPhase|ParticipantNo),
                      prior = prior,
                      iter = 6000,
                      save_all_pars = TRUE,
-                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+                     control = list(adapt_delta = 0.99),
                      cores = 4,
                      sample_prior = TRUE,
                      inits = 0)
@@ -733,11 +736,12 @@ model.full.Acc = brm(Response ~ ExpPhase * Condition + (ExpPhase * Condition|Par
                  prior = prior,
                  iter = 6000,
                  save_all_pars = TRUE,
-                 control = list(adapt_delta = 0.99,max_treedepth = 15),
+                 control = list(adapt_delta = 0.99),
                  cores = 4,
                  sample_prior = TRUE,
                  inits = 0)
 saveRDS(model.full.Acc,file="model.full.Acc.rds")
+
 # 
 # #Depression model
 # model.full.Acc.depression = brm(Hit.Rate ~ ExpPhase * Condition * BDI + (ExpPhase * Condition * BDI|ParticipantNo),
@@ -843,7 +847,7 @@ model.null.Cor = brm(Response ~ 1 + (1|ParticipantNo),
                      prior = prior,
                      iter = 6000,
                      save_all_pars = TRUE,
-                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+                     control = list(adapt_delta = 0.99),
                      cores = 4,
                      sample_prior = TRUE,
                      inits = 0)
@@ -861,7 +865,7 @@ model.expphase.Cor = brm(Response ~ ExpPhase + (ExpPhase|ParticipantNo),
                          prior = prior,
                          iter = 6000,
                          save_all_pars = TRUE,
-                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+                         control = list(adapt_delta = 0.99),
                          cores = 4,
                          sample_prior = TRUE,
                          inits = 0)
@@ -874,7 +878,7 @@ model.full.Cor = brm(Response ~ ExpPhase * Condition + (ExpPhase * Condition|Par
                      prior = prior,
                      iter = 6000,
                      save_all_pars = TRUE,
-                     control = list(adapt_delta = 0.99,max_treedepth = 15),
+                     control = list(adapt_delta = 0.99),
                      cores = 4,
                      sample_prior = TRUE,
                      inits = 0)
@@ -882,9 +886,9 @@ saveRDS(model.full.Cor,file="model.full.Cor.rds")
 
 
 # data.x = data.final.corr
-# data.x$Response = ifelse(data.x$Response=="Correct",1,0)
+# data.x$Response = ifelse(data.x$Response==1,0,1)
 # data.x$Response = as.numeric(data.x$Response)
-# 
+# # 
 # library(lme4)
 # x = glmer(Response~ExpPhase*Condition + (1|ParticipantNo),data=data.x, family = "binomial")
 # summary(x)
@@ -1222,7 +1226,7 @@ saveRDS(bR2.full.Cor,file="bR2.full.Cor")
 #                         prior = prior,
 #                         iter = 6000,
 #                         save_all_pars = TRUE,
-#                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                         control = list(adapt_delta = 0.99),
 #                         cores = 4,
 #                         sample_prior = TRUE,
 #                         inits = 0)
@@ -1240,7 +1244,7 @@ saveRDS(bR2.full.Cor,file="bR2.full.Cor")
 #                             prior = prior,
 #                             iter = 6000,
 #                             save_all_pars = TRUE,
-#                             control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                             control = list(adapt_delta = 0.99),
 #                             cores = 4,
 #                             sample_prior = TRUE,
 #                             inits = 0)
@@ -1253,7 +1257,7 @@ saveRDS(bR2.full.Cor,file="bR2.full.Cor")
 #                         prior = prior,
 #                         iter = 6000,
 #                         save_all_pars = TRUE,
-#                         control = list(adapt_delta = 0.99,max_treedepth = 15),
+#                         control = list(adapt_delta = 0.99),
 #                         cores = 4,
 #                         sample_prior = TRUE,
 #                         inits = 0)
