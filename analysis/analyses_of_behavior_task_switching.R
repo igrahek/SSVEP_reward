@@ -46,11 +46,30 @@ data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("Bsln","
 data.raw = subset(data.raw,MovedDots==AttendedColor)
 
 # Create a switch - repeat variable
-data.final = ddply(data.raw,.(ParticipantNo),transform,
-                   Switch = append(data.raw$AttendedColor,NA,after=0)[-(length(data.raw$AttendedColor)+1)])
+# data.final.x = ddply(data.raw,.(ParticipantNo),transform,
+#                    Switch = append(data.raw$AttendedColor,NA,after=0)[-(length(data.raw$AttendedColor)+1)])
+# 
+# 
+# data.final$Switch = ifelse(data.final$AttendedColor==data.final$Switch,"Repeat","Switch")
+
+# for each subject
+# for (s in 1:length(unique(data.raw$ParticipantNo))){
+#   # for each trial
+#   for (t in 1:length(unique(data.raw$Trial))){
+#     # if this is the first trial use the inital estimate
+#     if(t==1) {
+#       data.raw$Switch=NA
+#     } else {
+#       data.raw$Switch[data.raw$ParticipantNo==unique(data.raw$ParticipantNo)[s] & data.raw$Trial==t]=ifelse(data.raw$AttendedColor[data.raw$ParticipantNo==unique(data.raw$ParticipantNo)[s] & data.raw$Trial==t]==data.raw$AttendedColor[data.raw$ParticipantNo==unique(data.raw$ParticipantNo)[s] & data.raw$Trial==t-1],"Repeat","Switch")
+#     }
+#   }
+# }
+
+# here there has to be anoter if saying that if t-(t-1)=1 then asign a switch/repeat, otherwise asign NA
 
 
-data.final$Switch = ifelse(data.final$AttendedColor==data.final$Switch,"Repeat","Switch")
+
+
 
 
 ### Convert variables to be used in analyses into factors
