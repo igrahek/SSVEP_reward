@@ -45,6 +45,23 @@ data.raw = read.csv(file = here("EEG_preprocessing/movement","grandAverage_ampli
 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+# # Average the movement and no movement trials
+# data.raw = ddply(data.raw,.(Subject,Frequency),transform,
+#              BslnRedAttended = (BslnRedAttended + BslnRedAttendedMovement)/2,
+#              BslnBlueAttended = (BslnBlueAttended + BslnBlueAttendedMovement)/2,
+#              AcqRedAttended = (AcqRedAttended + AcqRedAttendedMovement)/2,
+#              AcqBlueAttended = (AcqBlueAttended + AcqBlueAttendedMovement)/2,
+#              ExtRedAttended = (ExtRedAttended + ExtRedAttendedMovement)/2,
+#              ExtBlueAttended = (ExtBlueAttended + ExtBlueAttendedMovement)/2)
+
+
+
+# Select only movement or no movement trials
+
+# Only no movement
+# 
+# data.raw = select(data.raw,"Subject","Frequency","BslnRedAttended","BslnBlueAttended","AcqRedAttended","AcqBlueAttended","ExtRedAttended","ExtBlueAttended")
+
 # Rename columns
 colnames(data.raw) = c("Subject","Frequency","BslnRedAttendedNomov","BslnBlueAttendedNomov","AcqRedAttendedNomov","AcqBlueAttendedNomov","ExtRedAttendedNomov","ExtBlueAttendedNomov","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov")
 
@@ -52,6 +69,11 @@ colnames(data.raw) = c("Subject","Frequency","BslnRedAttendedNomov","BslnBlueAtt
 data = melt(data.raw,id.vars=c("Subject","Frequency"),
             measure.vars=c("BslnRedAttendedNomov","BslnBlueAttendedNomov","AcqRedAttendedNomov","AcqBlueAttendedNomov","ExtRedAttendedNomov","ExtBlueAttendedNomov","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov"),
             variable.name="Condition",value.name="Amplitude")
+
+# Reshape to long format - take only movement trials
+# data = melt(data.raw,id.vars=c("Subject","Frequency"),
+#             measure.vars=c("BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov"),
+#             variable.name="Condition",value.name="Amplitude")
 
 # Sort the new dataframe by participant name
 data = data[order(data$Subject),]
@@ -86,7 +108,7 @@ data$RecordingAndCondition = with(data, paste0(Condition,"_",Attention))
 data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor","Condition","RecordedFrequency","Attention","RecordingAndCondition","Movement","Amplitude"))
 
 # Take only the movement trials
-data = subset(data, Movement=="Mov")
+data = subset(data, Movement=="Nomov")
 
 
 # Sort the data 
@@ -137,6 +159,7 @@ data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "Recordi
 
 data.diff[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] = 
   lapply(data.diff[c("Subject", "Condition","ExpPhase",  "RecordingAndCondition")], factor)
+
 
 ```
 ## Means - raw data
@@ -583,6 +606,7 @@ for (i in 1:length(plottingConditions)){
              bty="l", # plot box type
              back.col="white") # background, color
 }
+
 
 plottingConditions = c("High","Low" )
 for (i in 1:length(plottingConditions)){

@@ -27,6 +27,22 @@ setwd(here())
 data.raw = read.csv(file = here("EEG_preprocessing/movement","grandAverage_amplitudes.csv"),header=TRUE,na.strings="NaN") 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+# Average the movement and no movement trials
+# data.raw = ddply(data.raw,.(Subject,Frequency),transform,
+#                  BslnRedAttended = (BslnRedAttended + BslnRedAttendedMov)/2,
+#                  BslnBlueAttended = (BslnBlueAttended + BslnBlueAttendedMov)/2,
+#                  AcqRedAttended = (AcqRedAttended + AcqRedAttendedMov)/2,
+#                  AcqBlueAttended = (AcqBlueAttended + AcqBlueAttendedMov)/2,
+#                  ExtRedAttended = (ExtRedAttended + ExtRedAttendedMov)/2,
+#                  ExtBlueAttended = (ExtBlueAttended + ExtBlueAttendedMov)/2)
+
+# Select only no movement trials
+# data.raw = dplyr::select(data.raw,"Subject","Frequency","BslnRedAttended","BslnBlueAttended","AcqRedAttended","AcqBlueAttended","ExtRedAttended","ExtBlueAttended")
+
+# # Select only  movement trials
+# data.raw = dplyr::select(data.raw,"Subject","Frequency","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov")
+
 # Rename columns
 colnames(data.raw) = c("Subject","Frequency","BslnRedAttendedNomov","BslnBlueAttendedNomov","AcqRedAttendedNomov","AcqBlueAttendedNomov","ExtRedAttendedNomov","ExtBlueAttendedNomov","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov")
 
@@ -34,6 +50,11 @@ colnames(data.raw) = c("Subject","Frequency","BslnRedAttendedNomov","BslnBlueAtt
 data = melt(data.raw,id.vars=c("Subject","Frequency"),
             measure.vars=c("BslnRedAttendedNomov","BslnBlueAttendedNomov","AcqRedAttendedNomov","AcqBlueAttendedNomov","ExtRedAttendedNomov","ExtBlueAttendedNomov","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov"),
             variable.name="Condition",value.name="Amplitude")
+
+# Reshape to long format - take only movement trials
+# data = melt(data.raw,id.vars=c("Subject","Frequency"),
+#             measure.vars=c("BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov"),
+#             variable.name="Condition",value.name="Amplitude")
 
 # Sort the new dataframe by participant name
 data = data[order(data$Subject),]
@@ -66,10 +87,6 @@ data$RecordingAndCondition = with(data, paste0(Condition,"_",Attention))
 
 # Select variables which we want to keep
 data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor","Condition","RecordedFrequency","Attention","RecordingAndCondition","Movement","Amplitude"))
-
-# Take only the movement trials
-data = subset(data, Movement=="Mov")
-
 
 # Sort the data 
 data = data[with(data, order(Subject)), ]
@@ -123,7 +140,6 @@ data.diff[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] =
 # # Exclude subjects with poor behavior
 # poor_behavior = c(15,17,31,34)
 # data = data[!data$Subject %in% poor_behavior,]
-
 
 # Plotting ###############################################################################################################################################################################################################
 
@@ -328,6 +344,10 @@ data$ExpPhase=relevel(data$ExpPhase,ref="Bsln")
 data$Condition=relevel(data$Condition,ref="High_Rew")
 data$Attention=relevel(data$Attention,ref="Att")
 
+# Contrast coding
+# data$Condition = ifelse(data$Condition == "High_Rew", 0.5, -0.5)
+# data$Attention = ifelse(data$Attention == "Att", 0.5, -0.5)
+
 # Prior for the intercept only model
 prior = c(
   prior(normal(1, 2), class = Intercept), #based on Anderson & Mueller, 2010 and on logic - max attention effect (removal of the unattended stimulus) == 2
@@ -337,15 +357,15 @@ prior = c(
 
 # Null model
 null = brm(Amplitude ~ 1 + (1|Subject),
-           data=data,
-           family=gaussian(),
-           prior = prior,
-           warmup = 2000,
-           iter = 10000,
-           save_all_pars = TRUE,
-           control = list(adapt_delta = 0.99),
-           cores = 4,
-           sample_prior = TRUE)
+                              data=data,
+                              family=gaussian(),
+                              prior = prior,
+                              warmup = 2000,
+                              iter = 10000,
+                              save_all_pars = TRUE,
+                              control = list(adapt_delta = 0.99),
+                              cores = 4,
+                              sample_prior = TRUE)
 saveRDS(null,file="null.EEG.allsub.rds")
 
 # Priors for the models with slopes
@@ -358,32 +378,45 @@ prior = c(
 
 # Exp phase model
 expphase = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
-               data=data,
-               family=gaussian(),
-               prior = prior,
-               warmup = 2000,
-               iter = 10000,
-               save_all_pars = TRUE,
-               control = list(adapt_delta = 0.99),
-               cores = 4,
-               sample_prior = TRUE)
+                                  data=data,
+                                  family=gaussian(),
+                                  prior = prior,
+                                  warmup = 2000,
+                                  iter = 10000,
+                                  save_all_pars = TRUE,
+                                  control = list(adapt_delta = 0.99),
+                                  cores = 4,
+                                  sample_prior = TRUE)
 saveRDS(expphase,file="expphase.EEG.allsubs.rds")
 
 # Attention model
 attention = brm(Amplitude ~ Attention + (Attention|Subject),
-                data=data,
-                family=gaussian(),
-                prior = prior,  
-                warmup = 2000,
-                iter = 10000,
-                save_all_pars = TRUE,
-                control = list(adapt_delta = 0.99),
-                cores = 4,
-                sample_prior = TRUE)
+                                   data=data,
+                                   family=gaussian(),
+                                   prior = prior,  
+                                   warmup = 2000,
+                                   iter = 10000,
+                                   save_all_pars = TRUE,
+                                   control = list(adapt_delta = 0.99),
+                                   cores = 4,
+                                   sample_prior = TRUE)
 saveRDS(attention,file="attention.EEG.allsubs.rds")
 
 # Two main effects - phase and attention
 phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention|Subject),
+                                        data=data,
+                                        family=gaussian(),
+                                        prior = prior,
+                                        warmup = 2000,
+                                        iter = 10000,
+                                        save_all_pars = TRUE,
+                                        control = list(adapt_delta = 0.99),
+                                        cores = 4,
+                                        sample_prior = TRUE)
+saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.rds")
+
+# Interaction between phase and attention
+phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + (ExpPhase + Attention|Subject),
                         data=data,
                         family=gaussian(),
                         prior = prior,
@@ -393,23 +426,23 @@ phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention
                         control = list(adapt_delta = 0.99),
                         cores = 4,
                         sample_prior = TRUE)
-saveRDS(phaseANDattention,file="phaseANDattention.EEG.allsubs.rds")
-
-# Interaction between phase and attention
-phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + (ExpPhase + Attention|Subject),
-                                    data=data,
-                                    family=gaussian(),
-                                    prior = prior,
-                                    warmup = 2000,
-                                    iter = 10000,
-                                    save_all_pars = TRUE,
-                                    control = list(adapt_delta = 0.99),
-                                    cores = 4,
-                                    sample_prior = TRUE)
 saveRDS(phaseANDattention_interaction,file="phaseANDattention_interaction.EEG.allsubs.rds")
 
 # Interaction between expphase and reward magnitude plus attention
 rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (ExpPhase + Attention + Condition|Subject),
+                         data=data,
+                         family=gaussian(),
+                         prior = prior,
+                         warmup = 2000,
+                         iter = 10000,
+                         save_all_pars = TRUE,
+                         control = list(adapt_delta = 0.99),
+                         cores = 4,
+                         sample_prior = TRUE)
+saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.rds")
+
+# Full model
+full = brm(Amplitude ~ Condition * ExpPhase * Attention + (ExpPhase + Attention + Condition|Subject),
                               data=data,
                               family=gaussian(),
                               prior = prior,
@@ -419,21 +452,7 @@ rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Ex
                               control = list(adapt_delta = 0.99),
                               cores = 4,
                               sample_prior = TRUE)
-saveRDS(rewardTimesPhasePlusAtt,file="rewardTimesPhasePlusAtt.EEG.allsubs.rds")
-
-# Full model
-full = brm(Amplitude ~ Condition * ExpPhase * Attention + (ExpPhase + Attention + Condition|Subject),
-           data=data,
-           family=gaussian(),
-           prior = prior,
-           warmup = 2000,
-           iter = 10000,
-           save_all_pars = TRUE,
-           control = list(adapt_delta = 0.99),
-           cores = 4,
-           sample_prior = TRUE)
 saveRDS(full,file="full.EEG.allsubs.rds")
-
 
 
 

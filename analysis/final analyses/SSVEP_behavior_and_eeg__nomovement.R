@@ -27,6 +27,22 @@ setwd(here())
 data.raw = read.csv(file = here("EEG_preprocessing/movement","grandAverage_amplitudes.csv"),header=TRUE,na.strings="NaN") 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+# Average the movement and no movement trials
+# data.raw = ddply(data.raw,.(Subject,Frequency),transform,
+#                  BslnRedAttended = (BslnRedAttended + BslnRedAttendedMov)/2,
+#                  BslnBlueAttended = (BslnBlueAttended + BslnBlueAttendedMov)/2,
+#                  AcqRedAttended = (AcqRedAttended + AcqRedAttendedMov)/2,
+#                  AcqBlueAttended = (AcqBlueAttended + AcqBlueAttendedMov)/2,
+#                  ExtRedAttended = (ExtRedAttended + ExtRedAttendedMov)/2,
+#                  ExtBlueAttended = (ExtBlueAttended + ExtBlueAttendedMov)/2)
+
+# Select only no movement trials
+# data.raw = dplyr::select(data.raw,"Subject","Frequency","BslnRedAttended","BslnBlueAttended","AcqRedAttended","AcqBlueAttended","ExtRedAttended","ExtBlueAttended")
+
+# # Select only  movement trials
+# data.raw = dplyr::select(data.raw,"Subject","Frequency","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov")
+
 # Rename columns
 colnames(data.raw) = c("Subject","Frequency","BslnRedAttendedNomov","BslnBlueAttendedNomov","AcqRedAttendedNomov","AcqBlueAttendedNomov","ExtRedAttendedNomov","ExtBlueAttendedNomov","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov")
 
@@ -34,6 +50,11 @@ colnames(data.raw) = c("Subject","Frequency","BslnRedAttendedNomov","BslnBlueAtt
 data = melt(data.raw,id.vars=c("Subject","Frequency"),
             measure.vars=c("BslnRedAttendedNomov","BslnBlueAttendedNomov","AcqRedAttendedNomov","AcqBlueAttendedNomov","ExtRedAttendedNomov","ExtBlueAttendedNomov","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov"),
             variable.name="Condition",value.name="Amplitude")
+
+# Reshape to long format - take only movement trials
+# data = melt(data.raw,id.vars=c("Subject","Frequency"),
+#             measure.vars=c("BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov"),
+#             variable.name="Condition",value.name="Amplitude")
 
 # Sort the new dataframe by participant name
 data = data[order(data$Subject),]
@@ -68,8 +89,7 @@ data$RecordingAndCondition = with(data, paste0(Condition,"_",Attention))
 data = subset(data, select=c("Subject","RewardedColor","ExpPhase","AttendedColor","Condition","RecordedFrequency","Attention","RecordingAndCondition","Movement","Amplitude"))
 
 # Take only the movement trials
-data = subset(data, Movement=="Mov")
-
+data = subset(data, Movement=="Nomov")
 
 # Sort the data 
 data = data[with(data, order(Subject)), ]
@@ -124,15 +144,14 @@ data.diff[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] =
 # poor_behavior = c(15,17,31,34)
 # data = data[!data$Subject %in% poor_behavior,]
 
-
 # Plotting ###############################################################################################################################################################################################################
 
 # prepare data for plotting
 dataPlot = data
 
 # rename variables
-colnames(dataPlot)[colnames(dataPlot)=="ExpPhase"] = "Reward phase"
-colnames(dataPlot)[colnames(dataPlot)=="Condition"] = "Reward probability"
+colnames(dataPlot)[colnames(dataPlot)=="ExpPhase"] <- "Reward phase"
+colnames(dataPlot)[colnames(dataPlot)=="Condition"] <- "Reward probability"
 
 # rename conditions
 dataPlot$`Reward phase` = recode(dataPlot$`Reward phase`,
@@ -433,7 +452,6 @@ full = brm(Amplitude ~ Condition * ExpPhase * Attention + (ExpPhase + Attention 
            cores = 4,
            sample_prior = TRUE)
 saveRDS(full,file="full.EEG.allsubs.rds")
-
 
 
 
