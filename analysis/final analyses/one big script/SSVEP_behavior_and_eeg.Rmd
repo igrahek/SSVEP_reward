@@ -1778,9 +1778,9 @@ data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor
 # make this variable a factor for further analyses
 data.final$Condition = factor(data.final$Condition)
 
-# # Exclude subjects with poor behavior
-# poor_behavior = c(15,17,31,34)
-# data.final = data.final[!data.final$ParticipantNo %in% poor_behavior,]
+# Exclude subjects without EEG
+missing_eeg = c(5,10,13,27)
+data.final = data.final[!data.final$ParticipantNo %in% missing_eeg,]
 
 ```
 ## D prime
@@ -1834,6 +1834,7 @@ data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
              theme=0, # preset theme (0: use your own)
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
+             avg.line.fun = median,
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
@@ -2115,6 +2116,7 @@ data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
              theme=0, # preset theme (0: use your own)
              point.col="black", # points: color
              point.o=.3, # points: opacity (0-1)
+             avg.line.fun = median,
              avg.line.col="black", # average line: color
              avg.line.lwd=2, # average line: line width
              avg.line.o=1, # average line: opacity (0-1)
@@ -2262,6 +2264,223 @@ pirateplot(formula = `Reaction time` ~ `Reward Phase` + `Reward Probability`, # 
              sortx = "sequential",
              bty="l", # plot box type
              back.col="white") # background, color
+
+
+# Basic posterior
+
+ggplot(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) +
+     stat_summary(fun.y = mean, geom="line")+ 
+    scale_x_discrete(limits=c("Baseline", "Acquisition", "Extinction")) +
+  facet_grid(.~`Reward Probability`)
+
+
+# Basic raw data
+
+ggplot(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`)) +
+     stat_summary(fun.y = mean, geom="line")+ 
+    scale_x_discrete(limits=c("Baseline", "Acquisition", "Extinction"))
+
+ggplot(data.plot, aes(x=`Reward phase`, y=Hits.RTs, colour=`Reward probability`)) + 
+  geom_violin() 
+
++ 
+  stat_summary(aes(x=posterior_conditions$`Reward Phase`, y=posterior_conditions$`Reaction time`, fill=posterior_conditions$`Reward Probability`),fun.y = mean, geom="line")
+
+
+
+
+#Raw data
+x=ggplot(data.plot, aes(x=`Reward phase`, y=Hits.RTs, label=`Reward probability`)) + 
+  geom_violin() +
+    facet_grid(.~`Reward probability`)
+
+
+
+y = x+ggplot(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) +
+     stat_summary(fun.y = mean, geom="line")+ 
+    scale_x_discrete(limits=c("Baseline", "Acquisition", "Extinction")) +
+  facet_grid(.~`Reward Probability`)
+
+
+
+library(HDInterval)
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline High Reward", 
+                                  "Baseline Low Reward", 
+                                  "Acquisition High Reward", 
+                                  "Acquisition Low Reward", 
+                                  "Extinction High Reward", 
+                                  "Extinction Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$low_95_CI = c(round(hdi(Baseline_High)[[1]], digits = 2),
+                        round(hdi(Baseline_Low)[[1]], digits = 2),
+                        round(hdi(Acquisition_High)[[1]], digits = 2),
+                        round(hdi(Acquisition_Low)[[1]], digits = 2),
+                        round(hdi(Extinction_High)[[1]], digits = 2),
+                        round(hdi(Extinction_Low)[[1]], digits = 2))
+
+posterior_means$high_95_CI = c(round(hdi(Baseline_High)[[2]], digits = 2),
+                        round(hdi(Baseline_Low)[[2]], digits = 2),
+                        round(hdi(Acquisition_High)[[2]], digits = 2),
+                        round(hdi(Acquisition_Low)[[2]], digits = 2),
+                        round(hdi(Extinction_High)[[2]], digits = 2),
+                        round(hdi(Extinction_Low)[[2]], digits = 2))
+
+posterior_means$low_50_CI = c(round(hdi(Baseline_High,0.5)[[1]], digits = 2),
+                        round(hdi(Baseline_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition_High,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction_High,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction_Low,0.5)[[1]], digits = 2))
+
+posterior_means$high_50_CI = c(round(hdi(Baseline_High,0.5)[[2]], digits = 2),
+                        round(hdi(Baseline_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition_High,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction_High,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction_Low,0.5)[[2]], digits = 2))
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probability`,
+                                      "High Reward" = "High",
+                                      "Low Reward" = "Low")
+
+posterior_means$`Reaction time` = c(555,555,555,555,555,555)
+
+
+
+# Combined plot
+data.plot.1 = data.plot
+data.plot.1$`Reaction time` = data.plot.1$Hits.RTs
+
+#Raw data
+x=ggplot(NULL, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) + 
+  geom_violin(data=data.plot.1, color ="grey",trim = FALSE,alpha="0.2") +
+  geom_violin(data=posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`),draw_quantiles = c(0.25, 0.5, 0.75)) +
+    stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, group=`Reward Probability`),fun.y = median, geom="line")+ 
+    scale_x_discrete(limits=c("Baseline", "Acquisition", "Extinction")) +
+  facet_grid(.~`Reward Probability`)
+
+#Raw data
+x=ggplot(NULL, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) + 
+  geom_boxplot(data=data.plot.1, color ="grey",alpha="0.2") +
+  geom_dotplot(data=data.plot.1,binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") +
+  # geom_jitter(data=data.plot.1,shape=16, position=position_jitter(0.2)) +
+  geom_violin(data=posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`),draw_quantiles = c(0.25, 0.5, 0.75)) +
+    stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, group=`Reward Probability`),fun.y = median, geom="line")+ 
+    scale_x_discrete(limits=c("Baseline", "Acquisition", "Extinction")) +
+  facet_grid(.~`Reward Probability`)
+
+
+# Boxplot + the model
+x=ggplot(data=data.plot.1, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) + 
+  # boxplot of the raw data
+  geom_boxplot(data=data.plot.1, color ="grey",alpha="0.2") +
+  # individual participants for the raw data
+  # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+  geom_jitter(dotsize=0.5, alpha="0.2",width = 0.15)+
+  # median of the model
+  stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, group=`Reward Probability`),fun.y = median, geom="line")+ 
+  # 95 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`Reaction time`-`Reaction time`+low_95_CI, ymax=`Reaction time`-`Reaction time`+high_95_CI), size = 4, color = "skyblue1", alpha = 1) +
+  # 50 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`Reaction time`-`Reaction time`+low_50_CI, ymax=`Reaction time`-`Reaction time`+high_50_CI), size = 4, color = "dodgerblue3", alpha = 1) +
+  scale_x_discrete(limits=c("Baseline", "Acquisition", "Extinction")) +
+  facet_grid(.~`Reward Probability`)
+
+# Violin + the model
+tiff("test1.tiff", units="in", width=8, height=5, res=800)
+
+ggplot(data=data.plot.1, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) + 
+  # violin of the raw data
+  geom_violin(data=data.plot.1, color ="#636363",trim = TRUE,alpha="0.2") +
+  # individual participants for the raw data
+  # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+  geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+  # mean of the model
+  stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+  # 95 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`Reaction time`-`Reaction time`+low_95_CI, ymax=`Reaction time`-`Reaction time`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+  # 50 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`Reaction time`-`Reaction time`+low_50_CI, ymax=`Reaction time`-`Reaction time`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+  scale_x_discrete(limits=c("Baseline", "Acquisition", "Extinction")) +
+  facet_grid(.~`Reward Probability`) + 
+  scale_y_continuous(breaks=seq(400,750,50)) +
+  
+   theme(
+    axis.line = element_line(size=1, colour = "black"),
+        panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+        panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+        panel.border = element_blank(), 
+        panel.background = element_blank(),
+        plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+        text=element_text(colour="black", size = 11),
+        axis.text.x=element_text(colour="black", size = 11),
+        axis.text.y=element_text(colour="black", size = 11),
+        axis.title=element_text(size=12,colour = "black")) + 
+  theme(strip.background =element_rect(fill="white")) + 
+  theme(strip.text = element_text(size = 12))
+  
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+# Raw data
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] = "Reward Phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] = "Reward Probability"
+
+# rename conditions
+data.plot$`Reward Phase` = recode(data.plot$`Reward Phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward Probability` = recode(data.plot$`Reward Probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+
+# Pirate plot
+   pirateplot(formula = Hits.RTs ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
+             main="Reaction times", # main title
+             ylim=c(400,700), # y-axis: limits
+             ylab="Reaction time", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             point.col="black", # points: color
+             point.o=.2, # points: opacity (0-1)
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.2, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             bty="l", # plot box type
+             back.col="white") # background, color
+
+
 ```
 
 
