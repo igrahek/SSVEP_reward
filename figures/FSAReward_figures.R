@@ -114,17 +114,17 @@ spectra <- read_csv(paste0(getwd(), "/grandAverage_spectra.csv")) %>% # load dat
   mutate(
     participant = as.factor(participant),
     frequency = as.numeric(levels(as.factor(frequency)))[as.factor(frequency)],
-    phase = recode(
+    Phase = recode(
       factor(condition),
-      "1" = "baseline", "2" = "baseline", "3" = "training", "4" = "training", "5" = "test", "6" = "test"
+      "1" = "Baseline", "2" = "Baseline", "3" = "Training", "4" = "Training", "5" = "Test", "6" = "Test"
     ),
     attended = recode(
       factor(condition),
       "1" = "red", "2" = "blue", "3" = "red", "4" = "blue", "5" = "red", "6" = "blue"
     ),
-    condition = as.factor(paste(phase, attended, sep = " "))
+    condition = as.factor(paste(Phase, attended, sep = " "))
   ) %>%
-  dplyr::select(participant, frequency, condition, phase, attended, amplitude)
+  dplyr::select(participant, frequency, condition, Phase, attended, amplitude)
 
 # extract within-subject 95% CIs
 spectra_withinssjCI <- spectra %>%
@@ -133,11 +133,11 @@ spectra_withinssjCI <- spectra %>%
   map_df(~ summarySEwithin(
     data = .,
     measurevar = "amplitude",
-    withinvars = c("phase", "attended", "condition"),
+    withinvars = c("Phase", "attended", "condition"),
     idvar = "participant"
   )) %>%
   mutate(frequency = as.numeric(rep(unique(spectra$frequency), each = length(unique(spectra$condition))))) %>%
-  dplyr::select(frequency, condition, phase, attended, N, amplitude, ci)
+  dplyr::select(frequency, condition, Phase, attended, N, amplitude, ci)
 
 # plot (frequency range: 0-16 Hz)
 spectra_all <-
@@ -147,13 +147,13 @@ spectra_all <-
       x = frequency,
       y = amplitude,
       color = condition,
-      linetype = phase
+      linetype = Phase
     )
   ) +
   geom_line(size = 1.3) +
   geom_ribbon( # ribbons: 95% CI
     data = spectra_withinssjCI,
-    aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = attended, linetype = phase),
+    aes(ymin = amplitude - ci, ymax = amplitude + ci, fill = attended, linetype = Phase),
     alpha = .2
   ) +
   scale_color_manual(values = rep(c("blue", "red"), 3)) +
@@ -260,11 +260,11 @@ amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load dat
     frequency = recode(factor(Frequency),
       "10" = "10 Hz", "12" = "12 Hz"
     ),
-    phase = recode(
+    Phase = recode(
       factor(cond),
-      "BslnRedAttended" = "baseline", "BslnBlueAttended" = "baseline",
-      "AcqRedAttended" = "training", "AcqBlueAttended" = "training",
-      "ExtRedAttended" = "test", "ExtBlueAttended" = "test"
+      "BslnRedAttended" = "Baseline", "BslnBlueAttended" = "Baseline",
+      "AcqRedAttended" = "Training", "AcqBlueAttended" = "Training",
+      "ExtRedAttended" = "Test", "ExtBlueAttended" = "Test"
     ),
     attended = recode(
       factor(cond),
@@ -272,16 +272,16 @@ amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load dat
       "AcqRedAttended" = "red", "AcqBlueAttended" = "blue",
       "ExtRedAttended" = "red", "ExtBlueAttended" = "blue"
     ),
-    condition = as.factor(paste(phase, attended, sep = " "))
+    condition = as.factor(paste(Phase, attended, sep = " "))
   ) %>%
-  dplyr::select(participant, frequency, condition, phase, attended, amplitude)
+  dplyr::select(participant, frequency, condition, Phase, attended, amplitude)
 
 # RDI plot
 obs_amps <-
   ggplot(
     amps,
     aes(
-      x = phase,
+      x = Phase,
       y = amplitude,
       color = attended,
       fill = attended
@@ -295,7 +295,7 @@ obs_amps <-
   ) +
   scale_color_manual(values = c("blue", "red")) +
   scale_fill_manual(values = c("blue", "red")) +
-  scale_x_discrete(limits = c("baseline", "training", "test")) +
+  scale_x_discrete(limits = c("Baseline", "Training", "Test")) +
   scale_y_continuous(
     name = expression(paste("amplitude (", mu, "V)")),
     limits = c(0, 5),
