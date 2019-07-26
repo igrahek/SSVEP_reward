@@ -116,7 +116,7 @@ spectra <- read_csv(paste0(getwd(), "/grandAverage_spectra.csv")) %>% # load dat
     frequency = as.numeric(levels(as.factor(frequency)))[as.factor(frequency)],
     phase = recode(
       factor(condition),
-      "1" = "baseline", "2" = "baseline", "3" = "rewarded", "4" = "rewarded", "5" = "non-rewarded", "6" = "non-rewarded"
+      "1" = "baseline", "2" = "baseline", "3" = "training", "4" = "training", "5" = "test", "6" = "test"
     ),
     attended = recode(
       factor(condition),
@@ -263,8 +263,8 @@ amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load dat
     phase = recode(
       factor(cond),
       "BslnRedAttended" = "baseline", "BslnBlueAttended" = "baseline",
-      "AcqRedAttended" = "rewarded", "AcqBlueAttended" = "rewarded",
-      "ExtRedAttended" = "non-rewarded", "ExtBlueAttended" = "non-rewarded"
+      "AcqRedAttended" = "training", "AcqBlueAttended" = "training",
+      "ExtRedAttended" = "test", "ExtBlueAttended" = "test"
     ),
     attended = recode(
       factor(cond),
@@ -295,7 +295,7 @@ obs_amps <-
   ) +
   scale_color_manual(values = c("blue", "red")) +
   scale_fill_manual(values = c("blue", "red")) +
-  scale_x_discrete(limits = c("baseline", "rewarded", "non-rewarded")) +
+  scale_x_discrete(limits = c("baseline", "training", "test")) +
   scale_y_continuous(
     name = expression(paste("amplitude (", mu, "V)")),
     limits = c(0, 5),
