@@ -6,6 +6,8 @@
 # Code written by: Ivan Grahek & Antonio Schettino (2016-2019)
 # Description: Code for the analysis of EEG data for Experiment 1 of the SSVEP - reward project. 
 
+
+
 ###### EEG ############
 
 # Importing data & first steps ###############################################################################################################################################################################################################
@@ -582,6 +584,8 @@ bR2.full.EEG = bayes_R2(full)
 saveRDS(bR2.full.EEG,file="bR2.full.EEG.nomovementtrials")
 
 
+
+
 ###### Behavior #########
 
 ################################################################## Code info ###############################################################################################################################################################################################################
@@ -689,308 +693,6 @@ data.final$Condition = factor(data.final$Condition)
 # Exclude subjects without EEG
 missing_eeg = c(5,10,13,27)
 data.final = data.final[!data.final$ParticipantNo %in% missing_eeg,]
-
-################################################################## Add Questionnaires ###############################################################################################################################################################################################################
-
-# import data
-questionnaires = read.csv2(file = here("data","Questionnaires.csv"),header=TRUE,na.strings="NaN") 
-
-#### Exclude participants with no EEG data ####
-
-missing_eeg = c(5,10,13,27)
-questionnaires = questionnaires[!questionnaires$Subject %in% missing_eeg,]
-
-#### Calculate gender ####
-gender = ddply(questionnaires,.(Subject),summarise,
-               Gender = unique(Sex))
-table(unlist(gender$Gender))
-
-
-#### Calculate age ####
-age = ddply(questionnaires,.(Subject),summarise,
-            Age = unique(Age))
-age$Age=as.numeric(age$Age)
-median(age$Age)
-
-#### Calculate BDI ####
-bdi = ddply(questionnaires,.(Subject),summarise,
-            BDI = sum(ItemdisplayBDI3.RESP,na.rm=TRUE))
-
-#### Calculate BIS BAS ####
-
-bisbas = subset(questionnaires, Procedure.Block. == "QBISBAS", select = c(Subject,ItemQ,ItemdisplayBISBAS.RESP,ItemsBISBAS))
-
-# Recode reversed items (2 and 22)
-bisbas$ItemdisplayBISBAS.RESP[bisbas$ItemsBISBAS == 2] = recode(bisbas$ItemdisplayBISBAS.RESP[bisbas$ItemsBISBAS == 2], "0=3; 1=2; 2=1; 3=0")
-bisbas$ItemdisplayBISBAS.RESP[bisbas$ItemsBISBAS == 22] = recode(bisbas$ItemdisplayBISBAS.RESP[bisbas$ItemsBISBAS == 22], "0=3; 1=2; 2=1; 3=0")
-
-# Put on the scale from 1-4 instead of 0-3
-bisbas$ItemdisplayBISBAS.RESP = bisbas$ItemdisplayBISBAS.RESP + 1
-
-bisbas = ddply(bisbas,.(Subject),summarise,
-               BIS = sum(ItemdisplayBISBAS.RESP[ItemsBISBAS == 2],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 8],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 13],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 16],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 19],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 22],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 24]),
-               
-               DRIVE = sum(ItemdisplayBISBAS.RESP[ItemsBISBAS == 3],
-                           ItemdisplayBISBAS.RESP[ItemsBISBAS == 9],
-                           ItemdisplayBISBAS.RESP[ItemsBISBAS == 12],
-                           ItemdisplayBISBAS.RESP[ItemsBISBAS == 21]),
-               
-               FUN = sum(ItemdisplayBISBAS.RESP[ItemsBISBAS == 5],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 10],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 15],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 20]),
-               
-               REWARD = sum(ItemdisplayBISBAS.RESP[ItemsBISBAS == 4],
-                            ItemdisplayBISBAS.RESP[ItemsBISBAS == 7],
-                            ItemdisplayBISBAS.RESP[ItemsBISBAS == 14],
-                            ItemdisplayBISBAS.RESP[ItemsBISBAS == 18],
-                            ItemdisplayBISBAS.RESP[ItemsBISBAS == 23]),
-               
-               BAS = sum(ItemdisplayBISBAS.RESP[ItemsBISBAS == 3],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 9],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 12],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 21],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 5],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 10],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 15],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 20],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 4],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 7],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 14],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 18],
-                         ItemdisplayBISBAS.RESP[ItemsBISBAS == 23]))
-
-questionnaires = merge(age,gender)
-questionnaires = merge(questionnaires,bdi)
-questionnaires = merge(questionnaires,bisbas)
-
-# Add information that we know about the missing participant's data
-newrow = rep(NA, ncol(questionnaires))
-questionnaires = rbind(questionnaires,newrow )
-questionnaires$Gender[40] = "male"
-questionnaires$Subject[40] = 1
-
-# Impute the missing data
-questionnaires$BDI = impute(questionnaires$BDI)
-questionnaires$BAS = impute(questionnaires$BAS)
-questionnaires$REWARD = impute(questionnaires$REWARD)
-questionnaires$Age = impute(questionnaires$Age)
-questionnaires$DRIVE = impute(questionnaires$DRIVE)
-questionnaires$FUN = impute(questionnaires$FUN)
-questionnaires$BIS = impute(questionnaires$BIS)
-
-
-questionnaires$BDI[40] = median(questionnaires$BDI, na.rm = TRUE)
-questionnaires$BAS[40] = median(questionnaires$BAS, na.rm = TRUE)
-questionnaires$REWARD[40] = median(questionnaires$REWARD, na.rm = TRUE)
-
-
-
-names(questionnaires)[names(questionnaires) == "Subject"] = "ParticipantNo"
-
-# Merge with the behavioral data
-data.final=merge(data.final, questionnaires, all.x=TRUE, sort=FALSE)
-
-
-
-# Add the participant for which we only know the name
-#data.final$Gender[data.final$ParticipantNo==1] = "male"
-
-# Center the questionnaire data
-data.final$BDI = scale(data.final$BDI, scale= FALSE, center = TRUE)
-data.final$BAS = scale(data.final$BAS, scale= FALSE, center = TRUE)
-data.final$REWARD = scale(data.final$REWARD, scale= FALSE, center = TRUE)
-
-################################################################## Plotting ###############################################################################################################################################################################################################
-
-# # Plot Hit rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-# # Prepare the dataset
-# data.plot = data.final
-# 
-# # rename variables
-# colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
-# colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
-# 
-# # rename conditions
-# data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
-#                                 "Acq" = "Acquisition",
-#                                 "Bsln" = "Baseline",
-#                                 "Ext" = "Extinction")
-# 
-# data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
-#                                       "High_Rew" = "High",
-#                                       "Low_Rew" = "Low")
-# 
-# 
-# 
-# 
-#   # Pirate plot
-#   pirateplot(formula=Hit.Rate ~ `Reward phase` + `Reward probability`, # dependent~independent variables
-#              data=data.plot, # data frame
-#              main = "Hit rates",
-#              ylim=c(0.1,0.9), # y-axis: limits
-#              ylab="Hit Rate", # y-axis: label
-#              theme=0, # preset theme (0: use your own)
-#              point.col="black", # points: color
-#              point.o=.3, # points: opacity (0-1)
-#              avg.line.col="black", # average line: color
-#              avg.line.lwd=2, # average line: line width
-#              avg.line.o=1, # average line: opacity (0-1)
-#              bean.b.col="black", # bean border, color
-#              bean.lwd=0.6, # bean border, line width
-#              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-#              bean.b.o=0.3, # bean border, opacity (0-1)
-#              bean.f.col="gray", # bean filling, color
-#              bean.f.o=.1, # bean filling, opacity (0-1)
-#              cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
-#              gl.col="gray", # gridlines: color
-#              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-#              cex.lab=1, # axis labels: size
-#              cex.axis=1, # axis numbers: size
-#              cex.names = 1,
-#              bty="l", # plot box type
-#              back.col="white") # background, color
-
-
-# # Plot False alarms------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-# Prepare the dataset
-# data.plot = data.final
-# 
-# # rename variables
-# colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
-# colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
-# 
-# # rename conditions
-# data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
-#                                   "Acq" = "Acquisition",
-#                                   "Bsln" = "Baseline",
-#                                   "Ext" = "Extinction")
-# 
-# data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
-#                                         "High_Rew" = "High",
-#                                         "Low_Rew" = "Low")
-
-
-
-
-# Pirate plot
-pirateplot(formula=FA.Rate ~ `Reward phase` + `Reward probability`, # dependent~independent variables
-           data=data.plot, # data frame
-           main = "False alarm rates",
-           ylim=c(-0.1,0.7), # y-axis: limits
-           ylab="False alarms", # y-axis: label
-           theme=0, # preset theme (0: use your own)
-           point.col="black", # points: color
-           point.o=.3, # points: opacity (0-1)
-           avg.line.col="black", # average line: color
-           avg.line.lwd=2, # average line: line width
-           avg.line.o=1, # average line: opacity (0-1)
-           bean.b.col="black", # bean border, color
-           bean.lwd=0.6, # bean border, line width
-           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-           bean.b.o=0.3, # bean border, opacity (0-1)
-           bean.f.col="gray", # bean filling, color
-           bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
-           gl.col="gray", # gridlines: color
-           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-           cex.lab=1, # axis labels: size
-           cex.axis=1, # axis numbers: size
-           cex.names = 1,
-           bty="l", # plot box type
-           back.col="white") # background, color
-
-
-
-# # Plot D prime------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-# Prepare the dataset
-data.plot = data.final
-#
-# rename variables
-colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
-colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
-#
-# # rename conditions
-data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
-                                  "Acq" = "Acquisition",
-                                  "Bsln" = "Baseline",
-                                  "Ext" = "Extinction")
-#
-data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
-                                        "High_Rew" = "High",
-                                        "Low_Rew" = "Low")
-
-
-
-
-# Pirate plot
-pirateplot(formula=dprime ~ `Reward phase` + `Reward probability`, # dependent~independent variables
-           data=data.plot, # data frame
-           main = "Dprime",
-           #ylim=c(-0.5,5), # y-axis: limits
-           ylab="Dprime", # y-axis: label
-           theme=0, # preset theme (0: use your own)
-           point.col="black", # points: color
-           point.o=.3, # points: opacity (0-1)
-           avg.line.fun = median,
-           avg.line.col="black", # average line: color
-           avg.line.lwd=2, # average line: line width
-           avg.line.o=1, # average line: opacity (0-1)
-           bean.b.col="black", # bean border, color
-           bean.lwd=0.6, # bean border, line width
-           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-           bean.b.o=0.3, # bean border, opacity (0-1)
-           bean.f.col="gray", # bean filling, color
-           bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
-           gl.col="gray", # gridlines: color
-           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-           cex.lab=1, # axis labels: size
-           cex.axis=1, # axis numbers: size
-           cex.names = 1,
-           bty="l", # plot box type
-           back.col="white") # background, color
-
-
-
-#  Plot Reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-# Pirate plot
-pirateplot(formula = Hits.RTs ~ `Reward phase` + `Reward probability`, # dependent~independent variables
-           data=data.plot, # data frame
-           ylim=c(400,700), # y-axis: limits
-           ylab="Reaction time", # y-axis: label
-           main = "Reaction times",
-           theme=0, # preset theme (0: use your own)
-           point.col="black", # points: color
-           point.o=.3, # points: opacity (0-1)
-           avg.line.col="black", # average line: color
-           avg.line.lwd=2, # average line: line width
-           avg.line.o=1, # average line: opacity (0-1)
-           bean.b.col="black", # bean border, color
-           bean.lwd=0.6, # bean border, line width
-           bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-           bean.b.o=0.3, # bean border, opacity (0-1)
-           bean.f.col="gray", # bean filling, color
-           bean.f.o=.1, # bean filling, opacity (0-1)
-           cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
-           gl.col="gray", # gridlines: color
-           gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-           cex.lab=1, # axis labels: size
-           cex.axis=1, # axis numbers: size
-           cex.names = 1,
-           bty="l", # plot box type
-           back.col="white") # background, color
-
 
 ################################################################## Stats ###############################################################################################################################################################################################################
 
@@ -1387,3 +1089,275 @@ saveRDS(bR2.full.Acc.dprime,file="bR2.full.Acc.dprime")
 #            back.col="white") # background, color
 # 
 # 
+
+
+
+
+###### Behavior - splitting phases #########
+
+################################################################## Code info ###############################################################################################################################################################################################################
+
+
+# Experiment: FSAReward (Ivan Grahek*, Antonio Schettino*, Gilles Pourtois, Ernst Koster, & Søren Andersen) (*: co-first authors)
+# Code written by: Ivan Grahek & Antonio Schettino (2016-2019)
+# Description: Code for the analysis of behavioral data for Experiment 1 of the SSVEP - reward project. 
+
+################################################################## Importing data & first steps ###############################################################################################################################################################################################################
+
+
+# Clear environemnt and import data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# clear the environment
+rm(list=ls()) 
+# clear the console
+cat("\014") 
+#load packages and install them if they're not installed
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr, here,psych)
+# set seed
+set.seed(42) 
+# set directory
+setwd(here())
+# import data
+data.raw = read.csv(file = here("data","Data_behavior_exp1_48pps.csv"),header=TRUE,na.strings="NaN")
+
+# Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Adding and renaming variables 
+# rename EventType variable
+names(data.raw)[names(data.raw) == "EventType"] = "MovedDots" 
+# add a variable with the name of the attended color instead of a numbers
+data.raw$AttendedColor = ifelse(data.raw$AttendedColor==1,"red","blue")
+# add a variable saying which color was linked with High_Rew (even numbers - blue was High_Rew)
+data.raw$RewardedColor = ifelse(data.raw$ParticipantNo%%2==0,"blue","red") 
+# add a variable with the name of the moved color instead of a numbers
+data.raw$MovedDots = ifelse(data.raw$MovedDots==1,"red","blue") 
+# split experimental phases into 6 isntead of 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("Bsln1","Bsln2","Acq1","Acq2","Ext1","Ext2"))
+# split experimental phases into 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+# data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("Bsln","Acq","Ext")) # trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext
+
+### Convert variables to be used in analyses into factors
+data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )] = 
+  lapply(data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )], factor)
+
+### Create variables needed for the accuracy analyses
+# count hits, false alarms, misses, correct rejections, and RT separately for each participant (their calculation is done in Matlab: see DataProcessing.m)
+data.final = ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots),summarise,
+                   numtrials=length(which(Response!=99)), # number of trials per condition (anything that is not 99 or any other number that we're not using)
+                   Hits=length(which(Response==1)), # hits: attended color moved, correct response
+                   FAs=length(which(Response==2)), # false alarms: attended color did not move, (wrong) response
+                   Misses=length(which(Response==0)), # misses: attended color moved, no response
+                   CRs=length(which(Response==3)), # correct rejections: attended color did not move, no response
+                   mean.RT=mean(RT,na.rm=TRUE)) # mean RT per condition
+
+
+
+# Exclude subjects without EEG
+missing_eeg = c(5,10,13,27)
+data.final = data.final[!data.final$ParticipantNo %in% missing_eeg,]
+################################################################## Calculate accuracy and RTs per condition ###############################################################################################################################################################################################################
+
+# Prepare the data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Calculate Hits and False alarms
+# Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
+# False alarms are  calculated for each participant in each condition on trials when they are attending the color that didn't move (the unattended color moved, but they responded)  
+# Here we create the same number of hits & fas for each of the two conditions (moved attended or not)
+data.final = ddply(data.final, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
+                   Hits = Hits[MovedDots==AttendedColor],
+                   FAs = FAs[MovedDots!=AttendedColor])
+
+# Keep only trials on which the attended color moved (we can do behavioral analysis only on those)
+data.final = subset(data.final,MovedDots==AttendedColor)
+
+### Calculate d'
+# use loglinear transformation: add 0.5 to Hits, FAs, Misses, and CRs (Hautus, 1995, Behavior Research Methods, Instruments, & Computers),
+# which is preferred over the 1/2N rule (Macmillan & Kaplan, 1985, Psychological Bulletin) because it results in less biased estimates of d'.
+data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarise,
+                    tot.Hits=Hits+.5, # hits
+                    tot.FAs=FAs+.5, # false alarms
+                    tot.Misses=(numtrials-Hits)+.5, # misses
+                    tot.CRs=(numtrials-FAs)+.5, # correct rejections
+                    Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
+                    FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
+                    dprime_by_hand=qnorm(Hit.Rate)-qnorm(FA.Rate),
+                    Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
+
+# Calculate SDT indices with psycho
+indices = psycho::dprime(data.final$tot.Hits, data.final$tot.FAs, data.final$tot.Misses, data.final$tot.CRs) 
+
+data.final = cbind(data.final, indices) 
+
+
+### Create a final dataframe for accuracy and RTs analyses
+# add a new variable specifying whether the participant is attending the high or Low_Rewed color
+data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High_Rew","Low_Rew")
+# make this variable a factor for further analyses
+data.final$Condition = factor(data.final$Condition)
+
+
+# Exclude subjects without EEG
+missing_eeg = c(5,10,13,27)
+data.final = data.final[!data.final$ParticipantNo %in% missing_eeg,]
+
+################################################################## Stats ###############################################################################################################################################################################################################
+
+# brms reaction times------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Set the working directory where to save the models
+setwd(here("brms_models"))
+
+#help stan run faster
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+# referencing for easier interpretation
+data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln1")
+data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+
+# Set the prior for the intercept only model
+prior = c(
+  prior(normal(500, 200), class = Intercept)) # A wide prior sensible for this type of task
+
+
+# Null model
+model.null.RT = brm(Hits.RTs ~ 1 + (1|ParticipantNo),
+                    data=data.final,
+                    family=gaussian(),
+                    prior = prior,
+                    iter = 6000,
+                    save_all_pars = TRUE,
+                    control = list(adapt_delta = 0.99,max_treedepth = 15),
+                    cores = 4,
+                    sample_prior = TRUE,
+                    inits = 0)
+saveRDS(model.null.RT,file="nullmodel.RT.split.rds")
+
+# Set the priors for the models with slope
+prior = c(
+  prior(normal(500, 200), class = Intercept), # A wide prior sensible for this type of task
+  prior(normal(0, 200), class = b)) # a wide prior
+
+# ExpPhase model
+model.expphase.RT = brm(Hits.RTs ~ ExpPhase + (ExpPhase|ParticipantNo),
+                        data=data.final,
+                        family=gaussian(),
+                        prior = prior,
+                        iter = 6000,
+                        save_all_pars = TRUE,
+                        control = list(adapt_delta = 0.99,max_treedepth = 15),
+                        cores = 4,
+                        sample_prior = TRUE,
+                        inits = 0)
+saveRDS(model.expphase.RT,file="expphasemodel.RT.split.rds")
+
+#Interaction model
+model.full.RT = brm(Hits.RTs ~ ExpPhase * Condition + (ExpPhase + Condition|ParticipantNo),
+                    data=data.final,
+                    family=gaussian(),
+                    prior = prior,
+                    iter = 6000,
+                    save_all_pars = TRUE,
+                    control = list(adapt_delta = 0.99,max_treedepth = 15),
+                    cores = 4,
+                    sample_prior = TRUE,
+                    inits = 0)
+saveRDS(model.full.RT,file="model.full.RT.split.rds")
+
+
+#WAIC
+compare.RT.waic = WAIC(model.null.RT,model.expphase.RT,model.full.RT, comapre = TRUE)
+saveRDS(compare.RT.waic,file="compare.RT.split.waic")
+
+
+# Weighted waic
+compare.RT.waic.weights = model_weights(model.null.RT,model.expphase.RT,model.full.RT, weights = "waic")
+saveRDS(compare.RT.waic.weights,file="compare.RT.split.waic.weights")
+
+
+# Bayesian R2
+#Null
+bR2.null.RT = bayes_R2(model.null.RT)
+saveRDS(bR2.null.RT,file="bR2.null.RT.split")
+#ExpPhase
+bR2.expphase.RT = bayes_R2(model.expphase.RT)
+saveRDS(bR2.expphase.RT,file="bR2.expphase.RT.split")
+#Full
+bR2.full.RT = bayes_R2(model.full.RT)
+saveRDS(bR2.full.RT,file="bR2.full.RT.split")
+
+# brms accuracy (d prime)------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Set the working directory where to save the models
+setwd(here("brms_models"))
+# referencing for easier interpretation
+data.final$ExpPhase=relevel(data.final$ExpPhase,ref="Bsln1")
+data.final$Condition=relevel(data.final$Condition,ref="High_Rew")
+
+# Set the priors for the model with only intercept
+prior = c(
+  prior(normal(1.8, 1), class = Intercept)) # based on Andersen & Mueller, 2011
+
+
+# Null model
+model.null.Acc.dprime = brm(dprime ~ 1 + (1|ParticipantNo),
+                            data=data.final,
+                            family=gaussian(),
+                            prior = prior,
+                            iter = 6000,
+                            save_all_pars = TRUE,
+                            control = list(adapt_delta = 0.99,max_treedepth = 15),
+                            cores = 4,
+                            sample_prior = TRUE,
+                            inits = 0)
+saveRDS(model.null.Acc.dprime,file="nullmodel.Acc.dprime.split.rds")
+
+# Set the priors for the models with slopes
+prior = c(
+  prior(normal(1.8, 1), class = Intercept), # based on Andersen & Mueller, 2011
+  prior(normal(0, 2), class = b)) # a wide prior
+
+# ExpPhase model
+model.expphase.Acc.dprime = brm(dprime ~ ExpPhase + (ExpPhase|ParticipantNo),
+                                data=data.final,
+                                family=gaussian(),
+                                prior = prior,
+                                iter = 6000,
+                                save_all_pars = TRUE,
+                                control = list(adapt_delta = 0.99,max_treedepth = 15),
+                                cores = 4,
+                                sample_prior = TRUE,
+                                inits = 0)
+saveRDS(model.expphase.Acc.dprime,file="expphasemodel.Acc.dprime.split.rds")
+
+#Interaction model
+model.full.Acc.dprime = brm(dprime ~ ExpPhase * Condition + (ExpPhase + Condition|ParticipantNo),
+                            data=data.final,
+                            family=gaussian(),
+                            prior = prior,
+                            iter = 6000,
+                            save_all_pars = TRUE,
+                            control = list(adapt_delta = 0.99,max_treedepth = 15),
+                            cores = 4,
+                            sample_prior = TRUE,
+                            inits = 0)
+saveRDS(model.full.Acc.dprime,file="model.full.Acc.dprime.split.rds")
+
+#WAIC
+compare.Acc.dprime.waic = WAIC(model.null.Acc.dprime,model.expphase.Acc.dprime,model.full.Acc.dprime, compare = TRUE)
+saveRDS(compare.Acc.dprime.waic,file="compare.Acc.dprime.split.waic")
+
+# Weighted waic
+compare.Acc.dprime.waic.weights = model_weights(model.null.Acc.dprime,model.expphase.Acc.dprime,model.full.Acc.dprime, weights = "waic")
+saveRDS(compare.Acc.dprime.waic.weights,file="compare.Acc.dprime.split.waic.weights")
+
+# Bayesian R2
+#Null
+bR2.null.Acc.dprime = bayes_R2(model.null.Acc.dprime)
+saveRDS(bR2.null.Acc.dprime,file="bR2.null.Acc.dprime.split")
+#ExpPhase
+bR2.expphase.Acc.dprime = bayes_R2(model.expphase.Acc.dprime)
+saveRDS(bR2.expphase.Acc.dprime,file="bR2.expphase.Acc.dprime.split")
+#Full
+bR2.full.Acc.dprime = bayes_R2(model.full.Acc.dprime)
+saveRDS(bR2.full.Acc.dprime,file="bR2.full.Acc.dprime.split")

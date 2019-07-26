@@ -385,97 +385,6 @@ Extinction_Low_NotAttended = post[["b_Intercept"]] +
 ```
 
 ```{r, warning=FALSE, message=FALSE}
-# make a data frame
-
-# posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
-# 
-# posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability", "Attention"), "_", extra = "merge")
-# 
-# posterior_conditions$Attention = recode(posterior_conditions$Attention,
-#                            "Attended" = "Attended",
-#                            "NotAttended" = "Unattended")
-# 
-# names(posterior_conditions)[4] = "Amplitude"
-# 
-# 
-# #order
-# #dataPlot$`Reward phase` = factor(dataPlot$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
-# #dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward phase`,dataPlot$`Reward probability`),]
-# 
-# 
-# plottingConditions = c("Attended","Unattended" )
-# for (i in 1:length(plottingConditions)){
-#   
-#   if(plottingConditions[i]=="Attended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Attended")}
-#   
-#   if(plottingConditions[i]=="Unattended"){dataAmplitudePlot=subset(posterior_conditions,Attention=="Unattended")}  
-# 
-# # Pirate plot
-# 
-#     pirateplot(formula = Amplitude ~ `Reward Phase` + `Reward Probability`, # dependent~independent variables
-#              data=dataAmplitudePlot, # data frame
-#              main=plottingConditions[i], # main title
-#              ylim=c(0.7,1.3), # y-axis: limits
-#              ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
-#              theme=0, # preset theme (0: use your own)
-#              avg.line.col="black", # average line: color
-#              avg.line.lwd=2, # average line: line width
-#              avg.line.o=1, # average line: opacity (0-1)
-#              bean.b.col="black", # bean border, color
-#              bean.lwd=0.6, # bean border, line width
-#              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-#              bean.b.o=0.3, # bean border, opacity (0-1)
-#              bean.f.col="gray", # bean filling, color
-#              bean.f.o=.1, # bean filling, opacity (0-1)
-#              cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
-#              gl.col="gray", # gridlines: color
-#              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-#              cex.lab=1, # axis labels: size
-#              cex.axis=1, # axis numbers: size
-#              cex.names = 1,
-#              sortx = "sequential",
-#              bty="l", # plot box type
-#              back.col="white") # background, color
-# }
-# 
-# plottingConditions = c("High","Low" )
-# for (i in 1:length(plottingConditions)){
-#   
-#   if(plottingConditions[i]=="High"){dataAmplitudePlot=subset(posterior_conditions,`Reward Probability`=="High")}
-#   
-#   if(plottingConditions[i]=="Low"){dataAmplitudePlot=subset(posterior_conditions,`Reward Probability`=="Low")}  
-# 
-# # Pirate plot
-# 
-#     pirateplot(formula = Amplitude ~ `Attention` + `Reward Phase`, # dependent~independent variables
-#              data=dataAmplitudePlot, # data frame
-#              main=plottingConditions[i], # main title
-#              ylim=c(0.7,1.3), # y-axis: limits
-#              ylab=expression(paste("Amplitude (",mu,"V)")), # y-axis: label
-#              theme=0, # preset theme (0: use your own)
-#              avg.line.col="black", # average line: color
-#              avg.line.lwd=2, # average line: line width
-#              avg.line.o=1, # average line: opacity (0-1)
-#              bean.b.col="black", # bean border, color
-#              bean.lwd=0.6, # bean border, line width
-#              bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
-#              bean.b.o=0.3, # bean border, opacity (0-1)
-#              bean.f.col="gray", # bean filling, color
-#              bean.f.o=.1, # bean filling, opacity (0-1)
-#              cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
-#              gl.col="gray", # gridlines: color
-#              gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
-#              cex.lab=1, # axis labels: size
-#              cex.axis=1, # axis numbers: size
-#              cex.names = 1,
-#              sortx = "sequential",
-#              bty="l", # plot box type
-#              back.col="white") # background, color
-# }
-
-
-
-
 
 # Data from the model
 
@@ -489,14 +398,20 @@ posterior_conditions$Attention = recode(posterior_conditions$Attention,
                            "Attended" = "Target",
                            "NotAttended" = "Distractor")
 
+posterior_conditions$Attention  = as.factor(posterior_conditions$Attention )
+
 posterior_conditions$`Reward Probability` = recode(posterior_conditions$`Reward Probability`,
                                       "High" = "High reward probability",
                                       "Low" = "Low reward probability")
+
+posterior_conditions$`Reward Probability` = as.factor(posterior_conditions$`Reward Probability`)
 
 posterior_conditions$`Reward Phase` = recode(posterior_conditions$`Reward Phase`,
                                 "Acquisition" = "Training",
                                 "Baseline" = "Baseline",
                                 "Extinction" = "Test")
+
+posterior_conditions$`Reward Phase` = as.factor(posterior_conditions$`Reward Phase`)
 
 names(posterior_conditions)[4] = "Amplitude"
 
@@ -580,14 +495,20 @@ posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probabilit
                                       "High Reward" = "High reward probability",
                                       "Low Reward" = "Low reward probability")
 
+posterior_means$`Reward Probability`= as.factor(posterior_means$`Reward Probability`)
+
 posterior_means$`Reward Phase` = recode(posterior_means$`Reward Phase`,
                                 "Acquisition" = "Training",
                                 "Baseline" = "Baseline",
                                 "Extinction" = "Test")
 
+posterior_means$`Reward Phase` = as.factor(posterior_means$`Reward Phase`)
+
 posterior_means$Attention = recode(posterior_means$Attention,
                            "Attended" = "Target",
                            "Unattended" = "Distractor")
+
+posterior_means$Attention = as.factor(posterior_means$Attention)
 
 # Create this variable in order to have it for plotting (this is a quick hack: in plotting the CIs this variable is added and then subtracted)
 posterior_means$Amplitude = c(1,1,1,1,1,1,1,1,1,1,1,1)
@@ -595,8 +516,11 @@ posterior_means$Amplitude = c(1,1,1,1,1,1,1,1,1,1,1,1)
 
 # Raw data
 # Prepare the dataset
-# prepare data for plotting
+# prepare data for plotting - average over motion
+
 dataPlot = data_all
+dataPlot = ddply(dataPlot,.(Attention,ExpPhase,Condition,Subject),plyr::summarize,Amplitude=mean(Amplitude, na.rm = TRUE))
+
 
 # rename variables
 colnames(dataPlot)[colnames(dataPlot)=="ExpPhase"] <- "Reward Phase"
@@ -616,39 +540,8 @@ dataPlot$Attention = recode(dataPlot$Attention,
                                         "Att" = "Target",
                                         "NotAtt" = "Distractor")
 
-#order
-# dataPlot$`Reward phase` = factor(dataPlot$`Reward phase`, levels = c("Baseline","Acquisition","Extinction"))
-# dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward phase`,dataPlot$`Reward probability`),]
 
-
-# plottingConditions = c("Attended","Unattended" )
-# for (i in 1:length(plottingConditions)){
-#   
-#   if(plottingConditions[i]=="Attended"){dataAmplitudePlot=subset(dataPlot,Attention=="Attended")
-#   posterior_means_plot=subset(posterior_means,Attention=="Attended")
-#   posterior_conditions_plot=subset(posterior_conditions,Attention=="Attended")}
-#   
-#   
-#   #  if(plottingConditions[i]=="Attended"){posterior_means_plot=subset(posterior_means,Attention=="Attended")}
-#   # if(plottingConditions[i]=="Attended"){posterior_conditions_plot=subset(posterior_conditions,Attention=="Attended")}
-#   
-#   
-#   else if(plottingConditions[i]=="Unattended"){dataAmplitudePlot=subset(dataPlot,Attention=="Unattended")
-#   posterior_means_plot=subset(posterior_means,Attention=="Unattended")
-#   posterior_conditions_plot=subset(posterior_conditions,Attention=="Unattended")}
-#   
-  # 
-  # if(plottingConditions[i]=="Unattended"){posterior_means_plot=subset(posterior_means,Attention=="Unattended")}
-  # if(plottingConditions[i]=="Unattended"){posterior_conditions_plot=subset(posterior_conditions,Attention=="Unattended")}
-  
-  
-  # Violin + the model
-  # if(plottingConditions[i]=="Attended"){tiff("ssvep_attended.tiff", units="in", width=8, height=5, res=800)}
-  # 
-  # if(plottingConditions[i]=="Unattended"){tiff("ssvep_unattended.tiff", units="in", width=8, height=5, res=800)}
-
-
-
+##### Plotting targets and distractors separately  #####
   
 # Attended
   
@@ -656,7 +549,7 @@ dataPlot$Attention = recode(dataPlot$Attention,
   posterior_means_plot=subset(posterior_means,Attention=="Target")
   posterior_conditions_plot=subset(posterior_conditions,Attention=="Target")
   
-  tiff("ssvep_attended.tiff", units="in", width=8, height=5, res=800)
+  # tiff("ssvep_attended.tiff", units="in", width=8, height=5, res=800)
     
   ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
     # violin of the raw data
@@ -672,7 +565,7 @@ dataPlot$Attention = recode(dataPlot$Attention,
     geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
     scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
     facet_grid(.~`Reward Probability`) + 
-    scale_y_continuous(breaks=seq(-1,3,0.5)) +
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
     theme(
       axis.line = element_line(size=1, colour = "black"),
       panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
@@ -687,7 +580,7 @@ dataPlot$Attention = recode(dataPlot$Attention,
     theme(strip.background =element_rect(fill="white")) + 
     theme(strip.text = element_text(size = 12))
   
-  dev.off()
+  # dev.off()
   
   
   
@@ -697,7 +590,7 @@ dataPlot$Attention = recode(dataPlot$Attention,
   posterior_means_plot=subset(posterior_means,Attention=="Distractor")
   posterior_conditions_plot=subset(posterior_conditions,Attention=="Distractor")
   
-  tiff("ssvep_unattended.tiff", units="in", width=8, height=5, res=800)
+  # tiff("ssvep_unattended.tiff", units="in", width=8, height=5, res=800)
     
   ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
     # violin of the raw data
@@ -713,7 +606,7 @@ dataPlot$Attention = recode(dataPlot$Attention,
     geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
     scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
     facet_grid(.~`Reward Probability`) + 
-    scale_y_continuous(breaks=seq(-1,3,0.5)) +
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
     theme(
       axis.line = element_line(size=1, colour = "black"),
       panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
@@ -728,16 +621,109 @@ dataPlot$Attention = recode(dataPlot$Attention,
     theme(strip.background =element_rect(fill="white")) + 
     theme(strip.text = element_text(size = 12))
   
-  dev.off()
+  # dev.off()
 
   
+  
+##### Plotting high and low separately  #####
+  
+# High
+  
+  dataAmplitudePlot=subset(dataPlot,`Reward Probability`=="High reward probability")
+  posterior_means_plot=subset(posterior_means,`Reward Probability`=="High reward probability")
+  posterior_conditions_plot=subset(posterior_conditions,`Reward Probability`=="High reward probability")
+  
+  dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+  posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+  posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+  
+  # tiff("ssvep_high.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=Attention)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=Attention),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    labs(title="High reward") +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+  
+  
+  
+# Low
+  
+  dataAmplitudePlot=subset(dataPlot,`Reward Probability`=="Low reward probability")
+  posterior_means_plot=subset(posterior_means,`Reward Probability`=="Low reward probability")
+  posterior_conditions_plot=subset(posterior_conditions,`Reward Probability`=="Low reward probability")
+  
+  dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+  posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+  posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+  
+  # tiff("ssvep_low.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=Attention)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=Attention),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    labs(title="Low reward") +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+####### Plotting everything together #####
   
 # Order for plotting
-dataPlot$Attention = factor(dataPlot$Attention, levels = c("Target","Distractor")) 
-posterior_conditions$Attention = factor(posterior_conditions$Attention, levels = c("Target","Distractor")) 
-posterior_means$Attention = factor(posterior_means$Attention, levels = c("Target","Distractor")) 
-
-dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward Phase`,dataPlot$`Reward Probability`),]
+# dataPlot$Attention = factor(dataPlot$Attention, levels = c("Target","Distractor")) 
+# posterior_conditions$Attention = factor(posterior_conditions$Attention, levels = c("Target","Distractor")) 
+# posterior_means$Attention = factor(posterior_means$Attention, levels = c("Target","Distractor")) 
+# 
+# dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward Phase`,dataPlot$`Reward Probability`),]
 
 dataPlot$Attention = relevel(dataPlot$Attention,"Target")
 posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
@@ -745,8 +731,8 @@ posterior_means$Attention = relevel(posterior_means$Attention,"Target")
 
 
   
-# both attended and unattended  
-    tiff("ssvep_both.tiff", units="in", width=16, height=10, res=800)
+  
+    # tiff("ssvep_both.tiff", units="in", width=16, height=10, res=800)
 
     ggplot(data=dataPlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
     # violin of the raw data
@@ -762,7 +748,7 @@ posterior_means$Attention = relevel(posterior_means$Attention,"Target")
     geom_linerange(data = posterior_means,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
     scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
     facet_grid(`Reward Probability`~Attention) + 
-    scale_y_continuous(breaks=seq(0.5,2,0.5)) +
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(0.5,2,0.5)) +
     theme(
       axis.line = element_line(size=2, colour = "black"),
       panel.grid.major = element_line(colour = "grey",size = 0.2,linetype = "dashed"),
@@ -776,7 +762,7 @@ posterior_means$Attention = relevel(posterior_means$Attention,"Target")
       axis.title=element_text(size=24,colour = "black")) + 
     theme(strip.background =element_rect(fill="white")) + 
     theme(strip.text = element_text(size = 24))
-dev.off()
+# dev.off()
 
 ```
 
@@ -1300,6 +1286,388 @@ for (i in 1:length(plottingConditions)){
              back.col="white") # background, color
 }
 
+
+
+
+# Data from the model
+
+# make a data frame of conditions from the posterior
+
+posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability", "Attention"), "_", extra = "merge")
+
+posterior_conditions$Attention = recode(posterior_conditions$Attention,
+                           "Attended" = "Target",
+                           "NotAttended" = "Distractor")
+
+posterior_conditions$Attention  = as.factor(posterior_conditions$Attention )
+
+posterior_conditions$`Reward Probability` = recode(posterior_conditions$`Reward Probability`,
+                                      "High" = "High reward probability",
+                                      "Low" = "Low reward probability")
+
+posterior_conditions$`Reward Probability` = as.factor(posterior_conditions$`Reward Probability`)
+
+posterior_conditions$`Reward Phase` = recode(posterior_conditions$`Reward Phase`,
+                                "Acquisition" = "Training",
+                                "Baseline" = "Baseline",
+                                "Extinction" = "Test")
+
+posterior_conditions$`Reward Phase` = as.factor(posterior_conditions$`Reward Phase`)
+
+names(posterior_conditions)[4] = "Amplitude"
+
+
+
+
+# Make a table with credible intervals
+posterior_means = as.data.frame(c("Attended Baseline High Reward", 
+                                  "Unattended Baseline High Reward", 
+                                  "Attended Baseline Low Reward",
+                                  "Unattended Baseline Low Reward",
+                                  
+                                  "Attended Acquisition High Reward", 
+                                  "Unattended Acquisition High Reward", 
+                                  "Attended Acquisition Low Reward",
+                                  "Unattended Acquisition Low Reward",
+                                  
+                                  "Attended Extinction High Reward", 
+                                  "Unattended Extinction High Reward", 
+                                  "Attended Extinction Low Reward",
+                                  "Unattended Extinction Low Reward"))
+
+names(posterior_means)[1] = "Condition"
+
+posterior_means$low_95_CI = c(round(hdi(Baseline_High_Attended)[[1]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_Attended)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_Attended)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended)[[1]], digits = 2),
+                              round(hdi(Extinction_High_Attended)[[1]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_Attended)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended)[[1]], digits = 2))
+
+posterior_means$high_95_CI = c(round(hdi(Baseline_High_Attended)[[2]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_Attended)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_Attended)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended)[[2]], digits = 2),
+                              round(hdi(Extinction_High_Attended)[[2]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_Attended)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended)[[2]], digits = 2))
+
+posterior_means$low_50_CI = c(round(hdi(Baseline_High_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_High_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended,0.5)[[1]], digits = 2))
+
+posterior_means$high_50_CI = c(round(hdi(Baseline_High_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_High_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended,0.5)[[2]], digits = 2))
+
+
+posterior_means =  posterior_means %>% separate(Condition, c("Attention","Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probability`,
+                                      "High Reward" = "High reward probability",
+                                      "Low Reward" = "Low reward probability")
+
+posterior_means$`Reward Probability`= as.factor(posterior_means$`Reward Probability`)
+
+posterior_means$`Reward Phase` = recode(posterior_means$`Reward Phase`,
+                                "Acquisition" = "Training",
+                                "Baseline" = "Baseline",
+                                "Extinction" = "Test")
+
+posterior_means$`Reward Phase` = as.factor(posterior_means$`Reward Phase`)
+
+posterior_means$Attention = recode(posterior_means$Attention,
+                           "Attended" = "Target",
+                           "Unattended" = "Distractor")
+
+posterior_means$Attention = as.factor(posterior_means$Attention)
+
+# Create this variable in order to have it for plotting (this is a quick hack: in plotting the CIs this variable is added and then subtracted)
+posterior_means$Amplitude = c(1,1,1,1,1,1,1,1,1,1,1,1)
+
+
+# Raw data
+# Prepare the dataset
+# prepare data for plotting - average over motion
+
+dataPlot = data_all
+dataPlot = ddply(dataPlot,.(Attention,ExpPhase,Condition,Subject),plyr::summarize,Amplitude=mean(Amplitude, na.rm = TRUE))
+
+
+# rename variables
+colnames(dataPlot)[colnames(dataPlot)=="ExpPhase"] <- "Reward Phase"
+colnames(dataPlot)[colnames(dataPlot)=="Condition"] <- "Reward Probability"
+
+# rename conditions
+dataPlot$`Reward Phase` = recode(dataPlot$`Reward Phase`,
+                                  "Acq" = "Training",
+                                  "Bsln" = "Baseline",
+                                  "Ext" = "Test")
+
+dataPlot$`Reward Probability` = recode(dataPlot$`Reward Probability`,
+                                        "High_Rew" = "High reward probability",
+                                        "Low_Rew" = "Low reward probability")
+
+dataPlot$Attention = recode(dataPlot$Attention,
+                                        "Att" = "Target",
+                                        "NotAtt" = "Distractor")
+
+
+##### Plotting targets and distractors separately  #####
+  
+# Attended
+  
+  dataAmplitudePlot=subset(dataPlot,Attention=="Target")
+  posterior_means_plot=subset(posterior_means,Attention=="Target")
+  posterior_conditions_plot=subset(posterior_conditions,Attention=="Target")
+  
+  # tiff("ssvep_attended.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~`Reward Probability`) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+  
+  
+  
+  # Unattended
+  
+  dataAmplitudePlot=subset(dataPlot,Attention=="Distractor")
+  posterior_means_plot=subset(posterior_means,Attention=="Distractor")
+  posterior_conditions_plot=subset(posterior_conditions,Attention=="Distractor")
+  
+  # tiff("ssvep_unattended.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~`Reward Probability`) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+
+  
+  
+##### Plotting high and low separately  #####
+  
+# High
+  
+  dataAmplitudePlot=subset(dataPlot,`Reward Probability`=="High reward probability")
+  posterior_means_plot=subset(posterior_means,`Reward Probability`=="High reward probability")
+  posterior_conditions_plot=subset(posterior_conditions,`Reward Probability`=="High reward probability")
+  
+  dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+  posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+  posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+  
+  # tiff("ssvep_high.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=Attention)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=Attention),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    labs(title="High reward") +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+  
+  
+  
+# Low
+  
+  dataAmplitudePlot=subset(dataPlot,`Reward Probability`=="Low reward probability")
+  posterior_means_plot=subset(posterior_means,`Reward Probability`=="Low reward probability")
+  posterior_conditions_plot=subset(posterior_conditions,`Reward Probability`=="Low reward probability")
+  
+  dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+  posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+  posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+  
+  # tiff("ssvep_low.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=Attention)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=Attention),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    labs(title="Low reward") +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+####### Plotting everything together #####
+  
+# Order for plotting
+# dataPlot$Attention = factor(dataPlot$Attention, levels = c("Target","Distractor")) 
+# posterior_conditions$Attention = factor(posterior_conditions$Attention, levels = c("Target","Distractor")) 
+# posterior_means$Attention = factor(posterior_means$Attention, levels = c("Target","Distractor")) 
+# 
+# dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward Phase`,dataPlot$`Reward Probability`),]
+
+dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+
+
+  
+  
+    # tiff("ssvep_both.tiff", units="in", width=16, height=10, res=800)
+
+    ggplot(data=dataPlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
+    # violin of the raw data
+    geom_violin(data=dataPlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`Amplitude`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(`Reward Probability`~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(0.5,2,0.5)) +
+    theme(
+      axis.line = element_line(size=2, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.2,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.2,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 24,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 22),
+      axis.text.x=element_text(colour="black", size = 22),
+      axis.text.y=element_text(colour="black", size = 22),
+      axis.title=element_text(size=24,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 24))
+# dev.off()
+
+
 ```
 
 Table of means across conditions
@@ -1821,6 +2189,387 @@ for (i in 1:length(plottingConditions)){
              back.col="white") # background, color
 }
 
+
+
+# Data from the model
+
+# make a data frame of conditions from the posterior
+
+posterior_conditions = melt(data.frame(Baseline_High_Attended, Baseline_High_NotAttended, Baseline_Low_Attended, Baseline_Low_NotAttended, Acquisition_High_Attended, Acquisition_High_NotAttended, Acquisition_Low_Attended, Acquisition_Low_NotAttended, Extinction_High_Attended, Extinction_High_NotAttended, Extinction_Low_Attended, Extinction_Low_NotAttended))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability", "Attention"), "_", extra = "merge")
+
+posterior_conditions$Attention = recode(posterior_conditions$Attention,
+                           "Attended" = "Target",
+                           "NotAttended" = "Distractor")
+
+posterior_conditions$Attention  = as.factor(posterior_conditions$Attention )
+
+posterior_conditions$`Reward Probability` = recode(posterior_conditions$`Reward Probability`,
+                                      "High" = "High reward probability",
+                                      "Low" = "Low reward probability")
+
+posterior_conditions$`Reward Probability` = as.factor(posterior_conditions$`Reward Probability`)
+
+posterior_conditions$`Reward Phase` = recode(posterior_conditions$`Reward Phase`,
+                                "Acquisition" = "Training",
+                                "Baseline" = "Baseline",
+                                "Extinction" = "Test")
+
+posterior_conditions$`Reward Phase` = as.factor(posterior_conditions$`Reward Phase`)
+
+names(posterior_conditions)[4] = "Amplitude"
+
+
+
+
+# Make a table with credible intervals
+posterior_means = as.data.frame(c("Attended Baseline High Reward", 
+                                  "Unattended Baseline High Reward", 
+                                  "Attended Baseline Low Reward",
+                                  "Unattended Baseline Low Reward",
+                                  
+                                  "Attended Acquisition High Reward", 
+                                  "Unattended Acquisition High Reward", 
+                                  "Attended Acquisition Low Reward",
+                                  "Unattended Acquisition Low Reward",
+                                  
+                                  "Attended Extinction High Reward", 
+                                  "Unattended Extinction High Reward", 
+                                  "Attended Extinction Low Reward",
+                                  "Unattended Extinction Low Reward"))
+
+names(posterior_means)[1] = "Condition"
+
+posterior_means$low_95_CI = c(round(hdi(Baseline_High_Attended)[[1]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_Attended)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_Attended)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended)[[1]], digits = 2),
+                              round(hdi(Extinction_High_Attended)[[1]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_Attended)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended)[[1]], digits = 2))
+
+posterior_means$high_95_CI = c(round(hdi(Baseline_High_Attended)[[2]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_Attended)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_Attended)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended)[[2]], digits = 2),
+                              round(hdi(Extinction_High_Attended)[[2]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_Attended)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended)[[2]], digits = 2))
+
+posterior_means$low_50_CI = c(round(hdi(Baseline_High_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_High_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_Attended,0.5)[[1]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended,0.5)[[1]], digits = 2))
+
+posterior_means$high_50_CI = c(round(hdi(Baseline_High_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline_High_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline_Low_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_High_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Acquisition_Low_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_High_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_High_NotAttended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_Attended,0.5)[[2]], digits = 2),
+                              round(hdi(Extinction_Low_NotAttended,0.5)[[2]], digits = 2))
+
+
+posterior_means =  posterior_means %>% separate(Condition, c("Attention","Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probability`,
+                                      "High Reward" = "High reward probability",
+                                      "Low Reward" = "Low reward probability")
+
+posterior_means$`Reward Probability`= as.factor(posterior_means$`Reward Probability`)
+
+posterior_means$`Reward Phase` = recode(posterior_means$`Reward Phase`,
+                                "Acquisition" = "Training",
+                                "Baseline" = "Baseline",
+                                "Extinction" = "Test")
+
+posterior_means$`Reward Phase` = as.factor(posterior_means$`Reward Phase`)
+
+posterior_means$Attention = recode(posterior_means$Attention,
+                           "Attended" = "Target",
+                           "Unattended" = "Distractor")
+
+posterior_means$Attention = as.factor(posterior_means$Attention)
+
+# Create this variable in order to have it for plotting (this is a quick hack: in plotting the CIs this variable is added and then subtracted)
+posterior_means$Amplitude = c(1,1,1,1,1,1,1,1,1,1,1,1)
+
+
+# Raw data
+# Prepare the dataset
+# prepare data for plotting - average over motion
+
+dataPlot = data_all
+dataPlot = ddply(dataPlot,.(Attention,ExpPhase,Condition,Subject),plyr::summarize,Amplitude=mean(Amplitude, na.rm = TRUE))
+
+
+# rename variables
+colnames(dataPlot)[colnames(dataPlot)=="ExpPhase"] <- "Reward Phase"
+colnames(dataPlot)[colnames(dataPlot)=="Condition"] <- "Reward Probability"
+
+# rename conditions
+dataPlot$`Reward Phase` = recode(dataPlot$`Reward Phase`,
+                                  "Acq" = "Training",
+                                  "Bsln" = "Baseline",
+                                  "Ext" = "Test")
+
+dataPlot$`Reward Probability` = recode(dataPlot$`Reward Probability`,
+                                        "High_Rew" = "High reward probability",
+                                        "Low_Rew" = "Low reward probability")
+
+dataPlot$Attention = recode(dataPlot$Attention,
+                                        "Att" = "Target",
+                                        "NotAtt" = "Distractor")
+
+
+##### Plotting targets and distractors separately  #####
+  
+# Attended
+  
+  dataAmplitudePlot=subset(dataPlot,Attention=="Target")
+  posterior_means_plot=subset(posterior_means,Attention=="Target")
+  posterior_conditions_plot=subset(posterior_conditions,Attention=="Target")
+  
+  # tiff("ssvep_attended.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~`Reward Probability`) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+  
+  
+  
+  # Unattended
+  
+  dataAmplitudePlot=subset(dataPlot,Attention=="Distractor")
+  posterior_means_plot=subset(posterior_means,Attention=="Distractor")
+  posterior_conditions_plot=subset(posterior_conditions,Attention=="Distractor")
+  
+  # tiff("ssvep_unattended.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~`Reward Probability`) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+
+  
+  
+##### Plotting high and low separately  #####
+  
+# High
+  
+  dataAmplitudePlot=subset(dataPlot,`Reward Probability`=="High reward probability")
+  posterior_means_plot=subset(posterior_means,`Reward Probability`=="High reward probability")
+  posterior_conditions_plot=subset(posterior_conditions,`Reward Probability`=="High reward probability")
+  
+  dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+  posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+  posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+  
+  # tiff("ssvep_high.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=Attention)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=Attention),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    labs(title="High reward") +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+  
+  
+  
+# Low
+  
+  dataAmplitudePlot=subset(dataPlot,`Reward Probability`=="Low reward probability")
+  posterior_means_plot=subset(posterior_means,`Reward Probability`=="Low reward probability")
+  posterior_conditions_plot=subset(posterior_conditions,`Reward Probability`=="Low reward probability")
+  
+  dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+  posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+  posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+  
+  # tiff("ssvep_low.tiff", units="in", width=8, height=5, res=800)
+    
+  ggplot(data=dataAmplitudePlot, aes(x=`Reward Phase`, y=`Amplitude`, label=Attention)) + 
+    # violin of the raw data
+    geom_violin(data=dataAmplitudePlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions_plot, aes(x=`Reward Phase`, y=`Amplitude`, group=Attention),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means_plot,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(.~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(-1,3,0.5)) +
+    labs(title="Low reward") +
+    theme(
+      axis.line = element_line(size=1, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 11),
+      axis.text.x=element_text(colour="black", size = 11),
+      axis.text.y=element_text(colour="black", size = 11),
+      axis.title=element_text(size=12,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 12))
+  
+  # dev.off()
+####### Plotting everything together #####
+  
+# Order for plotting
+# dataPlot$Attention = factor(dataPlot$Attention, levels = c("Target","Distractor")) 
+# posterior_conditions$Attention = factor(posterior_conditions$Attention, levels = c("Target","Distractor")) 
+# posterior_means$Attention = factor(posterior_means$Attention, levels = c("Target","Distractor")) 
+# 
+# dataPlot = dataPlot[order(dataPlot$Attention,dataPlot$`Reward Phase`,dataPlot$`Reward Probability`),]
+
+dataPlot$Attention = relevel(dataPlot$Attention,"Target")
+posterior_conditions$Attention = relevel(posterior_conditions$Attention,"Target")
+posterior_means$Attention = relevel(posterior_means$Attention,"Target")
+
+
+  
+  
+    # tiff("ssvep_both.tiff", units="in", width=16, height=10, res=800)
+
+    ggplot(data=dataPlot, aes(x=`Reward Phase`, y=`Amplitude`, label=`Reward Probability`)) + 
+    # violin of the raw data
+    geom_violin(data=dataPlot, color ="#636363",trim = TRUE,alpha="0.2") +
+    # individual participants for the raw data
+    # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+    geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+    # mean of the model
+    stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`Amplitude`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+    # 95 credible intervals of the model
+    geom_linerange(data = posterior_means,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_95_CI, ymax=`Amplitude`-`Amplitude`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+    # 50 credible intervals of the model
+    geom_linerange(data = posterior_means,width=.1, aes(ymin=`Amplitude`-`Amplitude`+low_50_CI, ymax=`Amplitude`-`Amplitude`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+    scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
+    facet_grid(`Reward Probability`~Attention) + 
+    scale_y_continuous(name="Amplitude (a.u.)",breaks=seq(0.5,2,0.5)) +
+    theme(
+      axis.line = element_line(size=2, colour = "black"),
+      panel.grid.major = element_line(colour = "grey",size = 0.2,linetype = "dashed"),
+      panel.grid.minor = element_line(colour = "grey",size = 0.2,linetype = "dashed"),
+      panel.border = element_blank(), 
+      panel.background = element_blank(),
+      plot.title = element_text(size = 24,  face = "bold",hjust = 0.5),
+      text=element_text(colour="black", size = 22),
+      axis.text.x=element_text(colour="black", size = 22),
+      axis.text.y=element_text(colour="black", size = 22),
+      axis.title=element_text(size=24,colour = "black")) + 
+    theme(strip.background =element_rect(fill="white")) + 
+    theme(strip.text = element_text(size = 24))
+# dev.off()
+
+
 ```
 
 Table of means across conditions
@@ -2273,13 +3022,15 @@ posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Ph
 names(posterior_conditions)[3] = "dprime"
 
 posterior_conditions$`Reward Probability` = recode(posterior_conditions$`Reward Probability`,
-                                      "High" = "High reward probability",
-                                      "Low" = "Low reward probability")
+                                      "High" = "High reward",
+                                      "Low" = "Low reward")
+
 
 posterior_conditions$`Reward Phase` = recode(posterior_conditions$`Reward Phase`,
                                 "Acquisition" = "Training",
                                 "Baseline" = "Baseline",
                                 "Extinction" = "Test")
+
 
 # Make a table with credible intervals
 posterior_means = as.data.frame(c("Baseline High Reward", 
@@ -2321,8 +3072,8 @@ posterior_means$high_50_CI = c(round(hdi(Baseline_High,0.5)[[2]], digits = 2),
 posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
 
 posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probability`,
-                                      "High Reward" = "High reward probability",
-                                      "Low Reward" = "Low reward probability")
+                                      "High Reward" = "High reward",
+                                      "Low Reward" = "Low reward")
 
 posterior_means$`Reward Phase` = recode(posterior_means$`Reward Phase`,
                                 "Acquisition" = "Training",
@@ -2348,12 +3099,12 @@ data.plot$`Reward Phase` = recode(data.plot$`Reward Phase`,
                                 "Ext" = "Test")
 
 data.plot$`Reward Probability` = recode(data.plot$`Reward Probability`,
-                                      "High_Rew" = "High reward probability",
-                                      "Low_Rew" = "Low reward probability")
+                                      "High_Rew" = "High reward",
+                                      "Low_Rew" = "Low reward")
 
 
 # Violin + the model
-tiff("dprime.tiff", units="in", width=8, height=5, res=800)
+# tiff("dprime.tiff", units="in", width=8, height=5, res=800)
 
 ggplot(data=data.plot, aes(x=`Reward Phase`, y=`dprime`, label=`Reward Probability`)) + 
   # violin of the raw data
@@ -2370,6 +3121,7 @@ ggplot(data=data.plot, aes(x=`Reward Phase`, y=`dprime`, label=`Reward Probabili
   scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
   facet_grid(.~`Reward Probability`) + 
   scale_y_continuous(breaks=seq(-1,3,0.5)) +
+  labs(title="Sensitivity d`", y = "Sensitivity d`") + 
   theme(
     axis.line = element_line(size=1, colour = "black"),
     panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
@@ -2384,7 +3136,7 @@ ggplot(data=data.plot, aes(x=`Reward Phase`, y=`dprime`, label=`Reward Probabili
   theme(strip.background =element_rect(fill="white")) + 
   theme(strip.text = element_text(size = 12))
   
-dev.off()
+# dev.off()
 
 
 
@@ -2634,8 +3386,14 @@ posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Ph
 names(posterior_conditions)[3] = "Reaction time"
 
 posterior_conditions$`Reward Probability` = recode(posterior_conditions$`Reward Probability`,
-                                      "High" = "High reward probability",
-                                      "Low" = "Low reward probability")
+                                      "High" = "High reward",
+                                      "Low" = "Low reward")
+
+posterior_conditions$`Reward Phase` = recode(posterior_conditions$`Reward Phase`,
+                                "Acquisition" = "Training",
+                                "Baseline" = "Baseline",
+                                "Extinction" = "Test")
+
 
 # Make a table with credible intervals
 posterior_means = as.data.frame(c("Baseline High Reward", 
@@ -2677,8 +3435,8 @@ posterior_means$high_50_CI = c(round(hdi(Baseline_High,0.5)[[2]], digits = 2),
 posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
 
 posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probability`,
-                                      "High Reward" = "High reward probability",
-                                      "Low Reward" = "Low reward probability")
+                                      "High Reward" = "High reward",
+                                      "Low Reward" = "Low reward")
 
 posterior_means$`Reward Phase` = recode(posterior_means$`Reward Phase`,
                                 "Acquisition" = "Training",
@@ -2704,14 +3462,14 @@ data.plot$`Reward Phase` = recode(data.plot$`Reward Phase`,
                                 "Ext" = "Test")
 
 data.plot$`Reward Probability` = recode(data.plot$`Reward Probability`,
-                                      "High_Rew" = "High reward probability",
-                                      "Low_Rew" = "Low reward probability")
+                                      "High_Rew" = "High reward",
+                                      "Low_Rew" = "Low reward")
 
 data.plot$`Reaction time` = data.plot$Hits.RTs
 
 
 # Violin + the model
-tiff("RTs.tiff", units="in", width=8, height=5, res=800)
+# tiff("RTs.tiff", units="in", width=8, height=5, res=800)
 
 ggplot(data=data.plot, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) + 
   # violin of the raw data
@@ -2728,6 +3486,7 @@ ggplot(data=data.plot, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Pr
   scale_x_discrete(limits=c("Baseline", "Training", "Test")) +
   facet_grid(.~`Reward Probability`) + 
   scale_y_continuous(breaks=seq(400,750,50)) +
+  labs(title="Reaction time", y = "Reaction time") + 
   theme(
     axis.line = element_line(size=1, colour = "black"),
     panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
@@ -2742,7 +3501,7 @@ ggplot(data=data.plot, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Pr
   theme(strip.background =element_rect(fill="white")) + 
   theme(strip.text = element_text(size = 12))
   
-dev.off()
+# dev.off()
 
 
 
@@ -2813,4 +3572,996 @@ Check the difference between low reward in acquisition vs. extinction
 ```{r, warning=FALSE, message=FALSE}
 Diff_Acq_Ext_Low = Extinction_Low - Acquisition_Low
 plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+# Behavior - splitting the phases
+## Import data
+```{r, warning=FALSE, message=FALSE}
+# Clear environemnt and import data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# # clear the environment
+# rm(list=ls()) 
+# # clear the console
+# cat("\014") 
+# #load packages and install them if they're not installed
+# if (!require("pacman")) install.packages("pacman")
+# pacman::p_load(plyr,Rmisc,yarrr,BayesFactor,reshape2,brms, broom, tidyverse, brmstools, BEST, knitr, here,psych)
+# # set seed
+# set.seed(42) 
+# # set directory
+# setwd(here())
+# import data
+data.raw = read.csv(file = here("data","Data_behavior_exp1_48pps.csv"),header=TRUE,na.strings="NaN")
+
+# Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Adding and renaming variables 
+# rename EventType variable
+names(data.raw)[names(data.raw) == "EventType"] = "MovedDots" 
+# add a variable with the name of the attended color instead of a numbers
+data.raw$AttendedColor = ifelse(data.raw$AttendedColor==1,"red","blue")
+# add a variable saying which color was linked with High_Rew (even numbers - blue was High_Rew)
+data.raw$RewardedColor = ifelse(data.raw$ParticipantNo%%2==0,"blue","red") 
+# add a variable with the name of the moved color instead of a numbers
+data.raw$MovedDots = ifelse(data.raw$MovedDots==1,"red","blue") 
+# split experimental phases into 6 isntead of 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,100,200,300,400,500,600),labels=c("Bsln1","Bsln2","Acq1","Acq2","Ext1","Ext2"))
+# split experimental phases into 3 phases (trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext)
+# data.raw$ExpPhase = cut(data.raw$Trial,breaks=c(0,200,400,600),labels=c("Bsln","Acq","Ext")) # trial 0-200: Bsln; trial 201-400: Acq; trial 401-600: Ext
+
+### Convert variables to be used in analyses into factors
+data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )] = 
+  lapply(data.raw[c("ParticipantNo", "AttendedColor","RewardedColor", "MovedDots", "ExpPhase" )], factor)
+
+### Create variables needed for the accuracy analyses
+# count hits, false alarms, misses, correct rejections, and RT separately for each participant (their calculation is done in Matlab: see DataProcessing.m)
+data.final = ddply(data.raw,.(ParticipantNo,ExpPhase,AttendedColor,RewardedColor,MovedDots),summarize,
+                  numtrials=length(which(Response!=99)), # number of trials per condition (anything that is not 99 or any other number that we're not using)
+                  Hits=length(which(Response==1)), # hits: attended color moved, correct response
+                  FAs=length(which(Response==2)), # false alarms: attended color did not move, (wrong) response
+                  Misses=length(which(Response==0)), # misses: attended color moved, no response
+                  CRs=length(which(Response==3)), # correct rejections: attended color did not move, no response
+                  mean.RT=mean(RT,na.rm=TRUE)) # mean RT per condition
+
+
+################################################################## Calculate accuracy and RTs per condition ###############################################################################################################################################################################################################
+
+# Prepare the data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+### Calculate Hits and False alarms
+# Hits are calculated for each participant in each condition on trials when they are attending the color that moved. 
+# False alarms are  calculated for each participant in each condition on trials when they are attending the color that didn't move (the unattended color moved, but they responded)  
+# Here we create the same number of hits & fas for each of the two conditions (moved attended or not)
+data.final = ddply(data.final, .(ParticipantNo,ExpPhase,AttendedColor), transform, 
+                 Hits = Hits[MovedDots==AttendedColor],
+                 FAs = FAs[MovedDots!=AttendedColor])
+
+# Keep only trials on which the attended color moved (we can do behavioral analysis only on those)
+data.final = subset(data.final,MovedDots==AttendedColor)
+
+### Calculate d'
+# use loglinear transformation: add 0.5 to Hits, FAs, Misses, and CRs (Hautus, 1995, Behavior Research Methods, Instruments, & Computers),
+# which is preferred over the 1/2N rule (Macmillan & Kaplan, 1985, Psychological Bulletin) because it results in less biased estimates of d'.
+data.final =  ddply(data.final,.(ParticipantNo,ExpPhase,RewardedColor,AttendedColor,numtrials),summarise,
+                    tot.Hits=Hits+.5, # hits
+                    tot.FAs=FAs+.5, # false alarms
+                    tot.Misses=(numtrials-Hits)+.5, # misses
+                    tot.CRs=(numtrials-FAs)+.5, # correct rejections
+                    Hit.Rate=tot.Hits/(tot.Hits+tot.Misses), # hit rate
+                    FA.Rate=tot.FAs/(tot.FAs+tot.CRs), # false alarm rate
+                    #dprime=qnorm(Hit.Rate)-qnorm(FA.Rate),
+                    Hits.RTs=mean(mean.RT,na.rm=TRUE)) # mean RTs
+
+# Calculate SDT indices with psycho
+indices = psycho::dprime(data.final$tot.Hits, data.final$tot.FAs, data.final$tot.Misses, data.final$tot.CRs) 
+
+data.final = cbind(data.final, indices) 
+                      
+
+### Create a final dataframe for accuracy and RTs analyses
+# add a new variable specifying whether the participant is attending the high or Low_Rewed color
+data.final$Condition = ifelse(data.final$RewardedColor==data.final$AttendedColor,"High_Rew","Low_Rew")
+# make this variable a factor for further analyses
+data.final$Condition = factor(data.final$Condition)
+
+# Exclude subjects without EEG
+missing_eeg = c(5,10,13,27)
+data.final = data.final[!data.final$ParticipantNo %in% missing_eeg,]
+
+```
+## D prime
+### Means - D prime - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(dprime, na.rm = TRUE), digits = 2), " [", round(hdi(dprime)[[1]], digits = 2), " ", round(hdi(dprime)[[2]], digits = 2), "]")))
+
+names(summary) = c("Reward phase", "Reward probability", "Dprime")
+
+# rename conditions
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                                "Acq1" = "Acquisition1",
+                                "Acq2" = "Acquisition2",
+                                "Bsln1" = "Baseline1",
+                                "Bsln2" = "Baseline2",
+                                "Ext1" = "Extinction1",
+                                "Ext2" = "Extinction2")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+kable(summary, caption = "Dprime per condition")
+```
+
+### Plot
+
+```{r, warning=FALSE, message=FALSE}
+# # Plot FA rates------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] <- "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] <- "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq1" = "Acquisition1",
+                                "Acq2" = "Acquisition2",
+                                "Bsln1" = "Baseline1",
+                                "Bsln2" = "Baseline2",
+                                "Ext1" = "Extinction1",
+                                "Ext2" = "Extinction2")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+  # Pirate plot
+  pirateplot(formula=dprime ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
+             main="Dprime", # main title
+             ylim=c(-2,4), # y-axis: limits
+             ylab="Dprime", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             point.col="black", # points: color
+             point.o=.3, # points: opacity (0-1)
+             avg.line.fun = median,
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             bty="l", # plot box type
+             back.col="white") # background, color
+  
+```
+
+\newpage
+
+### Statistics 
+
+```{r, warning=FALSE, message=FALSE}
+# Set the working directory in order to load the models
+# Set working directory
+setwd(here("brms_models"))
+
+
+model.full.Acc.dprime.split = readRDS("model.full.Acc.dprime.split.rds")
+compare.waic.Acc.dprime.split = readRDS("compare.Acc.dprime.split.waic")
+compare.Acc.dprime.split.waic.weights = readRDS("compare.Acc.dprime.split.waic.weights")
+bR2.null.Acc.dprime.split = readRDS("bR2.null.Acc.dprime.split")
+bR2.expphase.Acc.dprime.split = readRDS("bR2.expphase.Acc.dprime.split")
+bR2.full.Acc.dprime.split = readRDS("bR2.full.Acc.dprime.split")
+```
+
+### Model comparison with WAIC
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.waic.Acc.dprime.split)
+```
+
+### Model comparison with WAIC weights
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.Acc.dprime.split.waic.weights)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.Acc.dprime.split)
+```
+
+Experiment phase model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.Acc.dprime.split)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.full.Acc.dprime.split)
+```
+
+### Checking the best model
+
+Plotting the chains
+```{r, warning=FALSE, message=FALSE}
+# Plot chains
+plot(model.full.Acc.dprime.split, pars = "^b_", ask = FALSE, N=6)
+```
+
+Summary of the best model 
+
+```{r, warning=FALSE, message=FALSE}
+# Summary of the best model
+print(tidy(model.full.Acc.dprime.split, par_type = "non-varying"), digits = 1)
+```
+
+### Plotting the best model
+#### Sample from the posterior
+```{r, warning=FALSE, message=FALSE}
+# Analyzing the posterior and differences between conditions
+
+post = posterior_samples(model.full.Acc.dprime.split, "^b")
+
+
+################################################ Baseline 1 ####
+
+######### High reward
+Baseline1_High = post[["b_Intercept"]]
+######### Low reward
+Baseline1_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Baseline 2 ####
+
+######### High reward
+Baseline2_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseBsln2"]] 
+######### Low reward
+Baseline2_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseBsln2"]] +
+  post[["b_ConditionLow_Rew"]] +
+  post[["b_ExpPhaseBsln2:ConditionLow_Rew"]]
+
+################################################ Acquistion 1
+
+######### High reward
+Acquisition1_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq1"]] 
+######### Low reward
+Acquisition1_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq1"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq1:ConditionLow_Rew"]]
+
+################################################ Acquistion 2
+
+######### High reward
+Acquisition2_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq2"]] 
+######### Low reward
+Acquisition2_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq2"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq2:ConditionLow_Rew"]]
+
+################################################ Extinction 1
+
+######### High reward
+Extinction1_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt1"]] 
+######### Low reward
+Extinction1_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt1"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt1:ConditionLow_Rew"]]
+
+################################################ Extinction 2
+
+######### High reward
+Extinction2_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt2"]] 
+######### Low reward
+Extinction2_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt2"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt2:ConditionLow_Rew"]]
+```
+
+```{r, warning=FALSE, message=FALSE}
+
+# Data from the model
+
+# make a data frame
+posterior_conditions = melt(data.frame(Baseline1_High, Baseline2_High, Baseline1_Low, Baseline2_Low, Acquisition1_High, Acquisition1_Low, Acquisition2_High, Acquisition2_Low, Extinction1_High, Extinction1_Low, Extinction2_High, Extinction2_Low))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
+
+names(posterior_conditions)[3] = "dprime"
+
+posterior_conditions$`Reward Probability` = recode(posterior_conditions$`Reward Probability`,
+                                      "High" = "High reward",
+                                      "Low" = "Low reward")
+
+posterior_conditions$`Reward Phase` = recode(posterior_conditions$`Reward Phase`,
+                                "Acquisition1" = "Training1",
+                                "Acquisition2" = "Training2",
+                                "Baseline1" = "Baseline1",
+                                "Baseline1" = "Baseline2",
+                                "Extinction1" = "Test1",
+                                "Extinction2" = "Test2")
+
+# Make a table with credible intervals
+posterior_means = as.data.frame(c("Baseline1 High Reward", 
+                                  "Baseline2 High Reward", 
+                                  "Baseline1 Low Reward", 
+                                  "Baseline2 Low Reward",
+                                  "Acquisition1 High Reward", 
+                                  "Acquisition2 High Reward",
+                                  "Acquisition1 Low Reward", 
+                                  "Acquisition2 Low Reward", 
+                                  "Extinction1 High Reward", 
+                                  "Extinction2 High Reward",
+                                  "Extinction1 Low Reward",
+                                  "Extinction2 Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$low_95_CI = c(round(hdi(Baseline1_High)[[1]], digits = 2),
+                              round(hdi(Baseline2_High)[[1]], digits = 2),
+                        round(hdi(Baseline1_Low)[[1]], digits = 2),
+                        round(hdi(Baseline2_Low)[[1]], digits = 2),
+                        round(hdi(Acquisition1_High)[[1]], digits = 2),
+                        round(hdi(Acquisition2_High)[[1]], digits = 2),
+                        round(hdi(Acquisition1_Low)[[1]], digits = 2),
+                        round(hdi(Acquisition2_Low)[[1]], digits = 2),
+                        round(hdi(Extinction1_High)[[1]], digits = 2),
+                        round(hdi(Extinction2_High)[[1]], digits = 2),
+                        round(hdi(Extinction1_Low)[[1]], digits = 2),
+                        round(hdi(Extinction2_Low)[[1]], digits = 2))
+
+posterior_means$high_95_CI = c(round(hdi(Baseline1_High)[[2]], digits = 2),
+                              round(hdi(Baseline2_High)[[2]], digits = 2),
+                        round(hdi(Baseline1_Low)[[2]], digits = 2),
+                        round(hdi(Baseline2_Low)[[2]], digits = 2),
+                        round(hdi(Acquisition1_High)[[2]], digits = 2),
+                        round(hdi(Acquisition2_High)[[2]], digits = 2),
+                        round(hdi(Acquisition1_Low)[[2]], digits = 2),
+                        round(hdi(Acquisition2_Low)[[2]], digits = 2),
+                        round(hdi(Extinction1_High)[[2]], digits = 2),
+                        round(hdi(Extinction2_High)[[2]], digits = 2),
+                        round(hdi(Extinction1_Low)[[2]], digits = 2),
+                        round(hdi(Extinction2_Low)[[2]], digits = 2))
+
+posterior_means$low_50_CI = c(round(hdi(Baseline1_High,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline2_High,0.5)[[1]], digits = 2),
+                        round(hdi(Baseline1_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Baseline2_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition1_High,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition2_High,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition1_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition2_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction1_High,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction2_High,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction1_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction2_Low,0.5)[[1]], digits = 2))
+
+posterior_means$high_50_CI = c(round(hdi(Baseline1_High,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline2_High,0.5)[[2]], digits = 2),
+                        round(hdi(Baseline1_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Baseline2_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition1_High,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition2_High,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition1_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition2_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction1_High,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction2_High,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction1_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction2_Low,0.5)[[2]], digits = 2))
+
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probability`,
+                                      "High Reward" = "High reward",
+                                      "Low Reward" = "Low reward")
+
+posterior_means$`Reward Phase` = recode(posterior_means$`Reward Phase`,
+                                "Acquisition1" = "Training1",
+                                "Acquisition2" = "Training2",
+                                "Baseline1" = "Baseline1",
+                                "Baseline1" = "Baseline2",
+                                "Extinction1" = "Test1",
+                                "Extinction2" = "Test2")
+
+# Create this variable in order to have it for plotting (this is a quick hack: in plotting the CIs this variable is added and then subtracted)
+posterior_means$`dprime` = c(1,1,1,1,1,1)
+
+
+# Raw data
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] = "Reward Phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] = "Reward Probability"
+
+# rename conditions
+data.plot$`Reward Phase` = recode(data.plot$`Reward Phase`,
+                                "Acq1" = "Training1",
+                                "Acq2" = "Training2",
+                                "Bsln1" = "Baseline1",
+                                "Bsln2" = "Baseline2",
+                                "Ext1" = "Test1",
+                                "Ext2" = "Test2")
+
+data.plot$`Reward Probability` = recode(data.plot$`Reward Probability`,
+                                      "High_Rew" = "High reward",
+                                      "Low_Rew" = "Low reward")
+
+
+# Violin + the model
+# tiff("dprime_split.tiff", units="in", width=16, height=5, res=800)
+
+ggplot(data=data.plot, aes(x=`Reward Phase`, y=`dprime`, label=`Reward Probability`)) + 
+  # violin of the raw data
+  geom_violin(data=data.plot, color ="#636363",trim = TRUE,alpha="0.2") +
+  # individual participants for the raw data
+  # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+  geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+  # mean of the model
+  stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`dprime`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+  # 95 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`dprime`-`dprime`+low_95_CI, ymax=`dprime`-`dprime`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+  # 50 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`dprime`-`dprime`+low_50_CI, ymax=`dprime`-`dprime`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+  scale_x_discrete(limits=c("Baseline1","Baseline2", "Training1","Training2", "Test1","Test2")) +
+  facet_grid(.~`Reward Probability`) + 
+  scale_y_continuous(breaks=seq(-1,3,0.5)) +
+  labs(title="Sensitivity d`", y = "Sensitivity d`") + 
+  theme(
+    axis.line = element_line(size=1, colour = "black"),
+    panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+    panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+    panel.border = element_blank(), 
+    panel.background = element_blank(),
+    plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+    text=element_text(colour="black", size = 11),
+    axis.text.x=element_text(colour="black", size = 11),
+    axis.text.y=element_text(colour="black", size = 11),
+    axis.title=element_text(size=12,colour = "black")) + 
+  theme(strip.background =element_rect(fill="white")) + 
+  theme(strip.text = element_text(size = 12))
+  
+# dev.off()
+
+
+
+```
+
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline1 High Reward", 
+                                  "Baseline2 High Reward", 
+                                  "Baseline1 Low Reward", 
+                                  "Baseline2 Low Reward",
+                                  "Acquisition1 High Reward", 
+                                  "Acquisition2 High Reward",
+                                  "Acquisition1 Low Reward", 
+                                  "Acquisition2 Low Reward", 
+                                  "Extinction1 High Reward", 
+                                  "Extinction2 High Reward",
+                                  "Extinction1 Low Reward",
+                                  "Extinction2 Low Reward"))
+
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline1_High), digits = 2), " [", round(hdi(Baseline1_High)[[1]], digits = 2), " ", round(hdi(Baseline1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Baseline2_High), digits = 2), " [", round(hdi(Baseline2_High)[[1]], digits = 2), " ", round(hdi(Baseline2_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline1_Low), digits = 2), " [", round(hdi(Baseline1_Low)[[1]], digits = 2), " ", round(hdi(Baseline1_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline2_Low), digits = 2), " [", round(hdi(Baseline2_Low)[[1]], digits = 2), " ", round(hdi(Baseline2_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition1_High), digits = 2), " [", round(hdi(Acquisition1_High)[[1]], digits = 2), " ", round(hdi(Acquisition1_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition2_High), digits = 2), " [", round(hdi(Acquisition2_High)[[1]], digits = 2), " ", round(hdi(Acquisition2_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition1_Low), digits = 2), " [", round(hdi(Acquisition1_Low)[[1]], digits = 2), " ", round(hdi(Acquisition1_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition2_Low), digits = 2), " [", round(hdi(Acquisition2_Low)[[1]], digits = 2), " ", round(hdi(Acquisition2_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction1_High), digits = 2), " [", round(hdi(Extinction1_High)[[1]], digits = 2), " ", round(hdi(Extinction1_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction2_High), digits = 2), " [", round(hdi(Extinction2_High)[[1]], digits = 2), " ", round(hdi(Extinction2_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction1_Low), digits = 2), " [", round(hdi(Extinction1_Low)[[1]], digits = 2), " ", round(hdi(Extinction1_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction2_Low), digits = 2), " [", round(hdi(Extinction2_Low)[[1]], digits = 2), " ", round(hdi(Extinction2_Low)[[2]], digits = 2), "]"))
+
+names(posterior_means)[2] = "Mean [HDI]"
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+                        
+kable(posterior_means, caption = "Means per condition")
+
+```
+
+### Inference about the best model
+
+Check the difference between baseline1 vs. baseline2 in high reward   
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln1_Bsln2_High = Baseline2_High - Baseline1_High
+plotPost(Diff_Bsln1_Bsln2_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between baseline1 vs. baseline2 in low reward
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln1_Bsln2_Low = Baseline2_Low - Baseline1_Low
+plotPost(Diff_Bsln1_Bsln2_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between baseline2 vs. acquisition1 in high reward   
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln2_Acq1_High = Baseline2_High - Acquisition1_High
+plotPost(Diff_Bsln2_Acq1_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between baseline2 vs. acquisition1 in low reward
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln2_Acq1_Low = Acquisition1_Low - Baseline2_Low
+plotPost(Diff_Bsln2_Acq1_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+## Reaction times
+
+### Means - raw data
+
+```{r, warning=FALSE, message=FALSE}
+summary = ddply(data.final,.(ExpPhase,Condition),plyr::summarize,Mean=c(paste(round(mean(Hits.RTs, na.rm = TRUE), digits = 2), " [", round(hdi(Hits.RTs)[[1]], digits = 2), " ", round(hdi(Hits.RTs)[[2]], digits = 2), "]")))
+
+names(summary) = c("Reward phase", "Reward probability", "Reaction times")
+
+# rename conditions
+summary$`Reward phase` = recode(summary$`Reward phase`,
+                                "Acq1" = "Acquisition1",
+                                "Acq2" = "Acquisition2",
+                                "Bsln1" = "Baseline1",
+                                "Bsln2" = "Baseline2",
+                                "Ext1" = "Extinction1",
+                                "Ext2" = "Extinction2")
+
+summary$`Reward probability` = recode(summary$`Reward probability`,
+                           "High_Rew" = "High",
+                           "Low_Rew" = "Low")
+
+summary = as.data.frame(summary)
+
+kable(summary, caption = "Reaction times per condition")
+```
+
+### Plot
+
+```{r, warning=FALSE, message=FALSE}
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] = "Reward phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] = "Reward probability"
+
+# rename conditions
+data.plot$`Reward phase` = recode(data.plot$`Reward phase`,
+                                "Acq" = "Acquisition",
+                                "Bsln" = "Baseline",
+                                "Ext" = "Extinction")
+
+data.plot$`Reward probability` = recode(data.plot$`Reward probability`,
+                                      "High_Rew" = "High",
+                                      "Low_Rew" = "Low")
+
+# Pirate plot
+  pirateplot(formula = Hits.RTs ~ `Reward phase` + `Reward probability`, # dependent~independent variables
+             data=data.plot, # data frame
+             main="Reaction times", # main title
+             ylim=c(400,700), # y-axis: limits
+             ylab="Reaction time", # y-axis: label
+             theme=0, # preset theme (0: use your own)
+             point.col="black", # points: color
+             point.o=.3, # points: opacity (0-1)
+             avg.line.fun = median,
+             avg.line.col="black", # average line: color
+             avg.line.lwd=2, # average line: line width
+             avg.line.o=1, # average line: opacity (0-1)
+             bean.b.col="black", # bean border, color
+             bean.lwd=0.6, # bean border, line width
+             bean.lty=1, # bean border, line type (1: solid; 2:dashed; 3: dotted; ...)
+             bean.b.o=0.3, # bean border, opacity (0-1)
+             bean.f.col="gray", # bean filling, color
+             bean.f.o=.1, # bean filling, opacity (0-1)
+             cap.beans=FALSE, # max and min values of bean densities are capped at the limits found in the data
+             gl.col="gray", # gridlines: color
+             gl.lty=2, # gridlines: line type (1: solid; 2:dashed; 3: dotted; ...)
+             cex.lab=1, # axis labels: size
+             cex.axis=1, # axis numbers: size
+             cex.names = 1,
+             bty="l", # plot box type
+             back.col="white") # background, color
+```
+
+### Statistics
+```{r, warning=FALSE, message=FALSE}
+# Set the working directory in order to load the models
+# Set working directory
+setwd(here("brms_models"))
+
+model.full.RT.split = readRDS("model.full.RT.split.rds")
+compare.waic.RT.split = readRDS("compare.RT.split.waic")
+compare.RT.split.waic.weights = readRDS("compare.RT.split.waic.weights")
+bR2.null.RT.split = readRDS("bR2.null.RT.split")
+bR2.expphase.RT.split = readRDS("bR2.expphase.RT.split")
+bR2.full.RT.split = readRDS("bR2.full.RT.split")
+```
+
+### Model comparison with WAIC
+
+```{r, warning=FALSE, message=FALSE}
+print(compare.waic.RT.split)
+```
+
+### Bayesian R squared 
+
+Null model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.null.RT.split)
+```
+
+Experiment phase model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.expphase.RT.split)
+```
+
+Full model
+```{r, warning=FALSE, message=FALSE}
+print(bR2.full.RT.split)
+```
+
+### Checking the best model
+
+Plotting the chains
+```{r, warning=FALSE, message=FALSE}
+# Plot chains
+plot(model.full.RT.split, pars = "^b_", ask = FALSE, N=6)
+```
+
+Summary of the best model 
+
+```{r, warning=FALSE, message=FALSE}
+# Summary of the best model
+print(tidy(model.full.RT.split, par_type = "non-varying"), digits = 1)
+```
+
+
+### Plotting the best model
+#### Sample from the posterior
+```{r, warning=FALSE, message=FALSE}
+
+# Analyzing the posterior and differences between conditions
+
+post = posterior_samples(model.full.RT.split, "^b")
+
+
+################################################ Baseline 1 ####
+
+######### High reward
+Baseline1_High = post[["b_Intercept"]]
+######### Low reward
+Baseline1_Low = post[["b_Intercept"]] + 
+  post[["b_ConditionLow_Rew"]] 
+
+################################################ Baseline 2 ####
+
+######### High reward
+Baseline2_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseBsln2"]] 
+######### Low reward
+Baseline2_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseBsln2"]] +
+  post[["b_ConditionLow_Rew"]] +
+  post[["b_ExpPhaseBsln2:ConditionLow_Rew"]]
+
+################################################ Acquistion 1
+
+######### High reward
+Acquisition1_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq1"]] 
+######### Low reward
+Acquisition1_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq1"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq1:ConditionLow_Rew"]]
+
+################################################ Acquistion 2
+
+######### High reward
+Acquisition2_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq2"]] 
+######### Low reward
+Acquisition2_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseAcq2"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseAcq2:ConditionLow_Rew"]]
+
+################################################ Extinction 1
+
+######### High reward
+Extinction1_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt1"]] 
+######### Low reward
+Extinction1_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt1"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt1:ConditionLow_Rew"]]
+
+################################################ Extinction 2
+
+######### High reward
+Extinction2_High = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt2"]] 
+######### Low reward
+Extinction2_Low = post[["b_Intercept"]] + 
+  post[["b_ExpPhaseExt2"]] + 
+  post[["b_ConditionLow_Rew"]] + 
+  post[["b_ExpPhaseExt2:ConditionLow_Rew"]]
+```
+
+```{r, warning=FALSE, message=FALSE}
+# Data from the model
+
+# make a data frame
+posterior_conditions = melt(data.frame(Baseline1_High, Baseline2_High, Baseline1_Low, Baseline2_Low, Acquisition1_High, Acquisition1_Low, Acquisition2_High, Acquisition2_Low, Extinction1_High, Extinction1_Low, Extinction2_High, Extinction2_Low))
+
+posterior_conditions =  posterior_conditions %>% separate(variable, c("Reward Phase", "Reward Probability"), "_", extra = "merge")
+
+names(posterior_conditions)[3] = "Reaction time"
+
+posterior_conditions$`Reward Probability` = recode(posterior_conditions$`Reward Probability`,
+                                      "High" = "High reward",
+                                      "Low" = "Low reward")
+
+posterior_conditions$`Reward Phase` = recode(posterior_conditions$`Reward Phase`,
+                                "Acquisition1" = "Training1",
+                                "Acquisition2" = "Training2",
+                                "Baseline1" = "Baseline1",
+                                "Baseline1" = "Baseline2",
+                                "Extinction1" = "Test1",
+                                "Extinction2" = "Test2")
+
+# Make a table with credible intervals
+posterior_means = as.data.frame(c("Baseline1 High Reward", 
+                                  "Baseline2 High Reward", 
+                                  "Baseline1 Low Reward", 
+                                  "Baseline2 Low Reward",
+                                  "Acquisition1 High Reward", 
+                                  "Acquisition2 High Reward",
+                                  "Acquisition1 Low Reward", 
+                                  "Acquisition2 Low Reward", 
+                                  "Extinction1 High Reward", 
+                                  "Extinction2 High Reward",
+                                  "Extinction1 Low Reward",
+                                  "Extinction2 Low Reward"))
+names(posterior_means)[1] = "Condition"
+
+posterior_means$low_95_CI = c(round(hdi(Baseline1_High)[[1]], digits = 2),
+                              round(hdi(Baseline2_High)[[1]], digits = 2),
+                        round(hdi(Baseline1_Low)[[1]], digits = 2),
+                        round(hdi(Baseline2_Low)[[1]], digits = 2),
+                        round(hdi(Acquisition1_High)[[1]], digits = 2),
+                        round(hdi(Acquisition2_High)[[1]], digits = 2),
+                        round(hdi(Acquisition1_Low)[[1]], digits = 2),
+                        round(hdi(Acquisition2_Low)[[1]], digits = 2),
+                        round(hdi(Extinction1_High)[[1]], digits = 2),
+                        round(hdi(Extinction2_High)[[1]], digits = 2),
+                        round(hdi(Extinction1_Low)[[1]], digits = 2),
+                        round(hdi(Extinction2_Low)[[1]], digits = 2))
+
+posterior_means$high_95_CI = c(round(hdi(Baseline1_High)[[2]], digits = 2),
+                              round(hdi(Baseline2_High)[[2]], digits = 2),
+                        round(hdi(Baseline1_Low)[[2]], digits = 2),
+                        round(hdi(Baseline2_Low)[[2]], digits = 2),
+                        round(hdi(Acquisition1_High)[[2]], digits = 2),
+                        round(hdi(Acquisition2_High)[[2]], digits = 2),
+                        round(hdi(Acquisition1_Low)[[2]], digits = 2),
+                        round(hdi(Acquisition2_Low)[[2]], digits = 2),
+                        round(hdi(Extinction1_High)[[2]], digits = 2),
+                        round(hdi(Extinction2_High)[[2]], digits = 2),
+                        round(hdi(Extinction1_Low)[[2]], digits = 2),
+                        round(hdi(Extinction2_Low)[[2]], digits = 2))
+
+posterior_means$low_50_CI = c(round(hdi(Baseline1_High,0.5)[[1]], digits = 2),
+                              round(hdi(Baseline2_High,0.5)[[1]], digits = 2),
+                        round(hdi(Baseline1_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Baseline2_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition1_High,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition2_High,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition1_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Acquisition2_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction1_High,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction2_High,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction1_Low,0.5)[[1]], digits = 2),
+                        round(hdi(Extinction2_Low,0.5)[[1]], digits = 2))
+
+posterior_means$high_50_CI = c(round(hdi(Baseline1_High,0.5)[[2]], digits = 2),
+                              round(hdi(Baseline2_High,0.5)[[2]], digits = 2),
+                        round(hdi(Baseline1_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Baseline2_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition1_High,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition2_High,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition1_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Acquisition2_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction1_High,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction2_High,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction1_Low,0.5)[[2]], digits = 2),
+                        round(hdi(Extinction2_Low,0.5)[[2]], digits = 2))
+
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+posterior_means$`Reward Probability` = recode(posterior_means$`Reward Probability`,
+                                      "High Reward" = "High reward",
+                                      "Low Reward" = "Low reward")
+
+posterior_means$`Reward Phase` = recode(posterior_means$`Reward Phase`,
+                                "Acquisition1" = "Training1",
+                                "Acquisition2" = "Training2",
+                                "Baseline1" = "Baseline1",
+                                "Baseline1" = "Baseline2",
+                                "Extinction1" = "Test1",
+                                "Extinction2" = "Test2")
+
+# Create this variable in order to have it for plotting (this is a quick hack: in plotting the CIs this variable is added and then subtracted)
+posterior_means$`Reaction time` = c(555,555,555,555,555,555)
+
+
+# Raw data
+# Prepare the dataset
+data.plot = data.final
+
+# rename variables
+colnames(data.plot)[colnames(data.plot)=="ExpPhase"] = "Reward Phase"
+colnames(data.plot)[colnames(data.plot)=="Condition"] = "Reward Probability"
+
+# rename conditions
+data.plot$`Reward Phase` = recode(data.plot$`Reward Phase`,
+                                "Acq1" = "Training1",
+                                "Acq2" = "Training2",
+                                "Bsln1" = "Baseline1",
+                                "Bsln2" = "Baseline2",
+                                "Ext1" = "Test1",
+                                "Ext2" = "Test2")
+
+data.plot$`Reward Probability` = recode(data.plot$`Reward Probability`,
+                                      "High_Rew" = "High reward",
+                                      "Low_Rew" = "Low reward")
+
+data.plot$`Reaction time` = data.plot$Hits.RTs
+
+
+# Violin + the model
+# tiff("RTs_split.tiff", units="in", width=16, height=5, res=800)
+
+ggplot(data=data.plot, aes(x=`Reward Phase`, y=`Reaction time`, label=`Reward Probability`)) + 
+  # violin of the raw data
+  geom_violin(data=data.plot, color ="#636363",trim = TRUE,alpha="0.2") +
+  # individual participants for the raw data
+  # geom_point(binaxis='y', stackdir='center', dotsize=0.5, alpha="0.2") + 
+  geom_jitter(dotsize=0.9, alpha="0.6",width = 0.1,color="#bdbdbd")+
+  # mean of the model
+  stat_summary(data = posterior_conditions, aes(x=`Reward Phase`, y=`Reaction time`, group=`Reward Probability`),fun.y = mean, geom="line",size=0.8, colour = "#636363")+ 
+  # 95 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`Reaction time`-`Reaction time`+low_95_CI, ymax=`Reaction time`-`Reaction time`+high_95_CI), size = 4, color = "#74a9cf", alpha = 1) +
+  # 50 credible intervals of the model
+  geom_linerange(data = posterior_means,width=.1, aes(ymin=`Reaction time`-`Reaction time`+low_50_CI, ymax=`Reaction time`-`Reaction time`+high_50_CI), size = 4, color = "#045a8d", alpha = 1) +
+  scale_x_discrete(limits=c("Baseline1","Baseline2", "Training1","Training2", "Test1","Test2")) +
+  facet_grid(.~`Reward Probability`) + 
+  scale_y_continuous(breaks=seq(400,750,50)) +
+  labs(title="Reaction time", y = "Reaction time") + 
+  theme(
+    axis.line = element_line(size=1, colour = "black"),
+    panel.grid.major = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+    panel.grid.minor = element_line(colour = "grey",size = 0.1,linetype = "dashed"),
+    panel.border = element_blank(), 
+    panel.background = element_blank(),
+    plot.title = element_text(size = 12,  face = "bold",hjust = 0.5),
+    text=element_text(colour="black", size = 11),
+    axis.text.x=element_text(colour="black", size = 11),
+    axis.text.y=element_text(colour="black", size = 11),
+    axis.title=element_text(size=12,colour = "black")) + 
+  theme(strip.background =element_rect(fill="white")) + 
+  theme(strip.text = element_text(size = 12))
+  
+# dev.off()
+
+
+
+```
+
+
+Table of means across conditions
+
+```{r, warning=FALSE, message=FALSE}
+
+# Make a table with conditions
+posterior_means = as.data.frame(c("Baseline1 High Reward", 
+                                  "Baseline2 High Reward", 
+                                  "Baseline1 Low Reward", 
+                                  "Baseline2 Low Reward",
+                                  "Acquisition1 High Reward", 
+                                  "Acquisition2 High Reward",
+                                  "Acquisition1 Low Reward", 
+                                  "Acquisition2 Low Reward", 
+                                  "Extinction1 High Reward", 
+                                  "Extinction2 High Reward",
+                                  "Extinction1 Low Reward",
+                                  "Extinction2 Low Reward"))
+
+names(posterior_means)[1] = "Condition"
+
+posterior_means$Mean = c(paste(round(mean(Baseline1_High), digits = 2), " [", round(hdi(Baseline1_High)[[1]], digits = 2), " ", round(hdi(Baseline1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Baseline2_High), digits = 2), " [", round(hdi(Baseline2_High)[[1]], digits = 2), " ", round(hdi(Baseline2_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline1_Low), digits = 2), " [", round(hdi(Baseline1_Low)[[1]], digits = 2), " ", round(hdi(Baseline1_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Baseline2_Low), digits = 2), " [", round(hdi(Baseline2_Low)[[1]], digits = 2), " ", round(hdi(Baseline2_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition1_High), digits = 2), " [", round(hdi(Acquisition1_High)[[1]], digits = 2), " ", round(hdi(Acquisition1_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition2_High), digits = 2), " [", round(hdi(Acquisition2_High)[[1]], digits = 2), " ", round(hdi(Acquisition2_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition1_Low), digits = 2), " [", round(hdi(Acquisition1_Low)[[1]], digits = 2), " ", round(hdi(Acquisition1_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Acquisition2_Low), digits = 2), " [", round(hdi(Acquisition2_Low)[[1]], digits = 2), " ", round(hdi(Acquisition2_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction1_High), digits = 2), " [", round(hdi(Extinction1_High)[[1]], digits = 2), " ", round(hdi(Extinction1_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction2_High), digits = 2), " [", round(hdi(Extinction2_High)[[1]], digits = 2), " ", round(hdi(Extinction2_High)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction1_Low), digits = 2), " [", round(hdi(Extinction1_Low)[[1]], digits = 2), " ", round(hdi(Extinction1_Low)[[2]], digits = 2), "]"),
+                        paste(round(mean(Extinction2_Low), digits = 2), " [", round(hdi(Extinction2_Low)[[1]], digits = 2), " ", round(hdi(Extinction2_Low)[[2]], digits = 2), "]"))
+
+names(posterior_means)[2] = "Mean [HDI]"
+
+posterior_means =  posterior_means %>% separate(Condition, c("Reward Phase", "Reward Probability"), " ", extra = "merge")
+
+kable(posterior_means, caption = "Means per condition")
+```
+
+### Inference about the best model
+
+Check the difference between baseline1 vs. baseline2 in high reward   
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln1_Bsln2_High = Baseline2_High - Baseline1_High
+plotPost(Diff_Bsln1_Bsln2_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between baseline1 vs. baseline2 in low reward
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln1_Bsln2_Low = Baseline2_Low - Baseline1_Low
+plotPost(Diff_Bsln1_Bsln2_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between baseline2 vs. acquisition1 in high reward   
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln2_Acq1_High = Baseline2_High - Acquisition1_High
+plotPost(Diff_Bsln2_Acq1_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+```
+
+Check the difference between baseline2 vs. acquisition1 in low reward
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln2_Acq1_Low = Acquisition1_Low - Baseline2_Low
+plotPost(Diff_Bsln2_Acq1_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
