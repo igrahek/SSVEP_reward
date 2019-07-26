@@ -4058,32 +4058,32 @@ Table of means across conditions
 
 # Make a table with conditions
 posterior_means = as.data.frame(c("Baseline1 High Reward", 
-                                  "Baseline2 High Reward", 
                                   "Baseline1 Low Reward", 
+                                  "Baseline2 High Reward", 
                                   "Baseline2 Low Reward",
                                   "Acquisition1 High Reward", 
-                                  "Acquisition2 High Reward",
-                                  "Acquisition1 Low Reward", 
+                                  "Acquisition1 Low Reward",
+                                  "Acquisition2 High Reward", 
                                   "Acquisition2 Low Reward", 
                                   "Extinction1 High Reward", 
-                                  "Extinction2 High Reward",
                                   "Extinction1 Low Reward",
+                                  "Extinction2 High Reward",
                                   "Extinction2 Low Reward"))
 
 names(posterior_means)[1] = "Condition"
 
 posterior_means$Mean = c(paste(round(mean(Baseline1_High), digits = 2), " [", round(hdi(Baseline1_High)[[1]], digits = 2), " ", round(hdi(Baseline1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Baseline1_Low), digits = 2), " [", round(hdi(Baseline1_Low)[[1]], digits = 2), " ", round(hdi(Baseline1_Low)[[2]], digits = 2), "]"),
                          paste(round(mean(Baseline2_High), digits = 2), " [", round(hdi(Baseline2_High)[[1]], digits = 2), " ", round(hdi(Baseline2_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Baseline1_Low), digits = 2), " [", round(hdi(Baseline1_Low)[[1]], digits = 2), " ", round(hdi(Baseline1_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Baseline2_Low), digits = 2), " [", round(hdi(Baseline2_Low)[[1]], digits = 2), " ", round(hdi(Baseline2_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition1_High), digits = 2), " [", round(hdi(Acquisition1_High)[[1]], digits = 2), " ", round(hdi(Acquisition1_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition2_High), digits = 2), " [", round(hdi(Acquisition2_High)[[1]], digits = 2), " ", round(hdi(Acquisition2_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition1_Low), digits = 2), " [", round(hdi(Acquisition1_Low)[[1]], digits = 2), " ", round(hdi(Acquisition1_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition2_Low), digits = 2), " [", round(hdi(Acquisition2_Low)[[1]], digits = 2), " ", round(hdi(Acquisition2_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction1_High), digits = 2), " [", round(hdi(Extinction1_High)[[1]], digits = 2), " ", round(hdi(Extinction1_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction2_High), digits = 2), " [", round(hdi(Extinction2_High)[[1]], digits = 2), " ", round(hdi(Extinction2_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction1_Low), digits = 2), " [", round(hdi(Extinction1_Low)[[1]], digits = 2), " ", round(hdi(Extinction1_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction2_Low), digits = 2), " [", round(hdi(Extinction2_Low)[[1]], digits = 2), " ", round(hdi(Extinction2_Low)[[2]], digits = 2), "]"))
+                         paste(round(mean(Baseline2_Low), digits = 2), " [", round(hdi(Baseline2_Low)[[1]], digits = 2), " ", round(hdi(Baseline2_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition1_High), digits = 2), " [", round(hdi(Acquisition1_High)[[1]], digits = 2), " ", round(hdi(Acquisition1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition1_Low), digits = 2), " [", round(hdi(Acquisition1_Low)[[1]], digits = 2), " ", round(hdi(Acquisition1_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition2_High), digits = 2), " [", round(hdi(Acquisition2_High)[[1]], digits = 2), " ", round(hdi(Acquisition2_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition2_Low), digits = 2), " [", round(hdi(Acquisition2_Low)[[1]], digits = 2), " ", round(hdi(Acquisition2_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction1_High), digits = 2), " [", round(hdi(Extinction1_High)[[1]], digits = 2), " ", round(hdi(Extinction1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction1_Low), digits = 2), " [", round(hdi(Extinction1_Low)[[1]], digits = 2), " ", round(hdi(Extinction1_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction2_High), digits = 2), " [", round(hdi(Extinction2_High)[[1]], digits = 2), " ", round(hdi(Extinction2_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction2_Low), digits = 2), " [", round(hdi(Extinction2_Low)[[1]], digits = 2), " ", round(hdi(Extinction2_Low)[[2]], digits = 2), "]"))
 
 names(posterior_means)[2] = "Mean [HDI]"
 
@@ -4122,6 +4122,7 @@ Check the difference between baseline2 vs. acquisition1 in low reward
 Diff_Bsln2_Acq1_Low = Acquisition1_Low - Baseline2_Low
 plotPost(Diff_Bsln2_Acq1_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
 ```
+
 ## Reaction times
 
 ### Means - raw data
@@ -4502,32 +4503,32 @@ Table of means across conditions
 
 # Make a table with conditions
 posterior_means = as.data.frame(c("Baseline1 High Reward", 
-                                  "Baseline2 High Reward", 
                                   "Baseline1 Low Reward", 
+                                  "Baseline2 High Reward", 
                                   "Baseline2 Low Reward",
                                   "Acquisition1 High Reward", 
-                                  "Acquisition2 High Reward",
-                                  "Acquisition1 Low Reward", 
+                                  "Acquisition1 Low Reward",
+                                  "Acquisition2 High Reward", 
                                   "Acquisition2 Low Reward", 
                                   "Extinction1 High Reward", 
-                                  "Extinction2 High Reward",
                                   "Extinction1 Low Reward",
+                                  "Extinction2 High Reward",
                                   "Extinction2 Low Reward"))
 
 names(posterior_means)[1] = "Condition"
 
 posterior_means$Mean = c(paste(round(mean(Baseline1_High), digits = 2), " [", round(hdi(Baseline1_High)[[1]], digits = 2), " ", round(hdi(Baseline1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Baseline1_Low), digits = 2), " [", round(hdi(Baseline1_Low)[[1]], digits = 2), " ", round(hdi(Baseline1_Low)[[2]], digits = 2), "]"),
                          paste(round(mean(Baseline2_High), digits = 2), " [", round(hdi(Baseline2_High)[[1]], digits = 2), " ", round(hdi(Baseline2_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Baseline1_Low), digits = 2), " [", round(hdi(Baseline1_Low)[[1]], digits = 2), " ", round(hdi(Baseline1_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Baseline2_Low), digits = 2), " [", round(hdi(Baseline2_Low)[[1]], digits = 2), " ", round(hdi(Baseline2_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition1_High), digits = 2), " [", round(hdi(Acquisition1_High)[[1]], digits = 2), " ", round(hdi(Acquisition1_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition2_High), digits = 2), " [", round(hdi(Acquisition2_High)[[1]], digits = 2), " ", round(hdi(Acquisition2_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition1_Low), digits = 2), " [", round(hdi(Acquisition1_Low)[[1]], digits = 2), " ", round(hdi(Acquisition1_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Acquisition2_Low), digits = 2), " [", round(hdi(Acquisition2_Low)[[1]], digits = 2), " ", round(hdi(Acquisition2_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction1_High), digits = 2), " [", round(hdi(Extinction1_High)[[1]], digits = 2), " ", round(hdi(Extinction1_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction2_High), digits = 2), " [", round(hdi(Extinction2_High)[[1]], digits = 2), " ", round(hdi(Extinction2_High)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction1_Low), digits = 2), " [", round(hdi(Extinction1_Low)[[1]], digits = 2), " ", round(hdi(Extinction1_Low)[[2]], digits = 2), "]"),
-                        paste(round(mean(Extinction2_Low), digits = 2), " [", round(hdi(Extinction2_Low)[[1]], digits = 2), " ", round(hdi(Extinction2_Low)[[2]], digits = 2), "]"))
+                         paste(round(mean(Baseline2_Low), digits = 2), " [", round(hdi(Baseline2_Low)[[1]], digits = 2), " ", round(hdi(Baseline2_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition1_High), digits = 2), " [", round(hdi(Acquisition1_High)[[1]], digits = 2), " ", round(hdi(Acquisition1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition1_Low), digits = 2), " [", round(hdi(Acquisition1_Low)[[1]], digits = 2), " ", round(hdi(Acquisition1_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition2_High), digits = 2), " [", round(hdi(Acquisition2_High)[[1]], digits = 2), " ", round(hdi(Acquisition2_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Acquisition2_Low), digits = 2), " [", round(hdi(Acquisition2_Low)[[1]], digits = 2), " ", round(hdi(Acquisition2_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction1_High), digits = 2), " [", round(hdi(Extinction1_High)[[1]], digits = 2), " ", round(hdi(Extinction1_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction1_Low), digits = 2), " [", round(hdi(Extinction1_Low)[[1]], digits = 2), " ", round(hdi(Extinction1_Low)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction2_High), digits = 2), " [", round(hdi(Extinction2_High)[[1]], digits = 2), " ", round(hdi(Extinction2_High)[[2]], digits = 2), "]"),
+                         paste(round(mean(Extinction2_Low), digits = 2), " [", round(hdi(Extinction2_Low)[[1]], digits = 2), " ", round(hdi(Extinction2_Low)[[2]], digits = 2), "]"))
 
 names(posterior_means)[2] = "Mean [HDI]"
 
