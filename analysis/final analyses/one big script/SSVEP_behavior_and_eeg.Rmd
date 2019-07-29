@@ -856,7 +856,7 @@ plotPost(Diff_Att_NotAtt_Ext_Low, xlab = "", col = "#b3cde0", cex = 1, showCurve
 Check the difference between baseline and acquisition in high reward attended
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Bsln_Acq_High_Att = Baseline_High_Attended - Acquisition_High_Attended
+Diff_Bsln_Acq_High_Att = Acquisition_High_Attended - Baseline_High_Attended
 plotPost(Diff_Bsln_Acq_High_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
@@ -870,7 +870,7 @@ plotPost(Diff_Bsln_Acq_Low_Att, xlab = "", col = "#b3cde0", cex = 1, showCurve =
 Check the difference between baseline and acquisition in high reward not attended
 
 ```{r, warning=FALSE, message=FALSE}
-Diff_Bsln_Acq_High_NotAtt = Baseline_High_NotAttended - Acquisition_High_NotAttended
+Diff_Bsln_Acq_High_NotAtt =  Acquisition_High_NotAttended - Baseline_High_NotAttended
 plotPost(Diff_Bsln_Acq_High_NotAtt, xlab = "", col = "#b3cde0", cex = 1, showCurve = FALSE, compVal = 0)
 ```
 
