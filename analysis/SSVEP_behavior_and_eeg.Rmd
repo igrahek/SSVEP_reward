@@ -12,8 +12,8 @@ output:
 
 # About the code
 
-Experiment: FSAReward (Ivan Grahek*, Antonio Schettino*, Gilles Pourtois, Ernst Koster, & Søren Andersen) (*: co-first authors)
-Code written by: Ivan Grahek & Antonio Schettino (2016-2018)
+Experiment: FSAReward (Ivan Grahek*, Antonio Schettino*, Ernst Koster, & Søren Andersen) (*: co-first authors)
+Code written by: Ivan Grahek & Antonio Schettino (2016-2019)
 Description: Code for the analysis of EEG data for Experiment 1 of the SSVEP - reward project.  
 
 _This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>._
