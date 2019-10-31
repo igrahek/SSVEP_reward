@@ -6,6 +6,7 @@
 # Description: Code for data preprocessing and the analysis of EEG and behavioral data for Experiment 1 of the SSVEP - reward project. 
 
 
+
 #### EEG  ####
 
 # Clear the environement and import the data------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,16 +77,6 @@ data = ddply(data,.(Subject,RecordedFrequency),transform,
 # Divide amplitudes in each Subject, Frequency, and Condition by the Mean Amplitude (normalization)
 data$Amplitude = data$Amplitude/data$MeanAmplitude
 
-# Calculate the reward index - High reward minus Low reward
-data.reward = ddply(data, .(Subject,ExpPhase,Attention), transform, Reward = Amplitude[Condition=="High_Rew"]-Amplitude[Condition=="Low_Rew"])
-# Delete the Attention column and rows which are not necessary (indexes repeated twice)
-data.reward = subset(data.reward,Condition=="High_Rew") #keep only Att as it is equal to NotAtt
-data.reward$Condition = NULL  #drop the Condition column
-
-# Sort the data 
-data.reward$ExpPhase = factor(data.reward$ExpPhase, levels = c("Bsln","Acq","Ext"))
-data.reward = data.reward[order(data.reward$Subject,data.reward$Attention,data.reward$ExpPhase),]
-
 # Convert variables to be used in analyses into factors
 data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "RecordingAndCondition")] = 
   lapply(data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "RecordingAndCondition")], factor)
@@ -123,7 +114,6 @@ null = brm(Amplitude ~ 1 + (1|Subject),
                               data=data,
                               family=gaussian(),
                               prior = prior,
-                              warmup = 2000,
                               iter = 6000,
                               save_all_pars = TRUE,
                               control = list(adapt_delta = 0.99),
@@ -142,7 +132,6 @@ expphase = brm(Amplitude ~ ExpPhase + (ExpPhase|Subject),
                                   data=data,
                                   family=gaussian(),
                                   prior = prior,
-                                  warmup = 2000,
                                   iter = 6000,
                                   save_all_pars = TRUE,
                                   control = list(adapt_delta = 0.99),
@@ -155,7 +144,6 @@ attention = brm(Amplitude ~ Attention + (Attention|Subject),
                                    data=data,
                                    family=gaussian(),
                                    prior = prior,  
-                                   warmup = 2000,
                                    iter = 6000,
                                    save_all_pars = TRUE,
                                    control = list(adapt_delta = 0.99),
@@ -168,7 +156,6 @@ phaseANDattention = brm(Amplitude ~ ExpPhase + Attention + (ExpPhase + Attention
                                         data=data,
                                         family=gaussian(),
                                         prior = prior,
-                                        warmup = 2000,
                                         iter = 6000,
                                         save_all_pars = TRUE,
                                         control = list(adapt_delta = 0.99),
@@ -181,7 +168,6 @@ phaseANDattention_interaction = brm(Amplitude ~ ExpPhase * Attention + (ExpPhase
                         data=data,
                         family=gaussian(),
                         prior = prior,
-                        warmup = 2000,
                         iter = 6000,
                         save_all_pars = TRUE,
                         control = list(adapt_delta = 0.99),
@@ -194,7 +180,6 @@ rewardTimesPhasePlusAtt = brm(Amplitude ~ Condition * ExpPhase + Attention + (Ex
                          data=data,
                          family=gaussian(),
                          prior = prior,
-                         warmup = 2000,
                          iter = 6000,
                          save_all_pars = TRUE,
                          control = list(adapt_delta = 0.99),
@@ -207,7 +192,6 @@ full = brm(Amplitude ~ Condition * ExpPhase * Attention + (ExpPhase + Attention 
                               data=data,
                               family=gaussian(),
                               prior = prior,
-                              warmup = 2000,
                               iter = 6000,
                               save_all_pars = TRUE,
                               control = list(adapt_delta = 0.99),
@@ -242,6 +226,7 @@ saveRDS(bR2.rewardTimesPhasePlusAtt.EEG,file="bR2.rewardTimesPhasePlusAtt.EEG.al
 #Full
 bR2.full.EEG = bayes_R2(full)
 saveRDS(bR2.full.EEG,file="bR2.full.EEG.alltrials")
+
 
 
 
