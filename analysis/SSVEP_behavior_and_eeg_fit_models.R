@@ -81,9 +81,6 @@ data$Amplitude = data$Amplitude/data$MeanAmplitude
 data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "RecordingAndCondition")] = 
   lapply(data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "RecordingAndCondition")], factor)
 
-data.diff[c("Subject", "Condition","ExpPhase", "RecordingAndCondition")] = 
-  lapply(data.diff[c("Subject", "Condition","ExpPhase",  "RecordingAndCondition")], factor)
-
 # Save the final data into a new variable and delete the subject with the noisy EEG data
 data_all = subset(data, Subject!=14)
 
