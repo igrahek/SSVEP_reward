@@ -24,7 +24,7 @@ Description: Code for the summary of results of behavioral and EEG data for Expe
 # EEG
 ## Topography & spectra
 
-![Topography and spectra](Figure1.jpg)
+![Topography and spectra](Figure4.jpg)
 \newpage
 
 ## Import data
