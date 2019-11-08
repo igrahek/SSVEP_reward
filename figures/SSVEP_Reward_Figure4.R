@@ -22,7 +22,7 @@ library(cowplot)
 library(eegUtils)
 library(ggpirate)
 
-########################################### FIGURE 1 ###########################################
+########################################### FIGURE 2 ###########################################
 ######################################### TOPOGRAPHIES #########################################
 
 # load electrode locations
@@ -174,30 +174,6 @@ spectra_all <-
     plot.title = element_text(size = 22, hjust = .5)
   )
 
-# zoom-in to relevant frequencies
-# plot (frequency range: 9-11 Hz)
-spectra_10Hz <-
-  spectra_all +
-  coord_cartesian(xlim = c(9, 11), ylim = c(.5, 1.5)) +
-  ggtitle("10 Hz") +
-  theme(
-    axis.title.x = element_blank(),
-    axis.text.x = element_blank(),
-    legend.position = "none"
-  )
-
-# plot (frequency range: 11-13 Hz)
-spectra_12Hz <-
-  spectra_all +
-  coord_cartesian(xlim = c(11, 13), ylim = c(.5, 1.5)) +
-  ggtitle("12 Hz") +
-  theme(
-    axis.title.y = element_blank(),
-    axis.title.x = element_blank(),
-    axis.text.x = element_blank(),
-    legend.position = "none"
-  )
-
 ######################################## ARRANGE PLOTS #########################################
 
 # arrange topographies in a single row
@@ -221,115 +197,20 @@ spectra_all <- plot_grid(spectra_all,
   labels = "B"
 )
 
-# arrange zoom-in spectra in a single row
-spectra_row <- plot_grid(spectra_10Hz,
-  spectra_12Hz,
-  align = "vh",
-  hjust = -1,
-  nrow = 1,
-  scale = .8,
-  labels = "C"
-)
-
 # all plots
-figure_1 <- plot_grid(topo_row,
+figure_4 <- plot_grid(topo_row,
   spectra_all,
-  spectra_row,
   ncol = 1,
-  nrow = 3
+  nrow = 2
 )
 
 # save as jpg
-save_plot(paste0(getwd(), "/Figure1.jpg"),
-  figure_1,
+save_plot(paste0(getwd(), "/Figure4.jpg"),
+  figure_4,
   base_height = 10,
   base_aspect_ratio = 1.1
 )
 
-################################################# FIGURE 2 ##################################################
-######################################### RDI PLOT SSVEP AMPLITUDES #########################################
-
-amps <- read_csv(paste0(getwd(), "/grandAverage_amplitudes.csv")) %>% # load data
-  gather(
-    key = cond,
-    value = amplitude,
-    "BslnRedAttended":"ExtBlueAttended"
-  ) %>%
-  mutate(
-    participant = as.factor(Subject),
-    frequency = recode(factor(Frequency),
-      "10" = "10 Hz", "12" = "12 Hz"
-    ),
-    Phase = recode(
-      factor(cond),
-      "BslnRedAttended" = "Baseline", "BslnBlueAttended" = "Baseline",
-      "AcqRedAttended" = "Training", "AcqBlueAttended" = "Training",
-      "ExtRedAttended" = "Test", "ExtBlueAttended" = "Test"
-    ),
-    attended = recode(
-      factor(cond),
-      "BslnRedAttended" = "red", "BslnBlueAttended" = "blue",
-      "AcqRedAttended" = "red", "AcqBlueAttended" = "blue",
-      "ExtRedAttended" = "red", "ExtBlueAttended" = "blue"
-    ),
-    condition = as.factor(paste(Phase, attended, sep = " "))
-  ) %>%
-  dplyr::select(participant, frequency, condition, Phase, attended, amplitude)
-
-# RDI plot
-obs_amps <-
-  ggplot(
-    amps,
-    aes(
-      x = Phase,
-      y = amplitude,
-      color = attended,
-      fill = attended
-    )
-  ) +
-  geom_pirate(
-    bars = FALSE,
-    points_params = list(size = 3, alpha = .5),
-    violins_params = list(size = 1),
-    show.legend = TRUE
-  ) +
-  scale_color_manual(values = c("blue", "red")) +
-  scale_fill_manual(values = c("blue", "red")) +
-  scale_x_discrete(limits = c("Baseline", "Training", "Test")) +
-  scale_y_continuous(
-    name = expression(paste("amplitude (", mu, "V)")),
-    limits = c(0, 5),
-    breaks = seq(0, 5, 1)
-  ) +
-  geom_hline(
-    yintercept = seq(0, 5, 1),
-    linetype = "dotted",
-    colour = "#999999",
-    size = .8,
-    alpha = .5
-  ) +
-  facet_wrap(~ frequency, scales = "free") +
-  ggtitle("observed amplitude") +
-  theme_minimal(base_size = 18) +
-  theme(
-    strip.text = element_text(
-      hjust = .5,
-      size = 24
-    ),
-    panel.grid = element_blank(),
-    legend.position = "none",
-    plot.title = element_text(face = "bold", size = 26, hjust = .5)
-  )
-
-# save as jpg
-save_plot(paste0(getwd(), "/Figure2.jpg"),
-  obs_amps,
-  base_height = 10,
-  base_aspect_ratio = 1.1
-)
-
-# HERE THERE WILL BE THE PREDICTED AMPLITUDE
-# (AMPLITUDE PREDICTED BY THE WINNING MODEL)
-# BOTH PLOTS WILL BE PUT IN FIGURE 2
+###################################################################################################
 
 
