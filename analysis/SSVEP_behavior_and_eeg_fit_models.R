@@ -23,7 +23,7 @@ set.seed(42)
 # Set working directory
 setwd(here())
 # import data
-data.raw = read.csv(file = here("EEG_preprocessing/movement","grandAverage_amplitudes.csv"),header=TRUE,na.strings="NaN") 
+data.raw = read.csv(file = here("EEG_preprocessing","grandAverage_amplitudes.csv"),header=TRUE,na.strings="NaN") 
 # Prepare the dataset------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Rename columns

@@ -41,7 +41,7 @@ set.seed(42)
 # Set working directory
 #setwd(here())
 # import data
-data.raw = read.csv(file = here("EEG_preprocessing/movement","grandAverage_amplitudes.csv"),header=TRUE,na.strings="NaN") 
+data.raw = read.csv(file = here("EEG_preprocessing","grandAverage_amplitudes.csv"),header=TRUE,na.strings="NaN") 
 
 # Rename columns
 colnames(data.raw) = c("Subject","Frequency","BslnRedAttendedNomov","BslnBlueAttendedNomov","AcqRedAttendedNomov","AcqBlueAttendedNomov","ExtRedAttendedNomov","ExtBlueAttendedNomov","BslnRedAttendedMov","BslnBlueAttendedMov","AcqRedAttendedMov","AcqBlueAttendedMov","ExtRedAttendedMov","ExtBlueAttendedMov")
