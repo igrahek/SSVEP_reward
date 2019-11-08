@@ -205,7 +205,7 @@ for (i in 1:length(plottingConditions)){
 ### Statistics 
 
 ```{r, warning=FALSE, message=FALSE}
-# Set the working directory in order to load the models
+# Set the working directory in order to load the models (necessary to download the models from: https://osf.io/kjds3/)
 # Set working directory
 setwd(here("brms_models"))
 
