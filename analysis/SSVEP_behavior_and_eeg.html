@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ivan Grahek &amp; Antonio Schettino" />
 
-<meta name="date" content="2019-10-31" />
+<meta name="date" content="2019-11-08" />
 
 <title>SSVEP reward - EEG results</title>
 
@@ -236,7 +236,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">SSVEP reward - EEG results</h1>
 <h4 class="author"><em>Ivan Grahek &amp; Antonio Schettino</em></h4>
-<h4 class="date"><em>2019-10-31</em></h4>
+<h4 class="date"><em>2019-11-08</em></h4>
 
 </div>
 
@@ -269,7 +269,7 @@ set.seed(42)
 # Set working directory
 #setwd(here())
 # import data
-data.raw = read.csv(file = here(&quot;EEG_preprocessing/movement&quot;,&quot;grandAverage_amplitudes.csv&quot;),header=TRUE,na.strings=&quot;NaN&quot;) 
+data.raw = read.csv(file = here(&quot;EEG_preprocessing&quot;,&quot;grandAverage_amplitudes.csv&quot;),header=TRUE,na.strings=&quot;NaN&quot;) 
 
 # Rename columns
 colnames(data.raw) = c(&quot;Subject&quot;,&quot;Frequency&quot;,&quot;BslnRedAttendedNomov&quot;,&quot;BslnBlueAttendedNomov&quot;,&quot;AcqRedAttendedNomov&quot;,&quot;AcqBlueAttendedNomov&quot;,&quot;ExtRedAttendedNomov&quot;,&quot;ExtBlueAttendedNomov&quot;,&quot;BslnRedAttendedMov&quot;,&quot;BslnBlueAttendedMov&quot;,&quot;AcqRedAttendedMov&quot;,&quot;AcqBlueAttendedMov&quot;,&quot;ExtRedAttendedMov&quot;,&quot;ExtBlueAttendedMov&quot;)
@@ -509,7 +509,7 @@ for (i in 1:length(plottingConditions)){
 </div>
 <div id="statistics" class="section level3">
 <h3>Statistics</h3>
-<pre class="r"><code># Set the working directory in order to load the models
+<pre class="r"><code># Set the working directory in order to load the models (necessary to download the models from: https://osf.io/kjds3/)
 # Set working directory
 setwd(here(&quot;brms_models&quot;))
 
@@ -2627,14 +2627,6 @@ bR2.full.Acc.dprime.split = readRDS(&quot;bR2.full.Acc.dprime.split&quot;)</code
 ## model.null.Acc.dprime     -225.4      19.9 
 ## model.expphase.Acc.dprime -234.1      19.9</code></pre>
 </div>
-<div id="model-comparison-with-waic-weights" class="section level3">
-<h3>Model comparison with WAIC weights</h3>
-<pre class="r"><code>print(compare.Acc.dprime.split.waic.weights)</code></pre>
-<pre><code>##     model.null.Acc.dprime model.expphase.Acc.dprime 
-##              1.343939e-98             2.079420e-102 
-##     model.full.Acc.dprime 
-##              1.000000e+00</code></pre>
-</div>
 <div id="bayesian-r-squared-3" class="section level3">
 <h3>Bayesian R squared</h3>
 <p>Null model</p>
@@ -3643,33 +3635,30 @@ plotPost(Diff_Bsln2_Acq1_Low, xlab = &quot;&quot;, col = &quot;#b3cde0&quot;, sh
 <h1>Creating figures for the manuscript</h1>
 <pre class="r"><code>library(cowplot)
 # Figure 2
-tiff(&quot;C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren &amp; Antonio/Experiment 1/SSVEP_reward/figures/Figure2.tiff&quot;, units=&quot;in&quot;, width=15, height=10, res=300)
-
-ggdraw() +
-    draw_plot(f.2.a, x = 0.03, y = 0.5, width = .45, height = .45) +
-    draw_plot(f.2.b, x = 0.53, y = .5, width = .45, height = .45) +
-    draw_plot(f.2.c, x = 0.03, y = 0, width = 0.45, height = 0.45) +
-    draw_plot(f.2.d, x = 0.53, y = 0, width = 0.45, height = 0.45) +
-
-  draw_plot_label(label = c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;,&quot;D&quot;), size = 20,
-                  x = c(0, 0.5, 0,0.5), y = c(1, 1, 0.5,0.5))
-
-dev.off()</code></pre>
-<pre><code>## png 
-##   2</code></pre>
-<pre class="r"><code># Figure 1 Supplementary materials
-tiff(&quot;C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren &amp; Antonio/Experiment 1/SSVEP_reward/figures/FigureSup1.tiff&quot;, units=&quot;in&quot;, width=15, height=10, res=300)
-
-ggdraw() +
-    draw_plot(f.sup.a, x = 0.03, y = 0.5, width = .9, height = .45) +
-    draw_plot(f.sup.b, x = 0.03, y = 0, width = .9, height = .45) +
-
-  draw_plot_label(label = c(&quot;A&quot;, &quot;B&quot;), size = 20,
-                  x = c(0, 0), y = c(1,0.5))
-
-dev.off()</code></pre>
-<pre><code>## png 
-##   2</code></pre>
+# tiff(&quot;C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren &amp; Antonio/Experiment 1/SSVEP_reward/figures/Figure2.tiff&quot;, units=&quot;in&quot;, width=15, height=10, res=300)
+# 
+# ggdraw() +
+#     draw_plot(f.2.a, x = 0.03, y = 0.5, width = .45, height = .45) +
+#     draw_plot(f.2.b, x = 0.53, y = .5, width = .45, height = .45) +
+#     draw_plot(f.2.c, x = 0.03, y = 0, width = 0.45, height = 0.45) +
+#     draw_plot(f.2.d, x = 0.53, y = 0, width = 0.45, height = 0.45) +
+# 
+#   draw_plot_label(label = c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;,&quot;D&quot;), size = 20,
+#                   x = c(0, 0.5, 0,0.5), y = c(1, 1, 0.5,0.5))
+# 
+# dev.off()
+# 
+# # Figure 1 Supplementary materials
+# tiff(&quot;C:/Users/igrahek/Documents/Studies/SSVEP Reward - Soren &amp; Antonio/Experiment 1/SSVEP_reward/figures/FigureSup1.tiff&quot;, units=&quot;in&quot;, width=15, height=10, res=300)
+# 
+# ggdraw() +
+#     draw_plot(f.sup.a, x = 0.03, y = 0.5, width = .9, height = .45) +
+#     draw_plot(f.sup.b, x = 0.03, y = 0, width = .9, height = .45) +
+# 
+#   draw_plot_label(label = c(&quot;A&quot;, &quot;B&quot;), size = 20,
+#                   x = c(0, 0), y = c(1,0.5))
+# 
+# dev.off()</code></pre>
 </div>
 
 
