@@ -24,3 +24,7 @@ Contents:
 
 6. manuscript
 	- The manuscript
+	
+	
+
+* For access to the raw behavioral and EEG data (needed for the preprocessing scripts), as well as the fitted models (needed to generate the summary of the results), go to: https://osf.io/kjds3/
