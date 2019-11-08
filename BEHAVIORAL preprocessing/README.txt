@@ -1,0 +1,1 @@
+﻿The FSAReward_preproc_behavior.m is used to preprocess the raw behavioral data in Matlab. 
