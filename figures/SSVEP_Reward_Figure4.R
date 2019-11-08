@@ -204,8 +204,8 @@ figure_4 <- plot_grid(topo_row,
   nrow = 2
 )
 
-# save as jpg
-save_plot(paste0(getwd(), "/Figure4.jpg"),
+# save as tiff
+save_plot(paste0(getwd(), "/Figure4.tiff"),
   figure_4,
   base_height = 10,
   base_aspect_ratio = 1.1
