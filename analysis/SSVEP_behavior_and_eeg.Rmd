@@ -8,6 +8,8 @@ output:
     toc: yes
     toc_float: yes
     theme: default 
+editor_options: 
+  chunk_output_type: console
 ---
 
 # About the code
@@ -22,12 +24,12 @@ Description: Code for the summary of results of behavioral and EEG data for Expe
 # EEG
 ## Topography & spectra
 
-![Topography and spectra](Figure1.jpg)
+![Topography and spectra](Figure4.jpg)
 \newpage
 
 ## Import data
 ```{r, warning=FALSE, message=FALSE}
-#### Clear the environement and import data #### 
+#### Clear the environment and import data #### 
 
 # clear the environment
 rm(list=ls())
@@ -101,8 +103,6 @@ data[c("Subject", "Condition","ExpPhase", "RewardedColor", "Attention", "Recordi
 # Save the final data into a new variable
 data_all = data
 data_all = subset(data_all, Subject!=14)
-
-
 ```
 
 
