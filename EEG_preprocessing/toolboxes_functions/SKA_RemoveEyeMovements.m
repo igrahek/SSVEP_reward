@@ -1,4 +1,4 @@
-% [EEG,Trials2Remove]=SCADS_RemoveEyeMovements(EEG,EOGChannelNrs,TimeRange,Threshold)
+% [EEG,Trials2Remove]=SKA_RemoveEyeMovements(EEG,EOGChannelNrs,TimeRange,Threshold)
 %
 % Finds (and optionally removes) trials with Eye Movements exceeding Threshold microvolot within
 % the specified timerange. TimeRange is a vector with two values: the
@@ -7,9 +7,9 @@
 % - Use eegF_Bipolarize to generate a bipolar VEOG & HEOG-Channels first
 %
 % (c) 2007 - S.Andersen
-function[EEG,Trials2Remove]=SCADS_RemoveEyeMovements(EEG,EOGChannelNrs,TimeRange,Threshold);
+function[EEG,Trials2Remove]=SKA_RemoveEyeMovements(EEG,EOGChannelNrs,TimeRange,Threshold);
 if nargin<2 || nargin>4 || (nargin>2 && ~ismember(numel(TimeRange),[0 2]))
-   help SCADS_RemoveEyeMovements;
+   help SKA_RemoveEyeMovements;
    return;
 end
 if nargin<3 || numel(TimeRange)==0
