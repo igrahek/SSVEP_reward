@@ -1,4 +1,4 @@
-%[EEG,Trials2Remove]=SCADS_RemoveBlinks(EEG,VEOGChannelNr,TimeRange)
+%[EEG,Trials2Remove]=SKA_RemoveBlinks(EEG,VEOGChannelNr,TimeRange)
 %
 % Finds (and optionally removes) trials with blinks within the specified timerange. Narrow spikes
 % from electrical artifacts are ignored (hopefully). TimeRange is a vector
@@ -10,7 +10,7 @@
 %   calling this function
 %
 % (c) 2004 - Gruber, Hassler & 2005,2006,2007,2008 - S.Andersen
-function[EEG,Trials2Remove]=SCADS_RemoveBlinks(EEG,VEOGChannelNr,TimeRange)
+function[EEG,Trials2Remove]=SKA_RemoveBlinks(EEG,VEOGChannelNr,TimeRange)
 if nargin<2 || nargin>3 || (nargin>2 && ~ismember(numel(TimeRange),[0 2]))
    help(mfilename)
    return

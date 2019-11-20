@@ -95,10 +95,10 @@ for isub = 1:numel(filenames) % loop through files
     [gen_bad_chans, EEG, trials2removeFASTER] = eegF_FASTER(cfg, EEG); % find & interpolate noisy channels; find trials contaminated by artifacts (does not eliminate them!)
     EEG = pop_reref(EEG, 1:64, 'keepref', 'on'); % re-reference to average (the eegF_FASTER function re-references to Cz, hence the need for re-referencing here)
     
-    % detect residual blinks and horizontal eye movements with SCADS
+    % detect residual blinks and horizontal eye movements
     EEG = eegF_Bipolarize(EEG);  % create bipolar vEOG and hEOG channels
-    [EEG, trials2removeBlinks] = SCADS_RemoveBlinks(EEG, 65); % find trials contaminated by blinks (does not eliminate them!)
-    [EEG, trials2removeEyeMov] = SCADS_RemoveEyeMovements(EEG, 66); % find trials contaminated by horizontal eye movements (does not eliminate them!)
+    [EEG, trials2removeBlinks] = SKA_RemoveBlinks(EEG, 65); % find trials contaminated by blinks (does not eliminate them!)
+    [EEG, trials2removeEyeMov] = SKA_RemoveEyeMovements(EEG, 66); % find trials contaminated by horizontal eye movements (does not eliminate them!)
     EEG = pop_select(EEG, 'nochannel', [65 66]); % remove bipolar eye channels
     
     TotTrials2Remove = unique([trials2removeFASTER, trials2removeBlinks, trials2removeEyeMov]); % total trials to remove according to all artifact rejection methods
