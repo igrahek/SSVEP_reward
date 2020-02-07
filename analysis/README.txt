@@ -1,4 +1,4 @@
-﻿Figure1.jpg is a figure which includes topographies and the frequency spectra. This figure is included in the summary of the results. 
+﻿Figure4.jpg is a figure which includes topographies and the frequency spectra. This figure is included in the summary of the results. 
 
 SSVEP_behavior_and_eeg.html is the summary of the results which includes all of the results and the code needed to produce them.
 
