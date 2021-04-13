@@ -1751,6 +1751,32 @@ plotPost(Diff_Acq_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 
 length(Diff_Acq_Ext_Low)
 ```
 
+
+Check the difference between high reward in baseline vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Ext_High = Extinction_High - Baseline_High
+plotPost(Diff_Bsln_Ext_High, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+length(Diff_Bsln_Ext_High)
+```
+
+Check the difference between low reward in baseline vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Ext_Low = Extinction_Low - Baseline_Low 
+plotPost(Diff_Bsln_Ext_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+length(Diff_Bsln_Ext_Low)
+```
+
+Check the difference between high and low reward in baseline vs. extinction 
+
+```{r, warning=FALSE, message=FALSE}
+Diff_Bsln_Ext_High_vs_Low = Diff_Bsln_Ext_High - Diff_Bsln_Ext_Low 
+plotPost(Diff_Bsln_Ext_High_vs_Low, xlab = "", col = "#b3cde0", showCurve = FALSE, cex = 1, compVal = 0)
+paste("Mean = ",round(mean(Diff_Bsln_Ext_High_vs_Low), digits = 2), " [", round(hdi(Diff_Bsln_Ext_High_vs_Low)[[1]], digits = 2), " ", round(hdi(Diff_Bsln_Ext_High_vs_Low)[[2]], digits = 2), "]")
+length(Diff_Bsln_Ext_High_vs_Low)
+```
+
 # Behavior - splitting the phases
 ## Import data
 ```{r, warning=FALSE, message=FALSE}
